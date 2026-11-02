@@ -260,3 +260,11 @@ button.def { background: linear-gradient(180deg, #b91c1c, #7f1d1d); }
 /* online žebříček */
 table.lb td:nth-child(2), table.lb th:nth-child(2) { text-align: left; } table.lb tr.me td { background: rgba(229,192,74,.15); color: #fde68a; }
 #bUpdCheck.hidden { display: none; } #verInfo { margin-top: 12px; font-size: 13px; }
+.lb-tabs { margin-bottom: 10px; } .ctag { color: #7dd3fc; font-weight: 700; }
+
+/* cloud a klany */
+#cloudBox h3, #clanBody h3 { color: #e5c04a; margin: 14px 0 6px; }
+.bigcode { font-size: 22px; letter-spacing: 2px; color: #fde047; }
+.clan-head { font-size: 20px; margin-bottom: 6px; } .ctag.big { font-size: 22px; }
+#cloudBox .row, #clanBody .row { margin-bottom: 8px; }
+#spPanel .seg { grid-template-columns: repeat(5, 1fr); display: grid; }

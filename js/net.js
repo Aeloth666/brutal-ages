@@ -298,10 +298,11 @@ function startGame(r, chal = null, camp = null, daily = false) {
   if (r !== 'guest') { S = newState(); acc = 0; aiWant = null; aiT = 1; aiEvoT = 0; aiBroke = 0; }
   if (r === 'guest' && camp != null) { curCamp = camp; if (SET.weather !== 'real') wxForce(CAMP[camp].wx); }
   curDef = r === 'solo' && camp != null && defNext === camp ? camp : null; defNext = null;   // obrana dobytého území
+  curSurv = r === 'solo' && survNext && chal == null && camp == null; survNext = false;
   lastBst = null;
   if (r === 'solo' || (r === 'host' && coop)) {
     curChal = chal; curCamp = camp; curDaily = daily;
-    const ch = chal != null ? CHAL[chal] : camp != null ? (curDef != null ? defMission(camp) : CAMP[camp]) : daily ? DAILY : null, di = ch ? ch.diff : SET.diff, D = DIFF[di];
+    const ch = chal != null ? CHAL[chal] : camp != null ? (curDef != null ? defMission(camp) : CAMP[camp]) : daily ? DAILY : curSurv ? SURV : null, di = ch ? ch.diff : SET.diff, D = DIFF[di];
     S.diff = di; Object.assign(S.pl[1], { gm: D.gm, xm: D.xm, gold: D.gold });
     if (ch) {
       const M = S.mods = ch.mods, me = S.pl[0], e = S.pl[1];
@@ -323,6 +324,7 @@ function startGame(r, chal = null, camp = null, daily = false) {
     if (r === 'host' && !coop) { const e1 = conns.find(k => k.side === 1); if (e1 && e1.info.pid) { setPrefs(S.pl[1], e1.info.af); S.pl[1].emb = e1.info.emb || 0; } }
     else setPrefs(S.pl[1], Array.from({ length: 5 }, () => (Math.random() * 4) | 0));   // počítač má náhodné národy
   }
+  if (curSurv) survStart();
   if (r === 'solo' && !tut) genApply(S.pl[0]);                     // bonusy generála jen proti počítači
   if (r !== 'guest') { S.st = newBst(); S.rage = r === 'solo' && S.camp != null && EXTREME(); }   // vztek jen v kampani pro jednoho hráče
   if (r !== 'guest') S.events = SET.evt !== false && S.camp == null && S.chal == null && !S.daily;

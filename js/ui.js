@@ -36,6 +36,15 @@ const ACH = [
   { id: 'camp45',  n: 'Perfekcionista',    d: 'Získej v kampani všech 45 hvězd.',            w: () => Object.values(CAMPS).reduce((a, b) => a + b, 0) >= CAMP.length * 3 },
   { id: 'rematch', n: 'Ještě jednou!',     d: 'Vyhraj odvetu proti kámošovi.',               w: () => role !== 'solo' && !coop && rematchN > 0 },
   // ---- bossové ----
+  { id: 'surv10',  n: 'Ještě dýchám',      d: 'Přežij 10 vln v Nekonečném přežití.', t: (m, V) => V.surv > 10 },
+  { id: 'surv25',  n: 'Šváb',              d: 'Přežij 25 vln. Tebe nic nezabije.',    t: (m, V) => V.surv > 25 },
+  { id: 'surv50',  n: 'Věčný',             d: 'Přežij 50 vln. Jdi spát.',             t: (m, V) => V.surv > 50 },
+  { id: 'candy',   n: 'Koledník',          d: 'O Halloweenu seber dýni s bonbony. Koleda, koleda!', secret: 1 },
+  { id: 'gift',    n: 'Dárek pod stromeček', d: 'O Vánocích seber dárek na bojišti.', secret: 1 },
+  { id: 'cloud',   n: 'Pojištěný',         d: 'Zálohuj svůj postup do cloudu.' },
+  { id: 'clanNew', n: 'Náčelník party',    d: 'Založ vlastní klan.' },
+  { id: 'clanJoin', n: 'Nováček v partě',  d: 'Přidej se ke klanu.' },
+  { id: 'clanGoal', n: 'Jeden za všechny', d: 'Splňte s klanem týdenní klanovou výzvu.' },
   { id: 'bMam',    n: 'Mamutí steak',      d: 'Poraž Válečného mamuta. Na grilu vydrží týden.' },
   { id: 'bDrag',   n: 'Drakobijce amatér', d: 'Poraž Draka. Princezna nebyla k dispozici.' },
   { id: 'bZep',    n: 'Splasknutý balonek', d: 'Sestřel Obří vzducholoď.' },
@@ -121,7 +130,7 @@ function domToast(dt) {
   const key = (tt.h || '') + tt.a.n;
   if (toastEl.dataset.k !== key) {
     toastEl.dataset.k = key;
-    toastEl.innerHTML = `<span class="t-ico">🏆</span><span><small>${esc(tt.h || 'ÚSPĚCH ODEMČEN')}</small><b>${esc(tt.a.n)}</b></span>`;
+    toastEl.innerHTML = `<span class="t-ico">${tt.tip ? '💡' : '🏆'}</span><span><small>${esc(tt.h || 'ÚSPĚCH ODEMČEN')}</small><b>${esc(tt.a.n)}</b></span>`;
   }
   toastEl.className = tt.l > 0.35 ? 'show' : '';
   if (tt.l <= 0) { toasts.shift(); toastEl.dataset.k = ''; }
@@ -131,16 +140,21 @@ function drawToasts(dt) {
   if (toastEl.className !== 'hidden') { toastEl.className = 'hidden'; toastEl.dataset.k = ''; }
   if (!toasts.length) return;
   const tt = toasts[0];
-  tt.l -= dt;
-  const k = Math.min(1, (4 - tt.l) * 4, tt.l * 3), y = HUD + 10 - (1 - k) * 80;
+  tt.L = tt.L || tt.l; tt.l -= dt;
+  const k = Math.min(1, (tt.L - tt.l) * 4, tt.l * 3), y = HUD + 10 - (1 - k) * 80;
   c.globalAlpha = Math.max(0, k);
-  const w = 380, x = W / 2 - w / 2;
-  rr(x, y + 3, w, 62, 14); c.fillStyle = 'rgba(0,0,0,.45)'; c.fill();
-  rr(x, y, w, 62, 14); c.fillStyle = lg('toast', 0, y, 0, y + 62, [[0, '#3a2a0a'], [1, '#1c1405']]); c.fill();
-  c.strokeStyle = '#e5c04a'; c.lineWidth = 2; c.stroke();
-  trophy(x + 34, y + 31, 1);
-  c.textAlign = 'left'; c.fillStyle = '#fde68a'; c.font = '800 12px system-ui'; c.fillText(tt.h || 'ÚSPĚCH ODEMČEN', x + 64, y + 22);
-  c.fillStyle = '#fff'; c.font = '900 19px system-ui'; c.fillText(tt.a.n, x + 64, y + 44, w - 76);
+  const w = tt.tip ? 660 : 380, h = tt.tip ? 74 : 62, x = W / 2 - w / 2;
+  rr(x, y + 3, w, h, 14); c.fillStyle = 'rgba(0,0,0,.45)'; c.fill();
+  rr(x, y, w, h, 14); c.fillStyle = tt.tip ? 'rgba(15,30,45,.96)' : lg('toast', 0, y, 0, y + 62, [[0, '#3a2a0a'], [1, '#1c1405']]); c.fill();
+  c.strokeStyle = tt.tip ? '#38bdf8' : '#e5c04a'; c.lineWidth = 2; c.stroke();
+  if (tt.tip) { c.font = '30px system-ui'; c.textAlign = 'center'; c.fillText('💡', x + 34, y + 47); } else trophy(x + 34, y + 31, 1);
+  c.textAlign = 'left'; c.fillStyle = tt.tip ? '#7dd3fc' : '#fde68a'; c.font = '800 12px system-ui'; c.fillText(tt.h || 'ÚSPĚCH ODEMČEN', x + 64, y + 22);
+  if (tt.tip) {                                       // tip: text na dva řádky
+    c.fillStyle = '#fff'; c.font = '700 15px system-ui';
+    const words = tt.a.n.split(' '); let line = '', ly = y + 42;
+    for (const wd of words) { if (c.measureText(line + wd).width > w - 80 && line) { c.fillText(line, x + 64, ly); line = ''; ly += 19; } line += wd + ' '; }
+    c.fillText(line, x + 64, ly);
+  } else { c.fillStyle = '#fff'; c.font = '900 19px system-ui'; c.fillText(tt.a.n, x + 64, y + 44, w - 76); }
   c.globalAlpha = 1;
   if (tt.l <= 0) toasts.shift();
 }

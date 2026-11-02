@@ -23,9 +23,10 @@ async function fbAuth() {
   } catch (e) { return null; }
 }
 const lbRow = () => ({ n: (SET.name || 'Hráč').slice(0, 14), r: Math.round(LB.r), w: LB.w, l: LB.l, lv: profLevel(),
-  st: Object.values(CAMPS).reduce((a, b) => a + b, 0), k: ST.kills, e: SET.emb || 0, t: Date.now() });
+  st: Object.values(CAMPS).reduce((a, b) => a + b, 0), k: ST.kills, e: SET.emb || 0, t: Date.now(), ...lbClan() });
 async function lbPush() {
   const a = await fbAuth(); if (!a) return false;
+  clanSync();
   try { return (await fetch(`${FB.db}/lb/${a.uid}.json?auth=${a.t}`, { method: 'PUT', body: JSON.stringify(lbRow()) })).ok; } catch (e) { return false; }
 }
 async function lbFetch() {
@@ -37,21 +38,45 @@ function lbResult(won) {
   const opp = OPP.rating || 1000, exp = 1 / (1 + Math.pow(10, (opp - LB.r) / 400));
   LB.r = Math.max(100, LB.r + 32 * ((won ? 1 : 0) - exp));
   won ? LB.w++ : LB.l++;
+  if (won) clanWin();
   if (LB.r >= 1200) achId('elo1200');
   store('aow-lb', LB); lbPush();
 }
 
+// nekonečné přežití: nejlepší počet vln
+async function survPush() {
+  const a = await fbAuth(); if (!a || !SURVB.best) return false;
+  try { return (await fetch(`${FB.db}/surv/${a.uid}.json?auth=${a.t}`, { method: 'PUT', body: JSON.stringify({ n: (SET.name || 'Hráč').slice(0, 14), w: SURVB.best, t: SURVB.t, e: SET.emb || 0, ...lbClan() }) })).ok; } catch (e) { return false; }
+}
+async function survFetch() {
+  const r = await fetch(`${FB.db}/surv.json?orderBy=${encodeURIComponent('"w"')}&limitToLast=100`).then(r => r.json());
+  return Object.entries(r || {}).map(([uid, v]) => ({ uid, ...v })).sort((a, b) => b.w - a.w || a.t - b.t);
+}
+const lbClan = () => (typeof CLAN !== 'undefined' && CLAN.tag ? { c: CLAN.tag } : {});
+let lbTab = 'duel';
 async function renderLb() {
   const box = $('lbBody');
   if (!FB.key) { box.innerHTML = '<p class="muted">Online žebříček zatím není zapnutý.</p>'; return; }
-  box.innerHTML = '<p class="muted">Načítám žebříček…</p>';
+  const tabs = `<div class="seg lb-tabs">${[['duel', '⚔ Souboje'], ['surv', '♾ Přežití'], ['clan', '🛡 Klany']].map(([k, n]) => `<button data-t="${k}" class="${lbTab === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+  box.innerHTML = tabs + '<p class="muted">Načítám žebříček…</p>';
+  const wire = () => box.querySelectorAll('.lb-tabs button').forEach(b => b.onclick = () => { lbTab = b.dataset.t; sfx('click'); renderLb(); });
+  wire();
+  const me = load('aow-fb', {}).uid, tag = p => p.c ? `<small class="ctag">[${esc(p.c)}]</small> ` : '';
+  if (lbTab === 'surv') {
+    await survPush();
+    let list; try { list = await survFetch(); } catch (e) { box.innerHTML = tabs + '<p class="muted">Žebříček se nepodařilo načíst – jsi online?</p>'; wire(); return; }
+    box.innerHTML = tabs + `<p class="muted">Nejvíc přežitých vln v Nekonečném přežití. Tvůj rekord: <b>${SURVB.best}</b></p>
+      <table class="bst lb"><tr><th>#</th><th>Hráč</th><th>Vln</th><th>Čas</th></tr>
+      ${list.map((p, i) => `<tr class="${p.uid === me ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td>${(EMBS[p.e] || {}).ic || ''} ${tag(p)}${esc(p.n)}</td><td><b>${p.w}</b></td><td>${fmtTime(p.t || 0)}</td></tr>`).join('')}</table>`;
+    wire(); return;
+  }
+  if (lbTab === 'clan') { box.innerHTML = tabs; wire(); if (typeof renderClanLb === 'function') renderClanLb(box); return; }
   await lbPush();
   let list;
-  try { list = await lbFetch(); } catch (e) { box.innerHTML = '<p class="muted">Žebříček se nepodařilo načíst – jsi online?</p>'; return; }
-  const me = load('aow-fb', {}).uid;
+  try { list = await lbFetch(); } catch (e) { box.innerHTML = tabs + '<p class="muted">Žebříček se nepodařilo načíst – jsi online?</p>'; wire(); return; }
   if (list.length >= 3 && list.findIndex(p => p.uid === me) >= 0 && list.findIndex(p => p.uid === me) < 3) achId('podium');
-  box.innerHTML = `<p class="muted">Hodnocení se počítá z online soubojů 1 na 1 (začíná se na 1000). Tvoje: <b>${Math.round(LB.r)}</b> · ${LB.w} výher, ${LB.l} proher</p>
+  box.innerHTML = tabs + `<p class="muted">Hodnocení se počítá z online soubojů 1 na 1 (začíná se na 1000). Tvoje: <b>${Math.round(LB.r)}</b> · ${LB.w} výher, ${LB.l} proher</p>
     <table class="bst lb"><tr><th>#</th><th>Hráč</th><th>Hodnocení</th><th>V : P</th><th>Úroveň</th><th>★ kampaň</th></tr>
-    ${list.map((p, i) => `<tr class="${p.uid === me ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td>${(EMBS[p.e] || {}).ic || ''} ${esc(p.n)}</td><td><b>${p.r}</b></td><td>${p.w} : ${p.l}</td><td>${p.lv}</td><td>${p.st}</td></tr>`).join('')}</table>`;
+    ${list.map((p, i) => `<tr class="${p.uid === me ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td>${(EMBS[p.e] || {}).ic || ''} ${tag(p)}${esc(p.n)}</td><td><b>${p.r}</b></td><td>${p.w} : ${p.l}</td><td>${p.lv}</td><td>${p.st}</td></tr>`).join('')}</table>`;
 }
 $('bLb').onclick = () => { openPanel('lbPanel'); renderLb(); };

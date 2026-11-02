@@ -44,7 +44,7 @@ function hud(V) {
     if (hero) add('Ničivý úder', p.acd > 0 ? p.acd + ' s' : 'PŘIPRAVENO', { a: 'hero' }, p.acd <= 0, ['slam']);
     else add(H.n, !okU(4) ? 'ZAKÁZÁNO' : p.hcd > 0 ? 'za ' + p.hcd + ' s' : H.c.toLocaleString('cs'), { a: 'hero' }, okU(4) && p.hcd <= 0 && p.gold >= H.c, ['u', p.age, 4]);
     add('Věže', M.noTower ? 'ZAKÁZÁNO' : `${p.tur.length}/${p.slots}`, 'tmode', !M.noTower, ['t', p.age, 0]);
-    add('Vylepšení', p.up.every(l => l >= upMax(p)) ? 'MAX' : 'Ú' + p.up[0] + ' Z' + p.up[1] + ' H' + p.up[2], 'gmode', true, ['g', 0]);
+    add('Vylepšení', p.up.every(l => l >= upMax(p)) ? 'MAX' : (LANG === 'en' ? 'A' + p.up[0] + ' H' + p.up[1] + ' W' : 'Ú' + p.up[0] + ' Z' + p.up[1] + ' H') + p.up[2], 'gmode', true, ['g', 0]);
     add(A.sp.n, p.spcd > 0 ? p.spcd + ' s' : 'PŘIPRAVENO', { a: 'special' }, p.spcd <= 0, ['s', p.age]);
     if (p.age < 4) add('Evoluce', M.noEvo ? 'ZAKÁZÁNO' : p.xp >= A.xp ? 'MŮŽEŠ!' : Math.floor(p.xp / A.xp * 100) + ' %', { a: 'evolve' }, !M.noEvo && p.xp >= A.xp, ['e']);
   } else if (uiMode === 'upgrades') {
@@ -75,11 +75,12 @@ function hud(V) {
   const lim = mm.survive || mm.limit, tl = lim ? ' · ' + fmtTime(Math.max(0, lim - V.time)) : '';
   if (ch) label = 'VÝZVA: ' + ch.n.toUpperCase() + tl;
   if (V.daily) label = DAILY.n.toUpperCase() + tl;
-  if (specMode) label = '👁 DIVÁK · ' + (OPP.n || 'hostitel').toUpperCase() + ' vs SOUPEŘ';
+  if (V.surv || curSurv) label = `♾ PŘEŽITÍ · VLNA ${V.surv} · DALŠÍ ZA ${V.survT} S · REKORD ${SURVB.best}`;
+  else if (specMode) label = '👁 DIVÁK · ' + (OPP.n || 'hostitel').toUpperCase() + ' vs SOUPEŘ';
   else if (cm) label = (curDef != null ? 'OBRANA ÚZEMÍ: ' : `KAMPAŇ ${V.camp + 1}/${CAMP.length}: `) + cm.n.toUpperCase() + tl;
   c.fillText(label, W - 14, 72, 250);
   c.fillStyle = '#fca5a5'; c.font = '800 14px system-ui';
-  c.fillText('Soupeř: ' + AGES[e.age].name, W - 14, 92);
+  c.fillText(V.surv ? 'Nepřítel: ' + AGES[e.age].name + ' · základna ∞' : 'Soupeř: ' + AGES[e.age].name, W - 14, 92);
   menuBtn = { x: W - 56, y: 10, w: 46, h: 40 };
   rr(menuBtn.x, menuBtn.y, menuBtn.w, menuBtn.h, 9); c.fillStyle = '#1e293b'; c.fill(); c.strokeStyle = '#334155'; c.lineWidth = 1.5; c.stroke();
   c.strokeStyle = '#cbd5e1'; c.lineWidth = 3; c.lineCap = 'round';
@@ -129,6 +130,7 @@ function drawTrex(x, dir) {
   if (GFXL >= 1 && Math.random() < 0.5) fx.push({ smoke: 1, x: MX(x) - dir * 40, y: GY - 4, vx: -dir * 20, vy: -15, r: 8, l: 0.7, ml: 0.7, col: 'rgba(150,120,90,.8)', col2: 'rgba(200,175,140,.6)' });
 }
 function drawChest(x) {
+  if (SEASON) return seasonChest(x);
   const y = GY - 2, b = Math.abs(Math.sin(T * 3)) * 3;
   c.fillStyle = 'rgba(255,220,90,.25)'; circ(x, y - 12, 22 + b);
   rr(x - 13, y - 16, 26, 16, 3); fo(lg('chestB', 0, y - 16, 0, y, [[0, '#a16207'], [1, '#713f12']]), 1.5);
@@ -214,7 +216,7 @@ function drawBtn(b) {
 
 function drawOver(V) {
   const win = V.over === mySide, cm = V.camp != null ? CAMP[V.camp] : null;
-  const title = cm && curDef != null ? (win ? 'ÚZEMÍ UBRÁNĚNO!' : 'ÚZEMÍ PADLO') : cm ? (win ? 'ÚZEMÍ DOBYTO!' : 'ÚTOK SELHAL') : win ? 'VÍTĚZSTVÍ!' : 'PROHRA';
+  const title = V.surv ? 'PADL JSI VE VLNĚ ' + V.surv : cm && curDef != null ? (win ? 'ÚZEMÍ UBRÁNĚNO!' : 'ÚZEMÍ PADLO') : cm ? (win ? 'ÚZEMÍ DOBYTO!' : 'ÚTOK SELHAL') : win ? 'VÍTĚZSTVÍ!' : 'PROHRA';
   c.fillStyle = 'rgba(8,10,16,.72)'; c.fillRect(0, 0, W, H);
   c.textAlign = 'center'; c.font = '900 72px system-ui';
   c.lineWidth = 10; c.strokeStyle = win ? '#7c2d12' : '#450a0a'; c.strokeText(title, W / 2, 250);
@@ -233,6 +235,7 @@ function drawOver(V) {
     const r = ST.vs[OPP.n || 'Kámoš'] || [0, 0];
     note = `Skóre proti ${OPP.n || 'kámošovi'}:  ${r[0]} : ${r[1]}`;
   }
+  if (V.surv) note = `Přežil jsi ${Math.max(0, V.surv - 1)} vln · rekord ${SURVB.best}`;
   if (note) { c.fillStyle = noteCol; c.font = '800 18px system-ui'; c.fillText(note, W / 2, 318); }
 
   overBtns = [];
@@ -313,7 +316,7 @@ function render(dt) {
   if (GFXL >= 3) ultraFront();
   wxFront(dt);
   if (V.dark > 0) { c.fillStyle = `rgba(6,8,24,${Math.min(0.62, V.dark * 0.12)})`; c.fillRect(0, 0, W, H); }
-  drawStorm(); drawNight(); drawEmotes(dt);
+  drawStorm(); seasonFx(dt); drawNight(); drawEmotes(dt);
   if (evtBanner) drawEvtBanner(dt);
   if (GFXL >= 3) ultraGrade();
   hud(V);

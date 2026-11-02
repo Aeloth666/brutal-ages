@@ -158,7 +158,10 @@ function genRecord(won, V) {
     }
     store('aow-world', WORLD);
   }
+  setTimeout(cloudAuto, 1500);
 }
+// po každé hře se postup sám zálohuje do cloudu (když má hráč kód zálohy)
+function cloudAuto() { if (typeof CLOUD !== 'undefined' && CLOUD.code) cloudBackup(true).catch(() => {}); }
 // obrana území skončila
 function defResult(won) {
   lastStars = 0;
@@ -203,6 +206,7 @@ function nightK(t) {
   return p < 0.45 ? 0 : p < 0.55 ? (p - 0.45) / 0.1 : p < 0.9 ? 1 : 1 - (p - 0.9) / 0.1;
 }
 function drawNight() {
+  tipTick();
   const k = nightK(V.time) * 0.55; if (k <= 0.01) return;
   c.fillStyle = `rgba(8,12,40,${k})`; c.fillRect(0, 0, W, H);
   if (GFXL === 0) return;
@@ -221,6 +225,27 @@ function drawStorm() {
   c.fillStyle = 'rgba(214,170,100,.32)'; c.fillRect(0, HUD, W, H - HUD);
   c.strokeStyle = 'rgba(240,210,150,.5)'; c.lineWidth = 1.5;
   for (let i = 0; i < 60; i++) { const y = HUD + ((i * 97) % (H - HUD)), x = ((T * 600 + i * 173) % (W + 200)) - 100; c.beginPath(); c.moveTo(x, y); c.lineTo(x - 40, y + 4); c.stroke(); }
+}
+
+// ---------- tipy pro nové věci (každý se ukáže jen jednou) ----------
+const TIPS = load('aow-tips', {});
+function tip(id, text) {
+  if (TIPS[id] || tut) return;
+  TIPS[id] = 1; store('aow-tips', TIPS);
+  toasts.push({ a: { n: text }, h: 'TIP', l: 8, tip: 1 });
+}
+$('bSP').addEventListener('click', () => {
+  tip('gen', '🎖 Generál: body za úrovně profilu, hvězdy a úkoly rozděl do stromu dovedností – armáda bude silnější.');
+  tip('quest', '✅ Úkoly: každý den tři nové a jeden týdenní. Odměnou jsou body generála a skiny armády.');
+});
+$('bCamp').addEventListener('click', () => tip('terr', '🗺 Každé dobyté území dává trvalý bonus. Když na něj Rudá horda zaútočí (⚔), ubraň ho.'));
+$('bMP').addEventListener('click', () => tip('mpNew', '🌍 Online žebříček, emoty v chatu a 👁 divácký režim – zadej kód hry a klikni na oko.'));
+function tipTick() {
+  if (!V || !role || replay || V.over >= 0) return;
+  if (V.time > 3) tip('spec', '⭐ Každý národ má speciální jednotku se zlatou šerpou – tlačítko je hned za těžkou jednotkou.');
+  if (V.time > 3 && FIELD !== 'meadow' && FIELD_FX[FIELD]) tip('field-' + FIELD, '🗺 ' + FIELD_FX[FIELD].n + '.');
+  if (nightK(V.time) > 0.5) tip('night', '🌙 Padla noc – je to jen vzhled, bojuje se úplně stejně.');
+  if (V.units.some(u => u.ty === 5)) tip('boss', '👹 Boss! Má obrovské zdraví – soustřeď na něj věže, hrdinu a speciální útok.');
 }
 
 // ---------- emoty (online) ----------

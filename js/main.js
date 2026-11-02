@@ -28,7 +28,7 @@ cv.addEventListener('pointerdown', e => {
       else if (b.k === 'bst') { renderBst(); openPanel('bstPanel'); }
       else if (b.k === 'camp') { const k = curCamp + (V.over === mySide ? 1 : 0); toMenu(); openCamp(Math.min(k, CAMP.length - 1)); }
       else if (b.k === 'next') startGame('solo', null, curCamp + 1);
-      else if (role === 'solo') { defNext = curDef; startGame('solo', curChal, curCamp, curDaily); }
+      else if (role === 'solo') { defNext = curDef; survNext = curSurv; startGame('solo', curChal, curCamp, curDaily); }
       else if (!rmMe) {
         rmMe = true; send({ t: 'rm' });
         if (role === 'host') hostRmCheck();

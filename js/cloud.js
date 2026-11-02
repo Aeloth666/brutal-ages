@@ -1,0 +1,120 @@
+// =====================================================================
+//  CLOUD – záloha postupu přes tajný kód (přenos do jiného telefonu / počítače) a KLANY
+//  Obojí běží přes stejnou Firebase databázi jako online žebříček.
+// =====================================================================
+const CLOUD = load('aow-cloud', { code: '', t: 0 });
+const BAK_SKIP = ['aow-fb', 'aow-cloud', 'aow-upd', 'aow-save'];          // přihlášení a technické věci se nepřenáší
+const fbPut = async (path, data) => { const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit'); const r = await fetch(`${FB.db}/${path}.json?auth=${a.t}`, { method: data === null ? 'DELETE' : 'PUT', body: data === null ? undefined : JSON.stringify(data) }); if (!r.ok) throw new Error('Zápis odmítnut (' + r.status + ')'); return a; };
+const fbGet = async path => { const r = await fetch(`${FB.db}/${path}.json`); if (!r.ok) throw new Error('Čtení selhalo (' + r.status + ')'); return r.json(); };
+const fmtCode = c => c.slice(0, 4) + '-' + c.slice(4);
+
+// ---------- záloha ----------
+async function cloudBackup(quiet) {
+  if (!CLOUD.code) { CLOUD.code = Array.from({ length: 8 }, () => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[(Math.random() * 31) | 0]).join(''); }
+  const v = {};
+  for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('aow-') && !BAK_SKIP.includes(k)) v[k] = localStorage.getItem(k); }
+  await fbPut('bak/' + CLOUD.code, { t: Date.now(), n: SET.name || 'Hráč', v });
+  CLOUD.t = Date.now(); store('aow-cloud', CLOUD); achId('cloud');
+  if (!quiet) toasts.push({ a: { n: 'Kód pro obnovení: ' + fmtCode(CLOUD.code) }, h: '☁️ POSTUP ZÁLOHOVÁN', l: 5 });
+}
+async function cloudRestore(code) {
+  code = code.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.length !== 8) throw new Error('Kód má 8 znaků (např. ABCD-EFGH)');
+  const d = await fbGet('bak/' + code);
+  if (!d || !d.v) throw new Error('Záloha s tímto kódem neexistuje');
+  if (!confirm(`Obnovit postup hráče „${d.n}“ ze dne ${new Date(d.t).toLocaleString('cs')}? Současný postup v tomto zařízení se přepíše.`)) return;
+  for (const [k, val] of Object.entries(d.v)) if (k.startsWith('aow-') && !BAK_SKIP.includes(k)) localStorage.setItem(k, val);
+  localStorage.setItem('aow-cloud', JSON.stringify({ code, t: d.t }));
+  location.reload();
+}
+function renderCloud() {
+  const b = $('cloudBox'); if (!b) return;
+  b.innerHTML = `<h3>☁️ Záloha postupu</h3>
+    <p class="muted">Uloží celý postup (kampaň, generál, úkoly, úspěchy, nastavení…) na server. Kódem ho pak obnovíš v jiném telefonu nebo na počítači. Záloha se pak dělá sama po každé hře.</p>
+    ${CLOUD.code ? `<p>Tvůj kód: <b class="bigcode">${fmtCode(CLOUD.code)}</b><br><small class="muted">Zapiš si ho – kdo ho zná, může si tvůj postup nahrát. Poslední záloha: ${CLOUD.t ? new Date(CLOUD.t).toLocaleString('cs') : '—'}</small></p>` : ''}
+    <div class="row"><button id="bBak">${CLOUD.code ? '☁️ Zálohovat teď' : '☁️ Vytvořit zálohu'}</button></div>
+    <div class="row"><input id="bakCode" maxlength="9" placeholder="KÓD ZÁLOHY" autocomplete="off" autocapitalize="characters"><button id="bRestore" class="ghost">Obnovit</button></div>
+    <p id="cloudMsg" class="muted"></p>`;
+  const msg = t => { $('cloudMsg').textContent = t; };
+  $('bBak').onclick = async () => { sfx('click'); msg('Zálohuji…'); try { await cloudBackup(); renderCloud(); } catch (e) { msg('❌ ' + e.message); } };
+  $('bRestore').onclick = async () => { sfx('click'); msg('Načítám…'); try { await cloudRestore($('bakCode').value); msg(''); } catch (e) { msg('❌ ' + e.message); } };
+}
+$('bGS').addEventListener('click', renderCloud);
+
+// ---------- klany ----------
+const CLAN = load('aow-clan', { tag: '' });
+const weekKey2 = () => typeof weekKey === 'function' ? weekKey() : '';
+const CLAN_GOAL = 20;                                    // týdenní klanová výzva: společně vyhrát 20 online soubojů
+function clanMe() { return { n: (SET.name || 'Hráč').slice(0, 14), r: Math.round(LB.r), w: LB.w, l: LB.l, sv: SURVB.best, wk: weekKey2(), ww: CLAN.ww && CLAN.wk === weekKey2() ? CLAN.ww : 0, t: Date.now() }; }
+async function clanSync() {
+  if (!CLAN.tag || !FB.key) return;
+  const a = await fbAuth(); if (!a) return;
+  try { await fetch(`${FB.db}/clans/${CLAN.tag}/m/${a.uid}.json?auth=${a.t}`, { method: 'PUT', body: JSON.stringify(clanMe()) }); } catch (e) {}
+}
+// výhra v online souboji se počítá do týdenní klanové výzvy
+function clanWin() { if (!CLAN.tag) return; if (CLAN.wk !== weekKey2()) { CLAN.wk = weekKey2(); CLAN.ww = 0; } CLAN.ww++; store('aow-clan', CLAN); clanSync(); }
+async function clanCreate(name, tag) {
+  tag = tag.toUpperCase().replace(/[^A-Z0-9]/g, ''); name = name.trim().slice(0, 20);
+  if (tag.length < 2 || tag.length > 4) throw new Error('Zkratka klanu má 2–4 písmena nebo číslice');
+  if (name.length < 3) throw new Error('Název klanu je moc krátký');
+  if (await fbGet('clans/' + tag + '/o')) throw new Error('Klan [' + tag + '] už existuje');
+  const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit');
+  await fbPut('clans/' + tag, { n: name, o: a.uid, t: Date.now(), m: { [a.uid]: clanMe() } });
+  CLAN.tag = tag; store('aow-clan', CLAN); achId('clanNew');
+}
+async function clanJoin(tag) {
+  tag = tag.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const c = await fbGet('clans/' + tag + '/n'); if (!c) throw new Error('Klan [' + tag + '] neexistuje');
+  CLAN.tag = tag; store('aow-clan', CLAN); await clanSync(); achId('clanJoin');
+}
+async function clanLeave() {
+  const a = await fbAuth(); if (!a || !CLAN.tag) return;
+  const own = await fbGet('clans/' + CLAN.tag + '/o');
+  if (own === a.uid) { const m = await fbGet('clans/' + CLAN.tag + '/m'); if (m && Object.keys(m).length > 1) throw new Error('Jsi zakladatel – klan můžeš zrušit, až v něm zůstaneš sám'); await fbPut('clans/' + CLAN.tag, null); }
+  else await fbPut('clans/' + CLAN.tag + '/m/' + a.uid, null);
+  CLAN.tag = ''; store('aow-clan', CLAN);
+}
+async function renderClan() {
+  const b = $('clanBody');
+  b.innerHTML = '<p class="muted">Načítám…</p>';
+  const msg = t => { const m = $('clanMsg'); if (m) m.textContent = t; };
+  try {
+    if (!CLAN.tag) {
+      b.innerHTML = `<p class="muted">Klan = parta kámošů se společnou zkratkou v žebříčku, společným přehledem a týdenní klanovou výzvou.</p>
+        <h3>Založit klan</h3><div class="row"><input id="clanName" maxlength="20" placeholder="Název klanu"><input id="clanTag" maxlength="4" placeholder="ZKR" style="max-width:90px" autocapitalize="characters"><button id="bClanNew">Založit</button></div>
+        <h3>Přidat se ke klanu</h3><div class="row"><input id="clanJoinTag" maxlength="4" placeholder="ZKRATKA" autocapitalize="characters"><button id="bClanJoin">Přidat se</button></div>
+        <p id="clanMsg" class="muted"></p>`;
+      $('bClanNew').onclick = async () => { sfx('click'); msg('Zakládám…'); try { await clanCreate($('clanName').value, $('clanTag').value); renderClan(); } catch (e) { msg('❌ ' + e.message); } };
+      $('bClanJoin').onclick = async () => { sfx('click'); msg('Hledám klan…'); try { await clanJoin($('clanJoinTag').value); renderClan(); } catch (e) { msg('❌ ' + e.message); } };
+      return;
+    }
+    await clanSync();
+    const c = await fbGet('clans/' + CLAN.tag);
+    if (!c) { CLAN.tag = ''; store('aow-clan', CLAN); return renderClan(); }
+    const me = (await fbAuth() || {}).uid, wk = weekKey2();
+    const mem = Object.entries(c.m || {}).map(([uid, v]) => ({ uid, ...v })).sort((x, y) => y.r - x.r);
+    const ww = mem.reduce((n, m) => n + (m.wk === wk ? m.ww || 0 : 0), 0), pct = Math.min(100, Math.round(ww / CLAN_GOAL * 100));
+    if (ww >= CLAN_GOAL) achId('clanGoal');
+    b.innerHTML = `<div class="clan-head"><span class="ctag big">[${esc(CLAN.tag)}]</span> <b>${esc(c.n)}</b> <small class="muted">${mem.length} ${mem.length === 1 ? 'člen' : mem.length < 5 ? 'členové' : 'členů'}</small></div>
+      <p class="muted">Pozvi kámoše: ať v Multiplayeru → 🛡 Klan zadá zkratku <b>${esc(CLAN.tag)}</b>.</p>
+      <h3>🎯 Týdenní klanová výzva</h3><div class="q-row ${ww >= CLAN_GOAL ? 'ok' : ''}"><span>Vyhrajte společně ${CLAN_GOAL} online soubojů</span><small>${Math.min(ww, CLAN_GOAL)} / ${CLAN_GOAL}</small><i style="width:${pct}%"></i></div>
+      <table class="bst lb"><tr><th>Člen</th><th>Hodnocení</th><th>V : P</th><th>Výher tento týden</th><th>♾ vln</th></tr>
+      ${mem.map(m => `<tr class="${m.uid === me ? 'me' : ''}"><td>${m.uid === c.o ? '👑 ' : ''}${esc(m.n)}</td><td><b>${m.r}</b></td><td>${m.w} : ${m.l}</td><td>${m.wk === wk ? m.ww || 0 : 0}</td><td>${m.sv || 0}</td></tr>`).join('')}</table>
+      <button id="bClanLeave" class="ghost">${c.o === me && mem.length <= 1 ? 'Zrušit klan' : 'Opustit klan'}</button><p id="clanMsg" class="muted"></p>`;
+    $('bClanLeave').onclick = async () => { if (!confirm('Opravdu opustit klan [' + CLAN.tag + ']?')) return; sfx('click'); try { await clanLeave(); renderClan(); } catch (e) { msg('❌ ' + e.message); } };
+  } catch (e) { b.innerHTML = '<p class="muted">Klany se nepodařilo načíst – jsi online? (' + esc(e.message) + ')</p>'; }
+}
+// žebříček klanů (záložka v online žebříčku)
+async function renderClanLb(box) {
+  const tabs = box.innerHTML;
+  try {
+    const all = await fbGet('clans') || {}, wk = weekKey2();
+    const list = Object.entries(all).filter(([, c]) => c && c.n && c.o).map(([tag, c]) => { const m = Object.values(c.m || {}); return { tag, n: c.n, k: m.length, w: m.reduce((s, x) => s + (x.w || 0), 0),
+      r: m.length ? Math.round(m.reduce((s, x) => s + (x.r || 1000), 0) / m.length) : 0, ww: m.reduce((s, x) => s + (x.wk === wk ? x.ww || 0 : 0), 0) }; }).sort((a, b) => b.w - a.w || b.r - a.r);
+    box.innerHTML = tabs + `<p class="muted">Klany podle celkového počtu online výher svých členů.</p>
+      <table class="bst lb"><tr><th>#</th><th>Klan</th><th>Členů</th><th>Výher</th><th>Ø hodnocení</th><th>Tento týden</th></tr>
+      ${list.map((c, i) => `<tr class="${c.tag === CLAN.tag ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td><span class="ctag">[${esc(c.tag)}]</span> ${esc(c.n)}</td><td>${c.k}</td><td><b>${c.w}</b></td><td>${c.r}</td><td>${c.ww}</td></tr>`).join('') || '<tr><td colspan="6">Zatím žádný klan – založ první!</td></tr>'}</table>`;
+  } catch (e) { box.innerHTML = tabs + '<p class="muted">Klany se nepodařilo načíst.</p>'; }
+  box.querySelectorAll('.lb-tabs button').forEach(b => b.onclick = () => { lbTab = b.dataset.t; sfx('click'); renderLb(); });
+}
+$('bClan').onclick = () => { openPanel('clanPanel'); renderClan(); };

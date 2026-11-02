@@ -175,7 +175,7 @@ function human(team, age, ty, ph, at, st, o = {}) {
   if (G && G.leg) stump(1, -19, 3); else leg(ph, walk, P[0], BT, o.sit);
   // hlava
   if (G && G.head) stump(1, -37.5, 3.6);
-  else { c.save(); c.translate(1, bob); head(team, age, o); c.restore(); }
+  else { c.save(); c.translate(1, bob); head(team, age, o); if (SEASON) seasonHat(); c.restore(); }
   // přední ruka se zbraní
   if (G && G.arm) { stump(2, -33 + bob, 2.6); return; }
   let ang;
