@@ -240,7 +240,9 @@ function applyCmd(s, c) {
       p.gold -= k; p.slots++; break;
     }
     case 'sell': {
-      const t = p.tur.pop();
+      // c.k = která věž (0 = horní); bez něj poslední postavená
+      const k = Number.isInteger(c.k) && c.k >= 0 && c.k < p.tur.length ? c.k : p.tur.length - 1;
+      const t = k >= 0 ? p.tur.splice(k, 1)[0] : null;
       if (t) p.gold += Math.floor(AGES[t.a].turrets[t.i].c / 2);
       break;
     }

@@ -52,6 +52,7 @@ cv.addEventListener('pointerdown', e => {
   for (const b of btns) if (hit(b)) {
     if (b.cmd === 'tmode') { if (b.ok) { uiMode = 'turrets'; sfx('click'); } }
     else if (b.cmd === 'gmode') { uiMode = 'upgrades'; sfx('click'); }
+    else if (b.cmd === 'smode') { if (b.ok) { uiMode = 'sell'; sfx('click'); } }
     else if (b.cmd === 'umode') { uiMode = 'units'; sfx('click'); }
     else if (b.ok) act(b.cmd);
     return;

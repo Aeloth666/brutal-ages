@@ -47,6 +47,10 @@ function hud(V) {
     add('Vylepšení', p.up.every(l => l >= upMax(p)) ? 'MAX' : (LANG === 'en' ? 'A' + p.up[0] + ' H' + p.up[1] + ' W' : 'Ú' + p.up[0] + ' Z' + p.up[1] + ' H') + p.up[2], 'gmode', true, ['g', 0]);
     add(A.sp.n, p.spcd > 0 ? p.spcd + ' s' : 'PŘIPRAVENO', { a: 'special' }, p.spcd <= 0, ['s', p.age]);
     if (p.age < 4) add('Evoluce', M.noEvo ? 'ZAKÁZÁNO' : p.xp >= A.xp ? 'MŮŽEŠ!' : Math.floor(p.xp / A.xp * 100) + ' %', { a: 'evolve' }, !M.noEvo && p.xp >= A.xp, ['e']);
+  } else if (uiMode === 'sell') {
+    if (!p.tur.length) uiMode = 'turrets';
+    p.tur.forEach((t, k) => { const d = AGES[t.a].turrets[t.i]; add((k + 1) + '. ' + d.n, '+' + Math.floor(d.c / 2).toLocaleString('cs'), { a: 'sell', k }, true, ['t', t.a, t.i]); });
+    add('Zpět', '', 'tmode', true, ['back']);
   } else if (uiMode === 'upgrades') {
     UPS.forEach((u, k) => {
       const max = p.up[k] >= upMax(p), cost = upCost(p, k);
@@ -57,8 +61,9 @@ function hud(V) {
     A.turrets.forEach((t, i) => { const k = turCost(p, t); add(t.n, k.toLocaleString('cs'), { a: 'turret', i }, p.gold >= k && p.tur.length < p.slots, ['t', p.age, i]); });
     const sc = SLOT_COST[p.slots - 1];
     add('+ Místo', p.slots < 4 ? sc.toLocaleString('cs') : 'MAX', { a: 'slot' }, p.slots < 4 && p.gold >= sc, ['plus']);
-    const lt = p.tur[p.tur.length - 1];
-    add('Prodat', lt ? '+' + Math.floor(AGES[lt.a].turrets[lt.i].c / 2).toLocaleString('cs') : '—', { a: 'sell' }, !!lt, ['sell']);
+    // jedna věž → prodat rovnou, víc věží → vybrat, kterou
+    const one = p.tur.length === 1 ? p.tur[0] : null;
+    add('Prodat', one ? '+' + Math.floor(AGES[one.a].turrets[one.i].c / 2).toLocaleString('cs') : p.tur.length ? 'vyber věž' : '—', one ? { a: 'sell', k: 0 } : 'smode', p.tur.length > 0, ['sell']);
     add('Zpět', '', 'umode', true, ['back']);
   }
   // když je tlačítek hodně, zúží se – vpravo musí zůstat místo pro popisek hry (nic se nepřekrývá)

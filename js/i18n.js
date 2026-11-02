@@ -34,7 +34,7 @@ const EN = {
   'PROTI POČÍTAČI': 'VS COMPUTER', 'Proti počítači': 'Vs computer', 'Počítač': 'Computer', 'Soupeř': 'Opponent', 'Nepřítel': 'Enemy', 'základna ∞': 'base ∞', 'ONLINE': 'ONLINE', 'DIVÁK': 'SPECTATOR', 'vs SOUPEŘ': 'vs OPPONENT', 'TÝM': 'TEAM', 'S': 'S',
   'OBRANA ÚZEMÍ': 'TERRITORY DEFENCE', 'PŘEŽITÍ': 'SURVIVAL', 'VLNA': 'WAVE', 'DALŠÍ ZA': 'NEXT IN', 'REKORD': 'RECORD', 'Přežil jsi': 'You survived', 'vln': 'waves', 'rekord': 'record', 'NOVÝ REKORD': 'NEW RECORD', 'vlna': 'wave', 'vlny': 'waves',
   'Útok': 'Attack', 'Drž': 'Hold', 'Ústup': 'Retreat', 'Vztek': 'Rage', 'Zuří': 'Raging', 'PŘIPRAVENO': 'READY', 'MŮŽEŠ': 'GO', 'ZAKÁZÁNO': 'BANNED', 'DALŠÍ VĚK': 'NEXT AGE', 'MAX': 'MAX',
-  'Věže': 'Towers', 'Vylepšení': 'Upgrades', 'Evoluce': 'Evolve', 'Místo': 'Slot', 'Prodat': 'Sell', 'Ničivý úder': 'Crushing blow', 'Zdraví': 'Health', 'Hradby': 'Walls',
+  'Věže': 'Towers', 'Vylepšení': 'Upgrades', 'Evoluce': 'Evolve', 'Místo': 'Slot', 'Prodat': 'Sell', 'vyber věž': 'pick tower', 'Ničivý úder': 'Crushing blow', 'Zdraví': 'Health', 'Hradby': 'Walls',
   'Vyber národ': 'Choose nation', 'EVOLUCE': 'EVOLUTION', 'VZTEK': 'RAGE', 'POSLEDNÍ BAŠTA': 'LAST BASTION', 'VÁLEČNÝ POKŘIK': 'WAR CRY', 'PADL': 'FELL',
   // ---- věky, jednotky, věže, speciály ----
   'Doba kamenná': 'Stone Age', 'Středověk': 'Middle Ages', 'Renesance': 'Renaissance', 'Moderní doba': 'Modern Age', 'Budoucnost': 'Future',
