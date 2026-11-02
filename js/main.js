@@ -158,3 +158,11 @@ if (!nativeApp && matchMedia('(pointer: coarse)').matches) addEventListener('poi
 }, true);
 // klávesové zkratky ukázat jen na počítači
 if (!matchMedia('(pointer: coarse)').matches) { const h = $('keysHelp'); if (h) h.classList.remove('hidden'); }
+
+// telefon na výšku: kromě CSS i přes JS (některé WebView media dotaz na orientaci nehlásí) – ukázat výzvu a pozastavit hru
+function orientCheck() {
+  const port = matchMedia('(pointer: coarse)').matches && innerHeight > innerWidth;
+  $('rotate').classList.toggle('show', port);
+  if (port && role === 'solo' && S && S.over < 0) paused = true;
+}
+addEventListener('resize', orientCheck); addEventListener('orientationchange', orientCheck); orientCheck();

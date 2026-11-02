@@ -61,6 +61,9 @@ function hud(V) {
     add('Prodat', lt ? '+' + Math.floor(AGES[lt.a].turrets[lt.i].c / 2).toLocaleString('cs') : '—', { a: 'sell' }, !!lt, ['sell']);
     add('Zpět', '', 'umode', true, ['back']);
   }
+  // když je tlačítek hodně, zúží se – vpravo musí zůstat místo pro popisek hry (nic se nepřekrývá)
+  const RIGHT = W - 236, last = btns[btns.length - 1];
+  if (last && last.x + last.w > RIGHT) { const step = (RIGHT - 246) / btns.length; btns.forEach((b, i) => { b.x = 246 + i * step; b.w = step - 5; }); }
   for (const b of btns) drawBtn(b);
   if (V.over < 0 && !replay) drawOrders(p); else orderBtns = [];
 
@@ -78,9 +81,9 @@ function hud(V) {
   if (V.surv || curSurv) label = `♾ PŘEŽITÍ · VLNA ${V.surv} · DALŠÍ ZA ${V.survT} S · REKORD ${SURVB.best}`;
   else if (specMode) label = '👁 DIVÁK · ' + (OPP.n || 'hostitel').toUpperCase() + ' vs SOUPEŘ';
   else if (cm) label = (curDef != null ? 'OBRANA ÚZEMÍ: ' : `KAMPAŇ ${V.camp + 1}/${CAMP.length}: `) + cm.n.toUpperCase() + tl;
-  c.fillText(label, W - 14, 72, 250);
+  c.fillText(label, W - 14, 72, 222);
   c.fillStyle = '#fca5a5'; c.font = '800 14px system-ui';
-  c.fillText(V.surv ? 'Nepřítel: ' + AGES[e.age].name + ' · základna ∞' : 'Soupeř: ' + AGES[e.age].name, W - 14, 92);
+  c.fillText(V.surv ? 'Nepřítel: ' + AGES[e.age].name + ' · základna ∞' : 'Soupeř: ' + AGES[e.age].name, W - 14, 92, 222);
   menuBtn = { x: W - 56, y: 10, w: 46, h: 40 };
   rr(menuBtn.x, menuBtn.y, menuBtn.w, menuBtn.h, 9); c.fillStyle = '#1e293b'; c.fill(); c.strokeStyle = '#334155'; c.lineWidth = 1.5; c.stroke();
   c.strokeStyle = '#cbd5e1'; c.lineWidth = 3; c.lineCap = 'round';
@@ -279,11 +282,23 @@ function render(dt) {
   if (V.trex) drawTrex(MX(V.trex[0]), V.trex[1] * (mirror ? -1 : 1));
   drawPools(dt);
   if (bloodCode) drawBloodCode(dt);
+  // aury pod jednotkami: pokřik generála (zlatá), bubeník poblíž (oranžová), léčitel poblíž (zelená)
+  const abOf = u => u.ty === 6 ? (SPECS[u.a][(u.f ?? (V.pl[u.side].af || [])[u.a]) | 0] || {}).ab : '';
+  const drums = V.units.filter(u => abOf(u) === 'drum'), heals = V.units.filter(u => abOf(u) === 'healer');
+  const near = (L, u, r) => L.some(a => a !== u && a.side === u.side && Math.abs(a.x - u.x) < r);
   // stíny (na vysoké a ultra měkké)
   for (const u of V.units) {
     const rx = u.ty === 5 ? 56 : u.ty === 2 ? 34 : u.ty === 3 ? 18 : u.ty === 4 ? 14 : 11, x = MX(u.x);
     if (GFXL >= 2) { c.fillStyle = rg('shadow', 0, 0, 0, 1, [[0, 'rgba(0,0,0,.34)'], [1, 'rgba(0,0,0,0)']]); c.save(); c.translate(x, GY + 1); c.scale(rx * 1.3, 5); circ(0, 0, 1); c.restore(); }
     else { c.fillStyle = 'rgba(0,0,0,.22)'; ell(x, GY + 1, rx, 3.5); }
+    if (u.ty !== 5) {
+      const au = [];
+      if (V.pl[u.side].cry) au.push('255,200,60');
+      if (near(drums, u, 160)) au.push('251,146,60');
+      if (near(heals, u, 140) && u.hp < u.mx) au.push('74,222,128');
+      au.forEach((col, i) => { c.strokeStyle = `rgba(${col},${0.5 + Math.sin(T * 5 + i * 2) * 0.2})`; c.lineWidth = 2;
+        c.beginPath(); c.ellipse(x, GY + 1, rx * 1.2 + 5 + i * 5, 4.5 + i * 1.5, 0, 0, Math.PI * 2); c.stroke(); });
+    }
     if (GFXL >= 3 && u.st === 0 && dt > 0 && Math.random() < dt * 3)
       fx.push({ smoke: 1, x: u.x - (u.side ? -1 : 1) * 6, y: GY - 2, vx: rnd(-10, 10), vy: rnd(-14, -6), r: rnd(2, 4), l: 0.7, ml: 0.7, col: 'rgba(150,120,90,.8)', col2: 'rgba(200,175,140,.6)' });
   }

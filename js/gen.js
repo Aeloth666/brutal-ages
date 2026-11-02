@@ -72,6 +72,20 @@ function renderGen() {
 }
 $('bGen').onclick = () => { renderGen(); openPanel('genPanel'); };
 
+// ---------- velitelství: rozcestník s odznaky ----------
+function refreshHQ() {
+  questRoll();
+  const free = genFree(), qOpen = QST.d.filter(q => !q.ok).length + (QST.w && !QST.w.ok ? 1 : 0), got = ACH.filter(a => ACHS[a.id]).length;
+  $('hqProf').textContent = 'úroveň ' + profLevel() + ' · ' + rankOf(profLevel());
+  $('hqGen').textContent = free > 0 ? free + ' volných bodů' : 'strom dovedností';
+  $('hqQuest').textContent = qOpen ? qOpen + ' nesplněných úkolů' : 'vše splněno ✔';
+  $('hqAch').textContent = got + ' / ' + ACH.length;
+  const n = (free > 0 ? 1 : 0) + (qOpen ? 1 : 0), b = $('hqBadge');
+  b.textContent = free > 0 ? free : qOpen; b.classList.toggle('hidden', !(free > 0 || qOpen));
+}
+$('bHQ').onclick = () => { refreshHQ(); openPanel('hqPanel'); };
+setTimeout(() => { try { refreshHQ(); } catch (e) {} }, 300);
+
 // ---------- denní a týdenní úkoly ----------
 const QST = load('aow-quest', { day: '', d: [], week: '', w: null, pts: 0, done: 0 });
 const QDEF = {
@@ -212,6 +226,13 @@ function drawNight() {
   if (GFXL === 0) return;
   const op = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter';
   for (const u of V.units) {
+    if (u.a === 3) {                                   // moderní doba: baterky – kužel světla dopředu
+      const x = MX(u.x), d = facing(u.side), y = GY - 34, L = 110 + 30 * k;
+      const g = c.createLinearGradient(x, y, x + d * L, y); g.addColorStop(0, `rgba(255,248,210,${0.5 * Math.min(1, k * 1.6)})`); g.addColorStop(1, 'rgba(255,248,210,0)');
+      c.fillStyle = g; c.beginPath(); c.moveTo(x + d * 6, y - 2); c.lineTo(x + d * L, y - 26); c.lineTo(x + d * L, y + 30); c.closePath(); c.fill();
+      c.fillStyle = `rgba(255,250,220,${Math.min(1, k * 1.6)})`; circ(x + d * 7, y, 2.2);
+      continue;
+    }
     const x = MX(u.x), warm = u.a < 3;
     c.fillStyle = rg(warm ? 'torchL' : 'laserL', 0, 0, 0, 1, warm ? [[0, 'rgba(255,170,70,.55)'], [1, 'rgba(255,120,30,0)']] : [[0, 'rgba(120,200,255,.5)'], [1, 'rgba(60,120,255,0)']]);
     c.save(); c.translate(x, GY - 40); c.scale(60 * k + 20, 50 * k + 16); c.globalAlpha = Math.min(1, k * 1.6); circ(0, 0, 1); c.restore();
@@ -234,7 +255,7 @@ function tip(id, text) {
   TIPS[id] = 1; store('aow-tips', TIPS);
   toasts.push({ a: { n: text }, h: 'TIP', l: 8, tip: 1 });
 }
-$('bSP').addEventListener('click', () => {
+$('bHQ').addEventListener('click', () => {
   tip('gen', '🎖 Generál: body za úrovně profilu, hvězdy a úkoly rozděl do stromu dovedností – armáda bude silnější.');
   tip('quest', '✅ Úkoly: každý den tři nové a jeden týdenní. Odměnou jsou body generála a skiny armády.');
 });

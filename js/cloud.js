@@ -4,8 +4,8 @@
 // =====================================================================
 const CLOUD = load('aow-cloud', { code: '', t: 0 });
 const BAK_SKIP = ['aow-fb', 'aow-cloud', 'aow-upd', 'aow-save'];          // přihlášení a technické věci se nepřenáší
-const fbPut = async (path, data) => { const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit'); const r = await fetch(`${FB.db}/${path}.json?auth=${a.t}`, { method: data === null ? 'DELETE' : 'PUT', body: data === null ? undefined : JSON.stringify(data) }); if (!r.ok) throw new Error('Zápis odmítnut (' + r.status + ')'); return a; };
-const fbGet = async path => { const r = await fetch(`${FB.db}/${path}.json`); if (!r.ok) throw new Error('Čtení selhalo (' + r.status + ')'); return r.json(); };
+const fbPut = async (path, data) => { const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit'); const r = await fbFetch(`${FB.db}/${path}.json?auth=${a.t}`, { method: data === null ? 'DELETE' : 'PUT', body: data === null ? undefined : JSON.stringify(data) }); if (!r.ok) throw new Error('Zápis odmítnut (' + r.status + ')'); return a; };
+const fbGet = async path => { const r = await fbFetch(`${FB.db}/${path}.json`); if (!r.ok) throw new Error('Čtení selhalo (' + r.status + ')'); return r.json(); };
 const fmtCode = c => c.slice(0, 4) + '-' + c.slice(4);
 
 // ---------- záloha ----------
@@ -49,7 +49,7 @@ function clanMe() { return { n: (SET.name || 'Hráč').slice(0, 14), r: Math.rou
 async function clanSync() {
   if (!CLAN.tag || !FB.key) return;
   const a = await fbAuth(); if (!a) return;
-  try { await fetch(`${FB.db}/clans/${CLAN.tag}/m/${a.uid}.json?auth=${a.t}`, { method: 'PUT', body: JSON.stringify(clanMe()) }); } catch (e) {}
+  try { await fbFetch(`${FB.db}/clans/${CLAN.tag}/m/${a.uid}.json?auth=${a.t}`, { method: 'PUT', body: JSON.stringify(clanMe()) }); } catch (e) {}
 }
 // výhra v online souboji se počítá do týdenní klanové výzvy
 function clanWin() { if (!CLAN.tag) return; if (CLAN.wk !== weekKey2()) { CLAN.wk = weekKey2(); CLAN.ww = 0; } CLAN.ww++; store('aow-clan', CLAN); clanSync(); }

@@ -534,11 +534,11 @@ function saveGame() {
 }
 function dropSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
 function getSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.v === 1 && s.S ? s : null; } catch (e) { return null; } }
-// průběžně každých 5 s, po konci hry se uložená hra smaže
+// průběžně každých 20 s (a hned při schování aplikace), po konci hry se uložená hra smaže
 function saveTick(dt) {
   if (role !== 'solo' || !S || tut || replay) return;
   if (S.over >= 0) { dropSave(); return; }
-  if ((saveAcc += dt) >= 5) { saveAcc = 0; saveGame(); }
+  if ((saveAcc += dt) >= 20) { saveAcc = 0; saveGame(); }
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
 addEventListener('pagehide', saveGame);

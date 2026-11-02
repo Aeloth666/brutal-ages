@@ -8,7 +8,7 @@
 <meta property="og:title" content="Brutal Ages">
 <meta property="og:description" content="Brutal ages demand brutal wars.">
 <meta property="og:image" content="icons/icon-512.png">
-<link rel="stylesheet" href="style.css?v=202611021009">
+<link rel="stylesheet" href="style.css?v=202611021557">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#10151f">
 <link rel="icon" href="icons/icon-192.png">
@@ -28,9 +28,12 @@
     </div>
     <div class="actions main-actions">
       <button id="bResume" class="big resume hidden"></button>
-      <button id="bSP" class="big">🎮 Singleplayer</button>
-      <button id="bMP" class="big">🌐 Multiplayer</button>
-      <button id="bGS" class="big ghost">⚙ Nastavení hry</button>
+      <button id="bSP" class="big">🎮 Hrát sám</button>
+      <button id="bMP" class="big">🌐 Hrát s kámoši</button>
+      <div class="main-row">
+        <button id="bHQ" class="big ghost hq">🎖 Velitelství<span id="hqBadge" class="badge hidden"></span></button>
+        <button id="bGS" class="big ghost">⚙ Nastavení</button>
+      </div>
     </div>
   </div>
 </div>
@@ -38,13 +41,13 @@
 <div id="spPanel" class="overlay hidden">
   <div class="panel">
     <div class="panel-head">
-      <h2>🎮 Singleplayer</h2>
+      <h2>🎮 Hrát sám</h2>
       <button class="ghost panel-close">Zpět</button>
     </div>
     <div class="scroll menu-sub">
-      <button id="bCamp">🗺 Kampaň</button>
-      <button id="bSolo">⚔ Hrát proti počítači</button>
-      <button id="bSurv">♾ Nekonečné přežití</button>
+      <div class="msec">⚔ Bitva</div>
+      <button id="bCamp">🗺 Kampaň <small>15 území napříč dějinami</small></button>
+      <button id="bSolo">⚔ Proti počítači</button>
       <div class="seg">
         <button data-d="0">Lehká</button>
         <button data-d="1">Normální</button>
@@ -52,14 +55,12 @@
         <button data-d="3">Nemožná</button>
         <button data-d="4" id="bInsane">🔥 Šílená</button>
       </div>
+      <button id="bSurv">♾ Nekonečné přežití <small>vydrž co nejvíc vln</small></button>
+      <div class="msec">🎯 Výzvy</div>
       <div class="sub-row">
         <button id="bDaily" class="ghost gold">📅 Denní výzva</button>
         <button id="bChal" class="ghost gold">🎯 Výzvy</button>
         <button id="bTut" class="ghost">🎓 Výuka</button>
-      </div>
-      <div class="sub-row">
-        <button id="bGen" class="ghost gold">🎖 Generál</button>
-        <button id="bQuest" class="ghost gold">✅ Úkoly a skiny</button>
       </div>
     </div>
   </div>
@@ -68,16 +69,18 @@
 <div id="mpPanel" class="overlay hidden">
   <div class="panel">
     <div class="panel-head">
-      <h2>🌐 Multiplayer</h2>
+      <h2>🌐 Hrát s kámoši</h2>
       <button class="ghost panel-close">Zpět</button>
     </div>
     <div class="scroll menu-sub">
+      <div class="msec">⚔ Nová hra</div>
       <div class="seg seg2" id="netMode">
         <button data-m="duel">⚔ Souboj 1 na 1</button>
         <button data-m="coop">🤝 Spolu proti PC</button>
         <button data-m="2v2">👥 2 na 2</button>
       </div>
       <button id="bHost">Založit online hru</button>
+      <div class="msec">🔑 Připojit se</div>
       <div class="row">
         <input id="code" maxlength="5" placeholder="KÓD" autocomplete="off" autocapitalize="characters">
         <button id="bJoin">Připojit</button>
@@ -85,11 +88,30 @@
       </div>
       <p id="status"></p>
       <div id="friends"></div>
+      <div class="msec">🏆 Komunita</div>
       <div class="sub-row">
-        <button id="bLb" class="ghost gold">🌍 Online žebříček</button>
+        <button id="bLb" class="ghost gold">🌍 Žebříček</button>
         <button id="bClan" class="ghost gold">🛡 Klan</button>
-        <button id="bStats" class="ghost">📊 Statistiky</button>
         <button id="bTourOpen" class="ghost gold">🏆 Turnaj</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="hqPanel" class="overlay hidden">
+  <div class="panel wide">
+    <div class="panel-head">
+      <h2>🎖 Velitelství</h2>
+      <button class="ghost panel-close">Zpět</button>
+    </div>
+    <div class="scroll">
+      <div class="hq-grid">
+        <button id="bProf" class="tile"><span class="ti">👤</span><b>Profil</b><small id="hqProf">úroveň, hodnost a znak</small></button>
+        <button id="bGen" class="tile"><span class="ti">🎖</span><b>Generál</b><small id="hqGen">strom dovedností</small></button>
+        <button id="bQuest" class="tile"><span class="ti">✅</span><b>Úkoly a skiny</b><small id="hqQuest">denní a týdenní úkoly</small></button>
+        <button id="bAch" class="tile"><span class="ti">🏆</span><b>Úspěchy</b><small id="hqAch">sbírka úspěchů</small></button>
+        <button id="bFac" class="tile"><span class="ti">🏳️</span><b>Národy</b><small>oblíbený národ pro každou dobu</small></button>
+        <button id="bStats" class="tile"><span class="ti">📊</span><b>Statistiky</b><small>výhry, prohry a rekordy</small></button>
       </div>
     </div>
   </div>
@@ -98,30 +120,17 @@
 <div id="gsPanel" class="overlay hidden">
   <div class="panel">
     <div class="panel-head">
-      <h2>⚙ Nastavení hry</h2>
+      <h2>⚙ Nastavení</h2>
       <button class="ghost panel-close">Zpět</button>
     </div>
     <div class="scroll menu-sub">
-      <div class="sub-row">
-        <button id="bProf" class="ghost gold">👤 Profil</button>
-        <button id="bFac" class="ghost gold">🏳️ Národ</button>
-        <button id="bAch" class="ghost gold">🏆 Úspěchy</button>
-        <button id="bLang" class="ghost">🌐</button>
-      </div>
-      <div id="cloudBox"></div>
-      <p id="verInfo" class="muted"></p>
-      <button id="bUpdCheck" class="ghost hidden">🔄 Zkontrolovat aktualizaci</button>
-      <p id="keysHelp" class="hidden">⌨ <b>Klávesy:</b> <kbd>1</kbd>–<kbd>9</kbd> tlačítka v liště · <kbd>H</kbd> hrdina · <kbd>Mezerník</kbd> speciál · <kbd>V</kbd> evoluce · <kbd>T</kbd> věže · <kbd>U</kbd> vylepšení · <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd> útok/drž/ústup · <kbd>R</kbd> vztek · <kbd>Tab</kbd> rychlost · <kbd>Esc</kbd> pauza</p>
+      <div class="msec">🔊 Zvuk</div>
       <div class="set-grid">
         <button id="bMusic" class="ghost">Hudba: ZAP</button>
         <button id="bSfx" class="ghost">Zvuky: ZAP</button>
         <button id="bVib" class="ghost">Vibrace: ZAP</button>
-        <button id="bBrutal" class="ghost">🩸 Brutal: VYP</button>
-        <button id="bWx" class="ghost">🌦 Počasí: VYP</button>
-        <button id="bEvt" class="ghost">⚡ Události: ZAP</button>
-        <button id="bAutoGfx" class="ghost">📉 Auto grafika: ZAP</button>
       </div>
-      <div class="colors-head">Grafika</div>
+      <div class="msec">🎨 Grafika</div>
       <div class="seg" id="gfxOpts">
         <button data-g="0">Nízká</button>
         <button data-g="1">Střední</button>
@@ -129,6 +138,19 @@
         <button data-g="3">Ultra</button>
       </div>
       <p class="muted" id="gfxNote"></p>
+      <div class="set-grid"><button id="bAutoGfx" class="ghost">📉 Auto grafika: ZAP</button></div>
+      <div class="msec">🎮 Hra</div>
+      <div class="set-grid">
+        <button id="bBrutal" class="ghost">🩸 Brutal: VYP</button>
+        <button id="bWx" class="ghost">🌦 Počasí: VYP</button>
+        <button id="bEvt" class="ghost">⚡ Události: ZAP</button>
+        <button id="bLang" class="ghost">🌐</button>
+      </div>
+      <div id="cloudBox"></div>
+      <div class="msec">ℹ️ O hře</div>
+      <p id="verInfo" class="muted"></p>
+      <button id="bUpdCheck" class="ghost hidden">🔄 Zkontrolovat aktualizaci</button>
+      <p id="keysHelp" class="hidden">⌨ <b>Klávesy:</b> <kbd>1</kbd>–<kbd>9</kbd> tlačítka v liště · <kbd>H</kbd> hrdina · <kbd>Mezerník</kbd> speciál · <kbd>V</kbd> evoluce · <kbd>T</kbd> věže · <kbd>U</kbd> vylepšení · <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd> útok/drž/ústup · <kbd>R</kbd> vztek · <kbd>Tab</kbd> rychlost · <kbd>Esc</kbd> pauza</p>
     </div>
   </div>
 </div>
@@ -299,26 +321,26 @@
   </div>
 </div>
 
-<script src="lib/peerjs.min.js?v=202611021009"></script>
-<script src="js/i18n.js?v=202611021009"></script>
-<script src="js/build.js?v=202611021009"></script>
-<script src="js/core.js?v=202611021009"></script>
-<script src="js/net.js?v=202611021009"></script>
-<script src="js/render.js?v=202611021009"></script>
-<script src="js/units.js?v=202611021009"></script>
-<script src="js/world.js?v=202611021009"></script>
-<script src="js/hud.js?v=202611021009"></script>
-<script src="js/meta.js?v=202611021009"></script>
-<script src="js/audio.js?v=202611021009"></script>
-<script src="js/ui.js?v=202611021009"></script>
-<script src="js/modes.js?v=202611021009"></script>
-<script src="js/extras.js?v=202611021009"></script>
-<script src="js/gen.js?v=202611021009"></script>
-<script src="js/lb.js?v=202611021009"></script>
-<script src="js/surv.js?v=202611021009"></script>
-<script src="js/season.js?v=202611021009"></script>
-<script src="js/cloud.js?v=202611021009"></script>
-<script src="js/main.js?v=202611021009"></script>
-<script src="js/update.js?v=202611021009"></script>
+<script src="lib/peerjs.min.js?v=202611021557"></script>
+<script src="js/i18n.js?v=202611021557"></script>
+<script src="js/build.js?v=202611021557"></script>
+<script src="js/core.js?v=202611021557"></script>
+<script src="js/net.js?v=202611021557"></script>
+<script src="js/render.js?v=202611021557"></script>
+<script src="js/units.js?v=202611021557"></script>
+<script src="js/world.js?v=202611021557"></script>
+<script src="js/hud.js?v=202611021557"></script>
+<script src="js/meta.js?v=202611021557"></script>
+<script src="js/audio.js?v=202611021557"></script>
+<script src="js/ui.js?v=202611021557"></script>
+<script src="js/modes.js?v=202611021557"></script>
+<script src="js/extras.js?v=202611021557"></script>
+<script src="js/gen.js?v=202611021557"></script>
+<script src="js/lb.js?v=202611021557"></script>
+<script src="js/surv.js?v=202611021557"></script>
+<script src="js/season.js?v=202611021557"></script>
+<script src="js/cloud.js?v=202611021557"></script>
+<script src="js/main.js?v=202611021557"></script>
+<script src="js/update.js?v=202611021557"></script>
 </body>
 </html>

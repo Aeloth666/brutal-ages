@@ -14,6 +14,7 @@ function drawBase(s, p) {
     if (p.tur[k]) drawTurret(p.tur[k].a, p.tur[k].i, 54, y + 2);
   }
   c.restore();
+  if (p.hp > 0 && p.hp < p.mhp * 0.5) baseDamage(MX(BX[s]), p.hp < p.mhp * 0.2, s);
   const x = MX(BX[s]) - 55, y = GY - 248;
   rr(x - 3, y - 3, 116, 14, 6); c.fillStyle = 'rgba(15,20,30,.75)'; c.fill();
   rr(x, y, 110 * Math.max(0, p.hp / p.mhp), 8, 4);
@@ -24,6 +25,27 @@ function drawBase(s, p) {
   c.fillStyle = '#fff'; c.fillText(hpTxt, x + 55, y - 7);
 }
 
+// poškozená základna: pod 50 % HP kouří, pod 20 % navíc hoří
+function baseDamage(bx, fire, s) {
+  const spots = [[-28, -150], [22, -105], [-6, -205]], n = GFXL >= 2 ? 6 : 3;
+  spots.forEach(([dx, dy], k) => {
+    const x = bx + dx * facing(s), y = GY + dy;
+    for (let i = 0; i < n; i++) {                       // kouř stoupá a rozplývá se
+      const t = (T * 0.45 + i / n + k * 0.37) % 1, r = 7 + t * 20;
+      c.fillStyle = `rgba(${fire ? 40 : 70},${fire ? 36 : 66},${fire ? 34 : 62},${(1 - t) * (fire ? 0.5 : 0.35)})`;
+      circ(x + Math.sin(t * 5 + k * 2 + i) * 7 + t * 18, y - 8 - t * 95, r);
+    }
+    if (!fire) return;
+    const op = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter';
+    c.fillStyle = 'rgba(255,120,20,.28)'; circ(x, y - 6, 22);
+    c.globalCompositeOperation = op;
+    for (const [w, h, col] of [[11, 30, '#ea580c'], [7, 20, '#f59e0b'], [3.5, 11, '#fde68a']]) {
+      const fl = Math.sin(T * 13 + k * 3) * 3, fh = h * (0.85 + Math.sin(T * 9 + k) * 0.15);
+      c.beginPath(); c.moveTo(x - w, y); c.quadraticCurveTo(x - w * 1.2, y - fh * 0.55, x + fl, y - fh);
+      c.quadraticCurveTo(x + w * 1.2, y - fh * 0.5, x + w, y); c.closePath(); c.fillStyle = col; c.fill();
+    }
+  });
+}
 function flag(x, y, team, pole, h = 34) {
   c.strokeStyle = OL; c.lineWidth = 4.4; ln(x, y, x, y - h);
   c.strokeStyle = pole; c.lineWidth = 2.4; ln(x, y, x, y - h);
@@ -675,7 +697,13 @@ const TUR = [
   (i, a) => {
     rr(-12, -2, 24, 10, 2); fo('#7a5230', 1.3);
     if (i === 1) { limb([-2, -2, -2, -12], '#8b5a2b', 3); limb([-2, -12, -7, -20], '#8b5a2b', 2.6); limb([-2, -12, 3, -20], '#8b5a2b', 2.6); c.strokeStyle = '#ddd'; c.lineWidth = 0.8; ln(-7, -20, 3, -20); }
-    else if (i === 2) { c.beginPath(); c.ellipse(2, -5, 10, 5, 0, 0, Math.PI); fo('#a0703c', 1.3); c.fillStyle = '#f5f0e1'; ell(-1, -8, 3, 4); ell(5, -8, 3, 4); }
+    else if (i === 2) {
+      limb([-6, -2, 8, -10], '#8b5a2b', 3); c.beginPath(); c.ellipse(2, -5, 10, 5, 0, 0, Math.PI); fo('#a0703c', 1.3);
+      c.beginPath(); c.ellipse(2, -10, 6, 7.5, 0, 0, Math.PI * 2); fo('#b98f4e', 1.2);
+      c.strokeStyle = 'rgba(90,60,20,.7)'; c.lineWidth = 1; for (const y of [-14, -10, -6]) { c.beginPath(); c.ellipse(2, y, 5.2, 1.4, 0, 0, Math.PI); c.stroke(); }
+      c.fillStyle = '#2a1a0a'; circ(2, -8, 1.4);
+      c.fillStyle = '#facc15'; for (let k = 0; k < 3; k++) { const a = T * 6 + k * 2.1; circ(2 + Math.cos(a) * 9, -12 + Math.sin(a * 1.3) * 5, 1.1); }
+    }
     else { limb([-8, -2, 10, -14], '#8b5a2b', 3); c.beginPath(); c.arc(11, -16, 4.5, 0, Math.PI * 2); fo('#8a8a8a', 1.2); }
   },
   // středověk
@@ -720,7 +748,11 @@ function drawProj(pr) {
   switch (pr.p) {
     case 'stone': c.beginPath(); c.arc(x, y, 3.2, 0, Math.PI * 2); fo('#8a8a8a', 1); break;
     case 'rock': c.beginPath(); c.arc(x, y, 6, 0, Math.PI * 2); fo('#77736d', 1.3); c.fillStyle = '#a3a09a'; circ(x - 2, y - 2, 2); break;
-    case 'egg': c.beginPath(); c.ellipse(x, y, 4.2, 5.6, 0, 0, Math.PI * 2); fo('#f8f3e3', 1.1); c.fillStyle = '#b08a5a'; circ(x + 1, y + 1, 0.9); break;
+    case 'egg':                                       // vosí hnízdo s rojem vos
+      c.beginPath(); c.ellipse(x, y, 5, 6.2, 0, 0, Math.PI * 2); fo('#b98f4e', 1.1);
+      c.strokeStyle = 'rgba(90,60,20,.7)'; c.lineWidth = 0.8; for (const k of [-3, 0, 3]) { c.beginPath(); c.ellipse(x, y + k, 4.4, 1.1, 0, 0, Math.PI); c.stroke(); }
+      c.fillStyle = '#facc15'; for (let k = 0; k < 4; k++) { const a = T * 9 + k * 1.6; circ(x + Math.cos(a) * 8, y + Math.sin(a) * 6, 0.9); }
+      break;
     case 'oil': c.beginPath(); c.arc(x, y, 6, 0, Math.PI * 2); fo('#2b1a0a', 1.2); glowDot(x, y, 8, '#f97316'); break;
     case 'arrow': case 'fire':
       c.strokeStyle = OL; c.lineWidth = 3; ln(x - dx * 16, y - dy * 16, x, y);
@@ -984,6 +1016,11 @@ function bloodBurst(x, y, n, sp, np) {   // np = krev ze zásahu (kaluže jen v�
 }
 // rozsekání zvířat: tělo (s hlavou) + každá noha zvlášť
 // c = střed těla, box = obrys těla bez nohou, legs = [kyčel x, kyčel y, koleno dopředu, barva, šířka]
+// jízdní zvířata doby kamenné (rozsekání podle druhu – údaje z MOUNT)
+const BEAST_M = Object.fromEntries(Object.entries(MOUNT).map(([k, M]) => { const [bx, by, rx, ry] = M.body, [hx, hy] = M.head;
+  return [k, { kind: k, c: [bx, by], box: [bx - rx - 8, hx + 16, Math.min(by - ry, hy - 14) - 2, by + ry], L: M.L, hc: [hx, hy], hbox: [hx - 12, hx + 26, hy - 16, hy + 28],
+    neck: [M.neck[0], M.neck[1], M.neck[2]], legs: M.legs.map(([lx, front, near]) => [lx, M.hip, !!front, M.col[near ? 0 : 1], M.w]) }]; }));
+const beastOf = f => f.k ? BEAST_M[f.k] : BEAST[f.a];
 const BEAST = [
   { c: [0, -36], box: [-58, 46, -58, -17], L: [12, 12], hc: [28, -42], hbox: [10, 46, -58, -24], neck: [14, -31, 5],
     legs: [[-3, -24, true, '#3f7d33', 7.5], [4, -24, true, '#5aa64a', 8]] },
@@ -991,9 +1028,9 @@ const BEAST = [
     legs: [[-14, -28, false, '#5e3a1f', 4.5], [12, -28, true, '#5e3a1f', 4.5], [-9, -28, false, '#8b5a33', 4.8], [17, -28, true, '#8b5a33', 4.8]] },
 ];
 function tearBeast(cp) {
-  const { x, side, a } = cp, B = BEAST[a], m = side === 0 ? 1 : -1;    // m: směr dopředu ve světě
+  const { x, side, a } = cp, k = a === 0 ? mountKind(teamCol(side)) : null, B = k ? BEAST_M[k] : BEAST[a], m = side === 0 ? 1 : -1;    // m: směr dopředu ve světě
   cp.l = 0;                                                            // celé zvíře nahradí kusy
-  const base = { side, a, s: US, l: 9, ml: 9, gr: 0, bled: 0, rot: 0 };
+  const base = { side, a, k, s: US, l: 9, ml: 9, gr: 0, bled: 0, rot: 0 };
   fx.push({ ...base, gib: 'body', x: x + m * B.c[0] * US, y: GY + B.c[1] * US,
     vx: rnd(-50, 50), vy: -rnd(160, 260), vr: rnd(-2.5, 2.5) });
   // useknutá hlava s krkem odletí dopředu
@@ -1014,20 +1051,20 @@ function tearBeast(cp) {
 // noha zvířete: kyčel nahoře, kopyto/pařát dole, kreslená kolem svého středu
 const bLegMid = hy => (hy - 2) / 2;
 function drawBeastLeg(f) {
-  const B = BEAST[f.a], [, hy, knee, col, w] = B.legs[f.i];
+  const B = beastOf(f), [, hy, knee, col, w] = B.legs[f.i];
   c.translate(0, -bLegMid(hy));
-  const [px, py] = f.a === 1 && !knee ? hindLeg(0, hy, 0, false, 0, 0, col, w) : ikLeg(0, hy, 0, false, 0, 0, B.L[0], B.L[1], knee, col, w, f.a === 0 ? -6.5 : -2);
-  if (f.a === 0) dinoFoot(px, py, '#2f5f27'); else hoof(px, py);
+  const [px, py] = !B.kind && f.a === 1 && !knee ? hindLeg(0, hy, 0, false, 0, 0, col, w) : ikLeg(0, hy, 0, false, 0, 0, B.L[0], B.L[1], knee, col, w, !B.kind && f.a === 0 ? -6.5 : -2);
+  if (B.kind) mountFoot(B.kind, px, py, col); else if (f.a === 0) dinoFoot(px, py, '#2f5f27'); else hoof(px, py);
   stump(0, hy, w * 0.6);
 }
 function drawBeastHead(f) {
-  const B = BEAST[f.a];
+  const B = beastOf(f);
   c.translate(-B.hc[0], -B.hc[1]);
-  if (f.a === 0) dinoHead(0); else horseHead();
+  if (B.kind) mountHead(B.kind, 0); else if (f.a === 0) dinoHead(0); else horseHead();
   stump(B.neck[0], B.neck[1], B.neck[2]);
 }
 function drawBeastBody(f) {
-  const B = BEAST[f.a];
+  const B = beastOf(f);
   c.translate(-B.c[0], -B.c[1]);
   NO_RIDER = NO_LEGS = NO_BHEAD = true; heavy(teamCol(f.side), f.a, 0, 0, 1); NO_RIDER = NO_LEGS = NO_BHEAD = false;
   for (const [hx, hy, , , w] of B.legs) stump(hx, hy + 1.5, w * 0.62);
@@ -1074,13 +1111,13 @@ const GIB_BOX = { head: [-8, 8, -8, 8], arm: [-3, 3, -7, 8], leg: [-3, 6, -10, 1
 function gibBottom(f) {
   let b;
   if (f.gib === 'bhead') {
-    const B = BEAST[f.a];
+    const B = beastOf(f);
     b = [B.hbox[0] - B.hc[0], B.hbox[1] - B.hc[0], B.hbox[2] - B.hc[1], B.hbox[3] - B.hc[1]];
   } else if (f.gib === 'body') {
-    const B = BEAST[f.a];
+    const B = beastOf(f);
     b = [B.box[0] - B.c[0], B.box[1] - B.c[0], B.box[2] - B.c[1], B.box[3] - B.c[1]];
   } else if (f.gib === 'bleg') {
-    const hy = BEAST[f.a].legs[f.i][1], mid = bLegMid(hy);
+    const hy = beastOf(f).legs[f.i][1], mid = bLegMid(hy);
     b = [-6, 10, hy - mid, 2 - mid];  } else b = GIB_BOX[f.gib];
   const sn = Math.sin(f.rot), cs = Math.cos(f.rot);
   let m = 0;

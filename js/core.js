@@ -27,11 +27,11 @@ const AGES = [
     units: [
       { n: 'Jeskyňák',   c: 15,  hp: 55,  d: 16, r: 18,  s: 42, cd: 1.0, t: 1.0 },
       { n: 'Prakovník',  c: 30,  hp: 42,  d: 9,  r: 140, s: 42, cd: 1.1, t: 1.3, p: 'stone' },
-      { n: 'Dinojezdec', c: 70,  hp: 200, d: 40, r: 24,  s: 36, cd: 1.3, t: 3.0 }],
+      { n: 'Mamutí jezdec', c: 70,  hp: 200, d: 40, r: 24,  s: 36, cd: 1.3, t: 3.0 }],
     turrets: [
       { n: 'Kamenomet',  c: 100, d: 10, r: 330, cd: 1.1,  p: 'stone' },
       { n: 'Prakostroj', c: 200, d: 7,  r: 350, cd: 0.55, p: 'stone' },
-      { n: 'Vejcomet',   c: 500, d: 28, r: 340, cd: 1.5,  p: 'egg', sp: 30 }],
+      { n: 'Úlomet',     c: 500, d: 28, r: 340, cd: 1.5,  p: 'egg', sp: 30 }],
     sp: { n: 'Meteority', d: 50, count: 16, p: 'meteor' } },
   { name: 'Středověk', xp: 14000, baseHp: 1100,
     units: [
@@ -87,10 +87,10 @@ const HERO_CD = 60, HERO_ACD = 20;
 // bonusy: hp, melee, ranged, spd, build (čas výroby), base (hradby), tur (cena věží), gold (zlato za zabití),
 //         heavy (zdraví těžkých jednotek), cheap (cena jednotek), spcd (dobití speciálu)
 const AGEFAC = [
-  [ { n: 'Lovci mamutů', ic: '🦣', d: 'Vyvážený kmen, o 10 % víc zlata za zabití.', gold: 1.1, u: ['Jeskyňák', 'Prakovník', 'Dinojezdec'], hero: 'Náčelník' },
+  [ { n: 'Lovci mamutů', ic: '🦣', d: 'Vyvážený kmen, o 10 % víc zlata za zabití.', gold: 1.1, u: ['Jeskyňák', 'Prakovník', 'Mamutí jezdec'], hero: 'Náčelník' },
     { n: 'Kmen Vlka', ic: '🐺', d: 'Jednotky jsou o 20 % rychlejší.', spd: 1.2, u: ['Vlčí lovec', 'Vrhač kamenů', 'Vlčí jezdec'], hero: 'Vlčí vůdce', g: 'wolf' },
-    { n: 'Kmen Medvěda', ic: '🐻', d: 'Jednotky mají o 15 % víc zdraví.', hp: 1.15, u: ['Medvědí bojovník', 'Prakovník', 'Jezdec na ještěru'], hero: 'Medvědí náčelník', g: 'bear' },
-    { n: 'Kmen Orla', ic: '🦅', d: 'Střelci útočí o 25 % silněji.', ranged: 1.25, u: ['Lovec', 'Orlí oko', 'Dinojezdec'], hero: 'Šaman', g: 'eagle' } ],
+    { n: 'Kmen Medvěda', ic: '🐻', d: 'Jednotky mají o 15 % víc zdraví.', hp: 1.15, u: ['Medvědí bojovník', 'Prakovník', 'Medvědí jezdec'], hero: 'Medvědí náčelník', g: 'bear' },
+    { n: 'Kmen Orla', ic: '🦅', d: 'Střelci útočí o 25 % silněji.', ranged: 1.25, u: ['Lovec', 'Orlí oko', 'Pratuří jezdec'], hero: 'Šaman', g: 'eagle' } ],
   [ { n: 'Rytíři', ic: '🛡️', d: 'Hradby o 25 % silnější, věže o 20 % levnější.', base: 1.25, tur: 0.8, u: ['Šermíř', 'Lukostřelec', 'Rytíř'], hero: 'Král' },
     { n: 'Vikingové', ic: '🪓', d: 'Jednotky mají o 20 % víc zdraví.', hp: 1.2, u: ['Berserkr', 'Vrhač seker', 'Jarlův jezdec'], hero: 'Jarl', g: 'viking' },
     { n: 'Samurajové', ic: '🗡️', d: 'Útok zblízka +25 % a o 10 % rychlejší výroba.', melee: 1.25, build: 0.9, u: ['Samuraj', 'Lučištník', 'Jízdní samuraj'], hero: 'Šógun', g: 'samurai' },
@@ -138,9 +138,9 @@ const upCost = (p, k) => UP_COST[p.age] * (p.up[k] + 1);
 const upMax = p => Math.min(UP_MAX, p.age + 1);        // strop úrovně roste s věkem (jinak by šlo levně vymaxovat v pravěku)
 // bossové kampaně (konec každého věku): sw = plošný úder zblízka, y = výška těla nad zemí (letci)
 const BOSSES = [
-  { n: 'Válečný mamut', c: 400, hp: 2600, d: 75, r: 30, s: 20, cd: 1.6, t: 0, sw: 60, y: 60 },
+  { n: 'Šavlozubý tygr', c: 400, hp: 2600, d: 75, r: 30, s: 30, cd: 1.4, t: 0, sw: 60, y: 50 },
   { n: 'Drak', c: 1600, hp: 5200, d: 110, r: 95, s: 24, cd: 1.5, t: 0, sw: 85, y: 110 },
-  { n: 'Obří vzducholoď', c: 4500, hp: 5000, d: 150, r: 210, s: 16, cd: 2.6, t: 0, p: 'shell', sp: 40, y: 130 },
+  { n: 'Leonardův obrněný vůz', c: 4500, hp: 5000, d: 150, r: 210, s: 16, cd: 2.6, t: 0, p: 'shell', sp: 40, y: 18 },
   { n: 'Obří tank', c: 20000, hp: 10000, d: 330, r: 190, s: 15, cd: 2.4, t: 0, p: 'shell', sp: 45, y: 50 },
   { n: 'Titán', c: 55000, hp: 20000, d: 520, r: 210, s: 15, cd: 2.0, t: 0, p: 'ion', sp: 50, y: 110 },
 ];

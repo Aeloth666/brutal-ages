@@ -1,2 +1,2 @@
 // číslo sestavení hry – přepisuje ho vydat-verzi.ps1 (aktualizace se stáhne, jen když je na webu vyšší)
-const BUILD = 202611021009, GAME_VER = '2.5';
+const BUILD = 202611021557, GAME_VER = '2.6';

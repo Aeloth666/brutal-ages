@@ -10,7 +10,6 @@ function refreshSet() {
   $('gfxNote').textContent = GFX_D[GFXL];
   $('bEvt').textContent = '⚡ Události: ' + (SET.evt !== false ? 'ZAP' : 'VYP');
   $('bAutoGfx').textContent = '📉 Auto grafika: ' + (SET.gfxAuto !== false ? 'ZAP' : 'VYP');
-  $('bFac').textContent = '🏳️ Národy';
   $('bLang').textContent = LANG === 'en' ? '🌐 English' : '🌐 Čeština';
 }
 document.querySelectorAll('#gfxOpts button').forEach(b => b.onclick = () => { SET.gfx = GFXL = +b.dataset.g; saveSet(); resize(); refreshSet(); sfx('click'); });
