@@ -14,7 +14,7 @@ const ICE = { iceServers: [
   ...TURN] };
 let peer = null, conn = null;
 // hostitel drží spojení se všemi hráči (souboj a co-op 1, 2 na 2 až 3): { c, slot, side, info, lastRx, away, lost, rm }
-let conns = [], TEAM = false, GSIDE = 1, rmInfo = null;
+let conns = [], TEAM = false, GSIDE = 1, rmInfo = null, MYMEM = 0;   // MYMEM: kolikátý jsem hráč svého týmu (0/1)
 // diváci: dostávají jen obraz hry, nic neovládají (hostitel jich může mít víc)
 let specs = [], specMode = false;
 // relace pro návrat po výpadku, info o soupeři, stav odvety
@@ -175,12 +175,12 @@ const infoOf = m => ({ n: m.n, col: m.col, pid: m.pid, af: cleanAf(m.af), emb: m
 function onData(m, k) {
   if (!m) return;
   switch (m.t) {
-    case 'c': if (role === 'host' && k) applyCmd(k.side, m.c); break;
+    case 'c': if (role === 'host' && k) applyCmd(k.side, m.c, k.mem); break;
     case 's': if (role === 'guest') onSnap(m.d); break;
     case 'start':
       if (role === 'host' || k) break;
       specMode = !!m.spec; if (specMode) achId('spect');
-      SESS = m.sess; OPP = infoOf(m); if (!specMode) rememberFriend(OPP); coop = !!m.coop; TEAM = !!m.team; GSIDE = m.side ?? (coop ? 0 : 1); setField(m.field);
+      SESS = m.sess; OPP = infoOf(m); if (!specMode) rememberFriend(OPP); coop = !!m.coop; TEAM = !!m.team; GSIDE = m.side ?? (coop ? 0 : 1); MYMEM = m.mem | 0; setField(m.field);
       startGame('guest', null, m.camp ?? null);
       send({ t: 'hi', ...hello() }); partySend();
       break;
@@ -323,13 +323,22 @@ function startGame(r, chal = null, camp = null, daily = false) {
     setPrefs(S.pl[0], SET.af); S.pl[0].emb = SET.emb || 0;
     if (r === 'host' && !coop) { const e1 = conns.find(k => k.side === 1); if (e1 && e1.info.pid) { setPrefs(S.pl[1], e1.info.af); S.pl[1].emb = e1.info.emb || 0; } }
     else setPrefs(S.pl[1], Array.from({ length: 5 }, () => (Math.random() * 4) | 0));   // počítač má náhodné národy
+    if (r === 'host') {                                 // dva hráči na jedné straně: každý má své zlato a svůj národ
+      MYMEM = 0;
+      for (const k of conns) k.mem = k.side === 0 ? 1 : conns.filter(o => o.side === k.side && o.slot < k.slot).length;
+      for (const s of [0, 1]) {
+        const mem = (s === 0 ? [SET.af] : []).concat(conns.filter(k => k.side === s).sort((a, b) => a.slot - b.slot).map(k => k.info.af));
+        if (mem.length !== 2) continue;
+        const p = S.pl[s]; p.prefm = mem.map(cleanAf); p.afm = p.prefm.map(pr => pr.slice()); p.w = [p.gold, p.gold]; p.gold *= 2; p.pd = [0, 0];
+      }
+    }
   }
   if (curSurv) survStart();
   if (r === 'solo' && !tut) genApply(S.pl[0]);                     // bonusy generála jen proti počítači
   if (r !== 'guest') { S.st = newBst(); S.rage = r === 'solo' && S.camp != null && EXTREME(); }   // vztek jen v kampani pro jednoho hráče
   if (r !== 'guest') S.events = SET.evt !== false && S.camp == null && S.chal == null && !S.daily;
   if (r !== 'guest') { setField((S.camp != null && CAMP[S.camp].field) || (S.daily && DAILY.field) || pickField()); S.field = FIELD; }
-  if (r === 'host') { for (const k of conns) sendTo(k, { t: 'start', sess: SESS, ...hello(), coop, camp, field: FIELD, side: k.side, team: TEAM }); for (const s of specs) if (s.open) try { s.send(specStart()); } catch (e) {} partySend(); }
+  if (r === 'host') { for (const k of conns) sendTo(k, { t: 'start', sess: SESS, ...hello(), coop, camp, field: FIELD, side: k.side, team: TEAM, mem: k.mem | 0 }); for (const s of specs) if (s.open) try { s.send(specStart()); } catch (e) {} partySend(); }
 }
 
 let curTour = null;

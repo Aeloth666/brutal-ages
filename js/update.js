@@ -97,6 +97,13 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.9', d: '2026-11-02', cs: [
+    'Co-op a 2 na 2: každý hráč v týmu má vlastní zlato – nákup platí ten, kdo kupuje, a odměnu za zabití dostane majitel jednotky (za věže a speciální útoky napůl).',
+    'Každý hráč v týmu má svůj národ: jeho jednotky se kreslí podle jeho národa i u spoluhráče a soupeřů a na začátku věku si národ volí každý sám.',
+    'Základna, věže, vylepšení a evoluce zůstávají společné pro celý tým; bonusy národa strany se řídí prvním hráčem týmu.'], en: [
+    'Co-op and 2 vs 2: every player in a team has their own gold – the buyer pays and the kill reward goes to the unit’s owner (split in half for towers and special attacks).',
+    'Every team player has their own nation: their units are drawn in their nation’s look for the teammate and the opponents too, and everyone picks their nation at the start of each age.',
+    'The base, towers, upgrades and evolution stay shared by the whole team; the side’s nation bonuses follow the team’s first player.'] },
   { v: '2.8', d: '2026-11-02', cs: [
     'Nový kůň: nohy se třemi klouby, tvarované tělo, dlouhá hlava s hřívou a uzdečkou, vlající ocas, rytíř na čabrace.',
     'Nový T-Rex v události: vodorovné tělo vyvážené ocasem, mohutná stehna, velká hlava se zuby a malé ručky – a je větší.',

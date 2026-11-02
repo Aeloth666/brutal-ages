@@ -288,7 +288,7 @@ function render(dt) {
   drawPools(dt);
   if (bloodCode) drawBloodCode(dt);
   // aury pod jednotkami: pokřik generála (zlatá), bubeník poblíž (oranžová), léčitel poblíž (zelená)
-  const abOf = u => u.ty === 6 ? (SPECS[u.a][(u.f ?? (V.pl[u.side].af || [])[u.a]) | 0] || {}).ab : '';
+  const abOf = u => u.ty === 6 ? (SPECS[u.a][(u.f ?? ((V.pl[u.side].afm ? V.pl[u.side].afm[u.m | 0] : V.pl[u.side].af) || [])[u.a]) | 0] || {}).ab : '';
   const drums = V.units.filter(u => abOf(u) === 'drum'), heals = V.units.filter(u => abOf(u) === 'healer');
   const near = (L, u, r) => L.some(a => a !== u && a.side === u.side && Math.abs(a.x - u.x) < r);
   // stíny (na vysoké a ultra měkké)
@@ -316,7 +316,7 @@ function render(dt) {
     if (u.rg) rageAura(x, u);
     const rs = u.rg ? 1.12 : 1;
     c.save(); c.translate(x, GY); c.scale(facing(u.side) * (u.back ? -1 : 1) * US * rs, US * rs);
-    drawUnitLocal(teamCol(u.side), u.a, u.ty, r.ph, u.at, u.st);
+    drawUnitLocal(teamColM(u.side, u.m), u.a, u.ty, r.ph, u.at, u.st);
     c.restore();
     if (u.rg) { c.font = '16px system-ui'; c.textAlign = 'center'; c.fillText('💢', x + Math.sin(T * 9) * 2, GY - hpBarH(u) - 10); }
     if (u.hp < u.mx) {

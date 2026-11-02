@@ -813,7 +813,7 @@ function addFx(e) {
       if (BRUT() && !SET.egg && !bloodCode && !bloodCodeUsed && V && V.time > 90 && Math.random() < 0.05) bloodCode = { x: Math.max(160, Math.min(W - 160, MX(x))), l: 9, ml: 9 };
       if (SET.chicken) { part(10, '#f8fafc', 110, 2.2, 1, 120); sfx('cluck', x); }
       seasonDie(x);
-      const cp = { corpse: 1, x, side: e[3], a: e[4], ty: e[5], l: e[5] === 5 ? 3 : 1.3, ml: e[5] === 5 ? 3 : 1.3 };
+      const cp = { corpse: 1, x, side: e[3], a: e[4], ty: e[5], m: e[6] | 0, l: e[5] === 5 ? 3 : 1.3, ml: e[5] === 5 ? 3 : 1.3 };
       if (e[5] === 5) {                                   // padlý boss: série výbuchů a velký nápis
         if (e[3] !== mySide) achBoss(e[4]);
         shake = 2; vib([150, 60, 250]);
@@ -876,7 +876,7 @@ function drawFx(dt) {
       c.save(); c.translate(x, GY + (f.ty === 2 ? p * 8 : f.ty === 5 ? p * 14 : 0)); c.scale(facing(f.side) * US, US);
       if (f.ty !== 2 && f.ty !== 5) c.rotate(-p * 1.45);
       GORE = f.gore || null;
-      drawUnitLocal(teamCol(f.side), f.a, f.ty, 0, 0, 1);
+      drawUnitLocal(teamColM(f.side, f.m), f.a, f.ty, 0, 0, 1);
       GORE = null;
       c.restore();
     } else if (f.gib) {
@@ -1034,10 +1034,10 @@ const BEAST = [
     legs: [[-14, -28, false, '#5e3a1f', 4.5], [12, -28, true, '#5e3a1f', 4.5], [-9, -28, false, '#8b5a33', 4.8], [17, -28, true, '#8b5a33', 4.8]] },
 ];
 function tearBeast(cp) {
-  const { x, side, a } = cp, k = cp.k || (a === 0 ? mountKind(teamCol(side)) : a === 1 ? 'horse' : null), B = k ? BEAST_M[k] : BEAST[a], m = side === 0 ? 1 : -1;    // m: směr dopředu ve světě
+  const { x, side, a } = cp, k = cp.k || (a === 0 ? mountKind(teamColM(side, cp.m)) : a === 1 ? 'horse' : null), B = k ? BEAST_M[k] : BEAST[a], m = side === 0 ? 1 : -1;    // m: směr dopředu ve světě
   cp.l = 0;                                                            // celé zvíře nahradí kusy
   const sc = k === 'smilodon' ? 0.85 : 1, US0 = US * sc;               // tygr (boss) je kreslený zmenšený
-  const base = { side, a, k, s: US0, l: 9, ml: 9, gr: 0, bled: 0, rot: 0 };
+  const base = { side, a, k, m: cp.m, s: US0, l: 9, ml: 9, gr: 0, bled: 0, rot: 0 };
   fx.push({ ...base, gib: 'body', x: x + m * B.c[0] * US0, y: GY + B.c[1] * US0,
     vx: rnd(-50, 50), vy: -rnd(160, 260), vr: rnd(-2.5, 2.5) });
   // useknutá hlava s krkem odletí dopředu
@@ -1053,7 +1053,7 @@ function tearBeast(cp) {
   addPool(x, rnd(18, 26)); addPool(x + m * 25, rnd(8, 12)); addPool(x - m * 25, rnd(8, 12));
   if (k === 'smilodon') return;                                        // boss nikoho neveze
   // jezdec spadne zvlášť a dopadne jako obyčejný voják
-  const rider = { corpse: 1, x: x - m * 3 * US, side, a, ty: 0, l: 1.3, ml: 1.3 };
+  const rider = { corpse: 1, x: x - m * 3 * US, side, a, ty: 0, m: cp.m, l: 1.3, ml: 1.3 };
   fx.push(rider); gore(rider);
 }
 // noha zvířete: kyčel nahoře, kopyto/pařát dole, kreslená kolem svého středu
@@ -1075,7 +1075,7 @@ function drawBeastHead(f) {
 function drawBeastBody(f) {
   const B = beastOf(f);
   c.translate(-B.c[0], -B.c[1]);
-  NO_RIDER = NO_LEGS = NO_BHEAD = true; if (B.kind) mount(teamCol(f.side), B.kind, 0, false, 0); else heavy(teamCol(f.side), f.a, 0, 0, 1); NO_RIDER = NO_LEGS = NO_BHEAD = false;
+  NO_RIDER = NO_LEGS = NO_BHEAD = true; if (B.kind) mount(teamColM(f.side, f.m), B.kind, 0, false, 0); else heavy(teamColM(f.side, f.m), f.a, 0, 0, 1); NO_RIDER = NO_LEGS = NO_BHEAD = false;
   for (const [hx, hy, , , w] of B.legs) stump(hx, hy + 1.5, w * 0.62);
 }
 function gore(cp) {
@@ -1162,7 +1162,7 @@ function drawGib(f, dt) {
     fx.push({ blood: 1, x: f.x, y: f.y, vx: rnd(-20, 20), vy: rnd(-30, 10), l: 0.6, ml: 0.6, col: '#9f1212', r: rnd(1, 2), g: 600 });
   }
   }
-  const team = teamCol(f.side);
+  const team = teamColM(f.side, f.m);
   c.globalAlpha = Math.min(1, f.l / 1.5);
   c.save(); c.translate(MX(f.x), f.y); c.scale(facing(f.side) * f.s, f.s); c.rotate(f.rot);
   const OFg = outfitOf(team, f.a); SK = (OFg && OFg.skin) || SKIN3;

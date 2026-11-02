@@ -165,8 +165,8 @@ const SPECS = AGES.map((A, a) => {
 const uDef = (a, ty, f) => ty === 6 ? SPECS[a][f | 0] : ty === 5 ? BOSSES[a] : ty === 3 ? SUPER : ty === 4 ? HEROES[a] : AGES[a].units[ty];
 const uDefU = u => uDef(u.a, u.ty, u.f);
 // šířka jednotky v boji (rozestupy, dosah); jízdní zvířata podle velikosti – mamut je mnohem delší než vlk
-const unitW = (ty, s, a) => ty === 2 && a <= 1 && s != null ? mountW(s, a) : ty === 5 ? 96 : ty === 2 ? 64 : ty === 3 ? 34 : ty === 4 ? 32 : ty === 6 ? 30 : 26;
-const mountW = (s, a) => (MOUNT[a === 1 ? 'horse' : mountKind({ af: S.pl[s].af })] || {}).gw || 64;
+const unitW = (ty, s, a, m) => ty === 2 && a <= 1 && s != null ? mountW(s, a, m) : ty === 5 ? 96 : ty === 2 ? 64 : ty === 3 ? 34 : ty === 4 ? 32 : ty === 6 ? 30 : 26;
+const mountW = (s, a, m) => { const p = S.pl[s]; return (MOUNT[a === 1 ? 'horse' : mountKind({ af: p.afm ? p.afm[m | 0] : p.af })] || {}).gw || 64; };
 const unitY = u => u.ty === 5 ? BOSSES[u.a].y : u.ty >= 2 ? 34 : 28;          // kam míří střely
 const atkMul = s => 1 + UPS[0].k * S.pl[s].up[0];
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -217,7 +217,16 @@ function battleEvent() {
   }
 }
 
-function applyCmd(s, c) {
+// m = hráč v týmu (0/1), který příkaz dal – platí ze své peněženky a jednotky jsou jeho národa
+function applyCmd(s, c, m = 0) {
+  const p = S && S.pl[s], W = p && p.w;
+  if (!p) return;
+  m = W ? Math.min(1, Math.max(0, m | 0)) : 0;
+  if (W) { p.gold = W[m]; p.inCmd = true; }
+  p.cm = m; dmgMem = W ? m : null;
+  try { applyCmd0(s, c); } finally { if (W) { W[m] = p.gold; p.inCmd = false; p.gold = W[0] + W[1]; } }
+}
+function applyCmd0(s, c) {
   if (!S || S.over >= 0 || !c) return;
   const p = S.pl[s], M = S.mods || {};
   switch (c.a) {
@@ -225,9 +234,9 @@ function applyCmd(s, c) {
       if (c.ty === 3 && p.age < 4) return;
       if (s === 0 && M.only != null && c.ty !== M.only) return;
       if (![0, 1, 2, 3, 6].includes(c.ty)) return;
-      const f = (p.af && p.af[p.age]) | 0, d = uDef(p.age, c.ty, f), k = d && unitCost(p, c.ty);
+      const af = p.afm ? p.afm[p.cm | 0] : p.af, f = (af && af[p.age]) | 0, d = uDef(p.age, c.ty, f), k = d && unitCost(p, c.ty);
       if (!d || p.gold < k || p.q.length >= 5) return;
-      p.gold -= k; p.q.push({ a: p.age, ty: c.ty, f }); break;
+      p.gold -= k; p.q.push({ a: p.age, ty: c.ty, f, m: p.cm | 0 }); break;
     }
     case 'turret': {
       const d = AGES[p.age].turrets[c.i];
@@ -259,7 +268,15 @@ function applyCmd(s, c) {
       u.rage = 1; u.mx = Math.round(u.mx * 1.25); u.hp = Math.round(u.hp * 1.25);
       S.ev.push([u.x, GY - 50, 'rage', s]); break;
     }
-    case 'fac': { if (p.pick > 0) { setAgeFac(p, c.i); p.pick = 0; } break; }
+    case 'fac': {
+      if (!(p.pick > 0)) break;
+      if (!p.afm) { setAgeFac(p, c.i); p.pick = 0; break; }
+      // tým: každý si volí svůj národ; bonusy strany se řídí prvním hráčem, výběr končí, až zvolí oba
+      const i = Math.min(3, Math.max(0, c.i | 0)), m = p.cm | 0;
+      p.afm[m][p.age] = i; if (m === 0) setAgeFac(p, i);
+      p.pd = p.pd || [0, 0]; p.pd[m] = 1; if (p.pd[0] && p.pd[1]) p.pick = 0;
+      break;
+    }
     case 'ord': { const o = c.o | 0; if (o >= 0 && o < 3) p.ord = o; break; }
     case 'up': {
       const k = c.k | 0;
@@ -279,7 +296,7 @@ function applyCmd(s, c) {
       }
       const d = HEROES[p.age];
       if (p.hcd > 0 || p.gold < d.c || !spawnFree(s, 4)) return;
-      p.gold -= d.c; spawn(s, { a: p.age, ty: 4 }); p.acd = 3; break;
+      p.gold -= d.c; spawn(s, { a: p.age, ty: 4, m: p.cm | 0 }); p.acd = 3; break;
     }
     case 'evolve': {
       if (M.noEvo || p.age >= 4 || p.xp < AGES[p.age].xp) return;
@@ -287,6 +304,7 @@ function applyCmd(s, c) {
       const nm = AGES[p.age].baseHp * (1 + UPS[2].k * p.up[2]);
       p.hp += nm - p.mhp; p.mhp = nm; p.bm = 1;
       setAgeFac(p, p.pref[p.age]); p.pick = FAC_PICK;     // nový věk = nový výběr národa
+      if (p.afm) { p.afm.forEach((af, i) => af[p.age] = p.prefm[i][p.age]); p.pd = [0, 0]; }
       S.ev.push([BX[s], GY - 90, 'evo']); break;
     }
   }
@@ -301,22 +319,32 @@ function special(s) {
   }
 }
 
-function spawnFree(s, ty, a) {
-  const w = unitW(ty, s, a);
+function spawnFree(s, ty, a, m) {
+  const w = unitW(ty, s, a, m);
   return !S.units.some(u => u.side === s && Math.abs(u.x - SPAWN[s]) < (u.w + w) / 2 + 2);
 }
 function spawn(s, q) {
   const d = uDef(q.a, q.ty, q.f), g = GB(S.pl[s]);
   const F = facOf(s), hp = Math.round(d.hp * (1 + UPS[1].k * S.pl[s].up[1]) * (F.hp || 1) * (q.ty === 2 ? F.heavy || 1 : 1) * (q.ty === 4 ? g.heroHp * ((g.gear && g.gear[q.a][0]) || 1) : g.hp));
   S.units.push({ id: S.nid++, side: s, a: q.a, ty: q.ty, f: q.f | 0, x: SPAWN[s], hp, mx: hp,
-    w: unitW(q.ty, s, q.a), st: 0, at: 0, cd: 0.3 });
+    w: unitW(q.ty, s, q.a, q.m), m: q.m | 0, st: 0, at: 0, cd: 0.3 });
   if (S.st) { S.st.made[s]++; if (q.ty === 6) S.st.spec[s]++; }
   if (q.ty === 3) S.pl[s].supers++;
   // pokřik národa (hráč ho slyší jen občas, hrdina a supervoják vždy)
-  const p = S.pl[s]; S.ev.push([SPAWN[s], GY - 40, 'cry', s, q.a * 4 + ((p.af && p.af[q.a]) | 0), q.ty]);
+  const p = S.pl[s], afx = p.afm ? p.afm[q.m | 0] : p.af; S.ev.push([SPAWN[s], GY - 40, 'cry', s, q.a * 4 + ((afx && afx[q.a]) | 0), q.ty]);
 }
 
 let dmgSrc = 'u';                                  // odkud škoda je (u jednotky, t věže, s speciál, h hrdina) – pro statistiky
+let dmgMem = null;                                 // který hráč týmu škodu způsobil (null = věž, speciál… → odměna napůl)
+// V týmu (co-op, 2 na 2) má každý hráč vlastní peněženku p.w[m]; p.gold je pak součet. Bez určeného hráče se dělí napůl.
+// Během příkazu (p.inCmd) drží p.gold peněženku hráče, který příkaz dal (p.cm).
+function addGold(s, g, m) {
+  const p = S.pl[s]; if (!p) return;
+  const W = p.w; if (!W) { p.gold += g; return; }
+  const add = (i, v) => { if (p.inCmd && i === p.cm) p.gold += v; else W[i] += v; };
+  if (m == null) { add(0, g / 2); add(1, g / 2); } else add(m, g);
+  if (!p.inCmd) p.gold = W[0] + W[1];
+}
 function hurt(t, dmg, by, fromSpecial) {
   if (t.dead) return;
   if (t.ty === 6 && uDefU(t).ab === 'dodge' && Math.random() < 0.4) return;   // ninja uhne
@@ -328,14 +356,14 @@ function hurt(t, dmg, by, fromSpecial) {
     if (t.ty === 6 && d.ab === 'boom') { const src = dmgSrc; dmgSrc = 'u'; splash(t.x, 80, d.d * 4, t.side); dmgSrc = src; S.ev.push([t.x, GY - 20, 'boom']); }
     if (p) {
       const loot = g.loot && (t.ty === 2 || t.ty === 5) ? 2 : 1, gg = Math.round(d.c * KILL_GOLD * p.gm * (facOf(by).gold || 1) * g.gold * loot);
-      p.gold += gg; if (S.st) S.st.gold[by] += gg;
+      addGold(by, gg, dmgMem); if (S.st) S.st.gold[by] += gg;
       p.xp += Math.round(d.c * KILL_XP * p.xm * g.xp);
       p.kills++;
       if (fromSpecial) { p.spk++; p.spBest = Math.max(p.spBest, p.spk); }
     }
     if (t.ty === 4) S.pl[t.side].hcd = HERO_CD;
     if (t.rage) S.pl[t.side].rgcd = RAGE_CD;
-    S.ev.push([t.x, GY - 22, 'die', t.side, t.a, t.ty]);
+    S.ev.push([t.x, GY - 22, 'die', t.side, t.a, t.ty, t.m | 0]);
   }
 }
 function hitBase(s, dmg, by) {
@@ -362,13 +390,13 @@ function attack(u, d0, tgt, dir) {
   if (S.units.some(a => a.side === u.side && a !== u && a.ty === 6 && !a.dead && Math.abs(a.x - u.x) < 160 && uDefU(a).ab === 'drum')) k *= 1.4;
   u.hit = 1;
   const d = { ...d0, d: d0.d * atkMul(u.side) * ((d0.p ? F.ranged : F.melee) || 1) * (u.rage ? 1.3 : 1) * k };
-  dmgSrc = u.ty === 4 ? 'h' : 'u';
+  dmgSrc = u.ty === 4 ? 'h' : 'u'; dmgMem = u.m ?? null;
   if (d.p) {
     const y0 = GY - (u.ty === 5 ? d.y : u.ty === 2 ? 50 : u.ty === 3 ? 62 : 38), x0 = u.x + dir * (u.w / 2 + 4);
     const base = tgt === 'base';
     S.proj.push({ id: S.nid++, x: x0, y: y0, tid: base ? -1 : tgt.id,
       tx: base ? BF[1 - u.side] - dir * 15 : tgt.x, ty: base ? GY - 60 : GY - 22,
-      d: d.d, side: u.side, p: pp, sp: d.sp || 0, v: SPD[pp], src: u.ty === 4 ? 'h' : 'u' });
+      d: d.d, side: u.side, p: pp, sp: d.sp || 0, v: SPD[pp], src: u.ty === 4 ? 'h' : 'u', m: u.m });
     if (pp !== 'stone' && pp !== 'arrow' && pp !== 'axe') S.ev.push([x0 + dir * 6, y0, 'muz']);
   } else if (tgt === 'base') {
     hitBase(1 - u.side, d.d, u.side); S.ev.push([BF[1 - u.side], GY - 30, 'hit']);
@@ -380,7 +408,7 @@ function attack(u, d0, tgt, dir) {
     if (u.ty === 6) {
       const done = Math.max(0, hp0 - Math.max(0, tgt.hp));
       if (d0.ab === 'leech') u.hp = Math.min(u.mx, u.hp + done);
-      if (d0.ab === 'thief') { const g2 = Math.round(done * 0.35); P.gold += g2; if (S.st) S.st.gold[u.side] += g2; }
+      if (d0.ab === 'thief') { const g2 = Math.round(done * 0.35); addGold(u.side, g2, u.m); if (S.st) S.st.gold[u.side] += g2; }
     }
   }
 }
@@ -417,7 +445,7 @@ function step(dt) {
     }
     if (S.chest) {                                     // truhlu sebere první jednotka, která k ní dojde
       const u = S.units.find(u => Math.abs(u.x - S.chest.x) < 16);
-      if (u) { S.pl[u.side].gold += S.chest.g; S.ev.push([S.chest.x, GY - 30, 'chest', u.side, S.chest.g]); S.chest = null; }
+      if (u) { addGold(u.side, S.chest.g, u.m); S.ev.push([S.chest.x, GY - 30, 'chest', u.side, S.chest.g]); S.chest = null; }
     }
   }
   // fronty výroby + cooldown speciálu
@@ -437,7 +465,7 @@ function step(dt) {
       p.qt += dt;
       if (p.qt >= bt) {
         p.qt = bt;
-        if (spawnFree(s, q.ty, q.a)) { spawn(s, q); p.q.shift(); p.qt = 0; }
+        if (spawnFree(s, q.ty, q.a, q.m)) { spawn(s, q); p.q.shift(); p.qt = 0; }
       }
     }
   }
@@ -528,7 +556,7 @@ function step(dt) {
       }
       continue;
     }
-    dmgSrc = pr.src || 'u';
+    dmgSrc = pr.src || 'u'; dmgMem = pr.m ?? null;
     if (pr.tid >= 0) {
       const t = byId.get(pr.tid);
       if (t && !t.dead) { pr.tx = t.x; pr.ty = GY - unitY(t); } else pr.lost = 1;
@@ -628,21 +656,22 @@ function snap(ev) {
     P: S.pl.map(p => [Math.floor(p.gold), Math.floor(p.xp), p.age, Math.ceil(p.hp), p.mhp, p.slots,
       p.tur.map(t => t.a * 3 + t.i), p.q.map(q => q.a * 8 + q.ty),
       p.q.length ? Math.round(p.qt / (uDef(p.q[0].a, p.q[0].ty, p.q[0].f).t * (facOf(S.pl.indexOf(p)).build || 1) * GB(p).build) * 100) / 100 : 0, Math.ceil(p.spcd),
-      p.kills, p.spBest, p.supers, p.built, p.up, Math.ceil(p.hcd), Math.ceil(p.acd), p.ord, p.af, p.emb, Math.ceil(p.pick), Math.ceil(p.rgcd || 0), p.cryT > 0 ? 1 : 0]),
+      p.kills, p.spBest, p.supers, p.built, p.up, Math.ceil(p.hcd), Math.ceil(p.acd), p.ord, p.af, p.emb, Math.ceil(p.pick), Math.ceil(p.rgcd || 0), p.cryT > 0 ? 1 : 0, p.w ? p.w.map(v => Math.floor(v)) : 0, p.afm || 0]),
     Tm: Math.floor(S.time), D: S.diff, X: S.chal, K: S.camp, Dy: S.daily, Dk: Math.ceil(S.dark), Ch: S.chest ? Math.round(S.chest.x) : 0, Tx: S.trex ? [Math.round(S.trex.x), S.trex.dir] : 0, Rg: S.rage ? 1 : 0, Sp: S.speed, Wt: netWait ? 1 : 0, Sm: S.storm > 0 ? 1 : 0, Sv: S.surv ? [S.surv.wave, Math.ceil(S.surv.t)] : 0,
     U: S.units.map(u => [u.id, u.side, u.a, u.ty, Math.round(u.x * 10) / 10, Math.ceil(u.hp), u.mx, u.st,
-      Math.round(u.at * 100) / 100, u.back ? 1 : 0, u.rage ? 1 : 0]),
+      Math.round(u.at * 100) / 100, u.back ? 1 : 0, u.rage ? 1 : 0, u.m | 0]),
     R: S.proj.map(p => [p.id, Math.round(p.x), Math.round(p.y), p.p, Math.round(p.dx || 0), Math.round(p.dy || 0)]),
     E: ev, O: S.over,
   };
 }
 function decode(sn) {
   return {
-    pl: sn.P.map(a => ({ gold: a[0], xp: a[1], age: a[2], hp: a[3], mhp: a[4], slots: a[5],
+    // v týmu vidí každý své zlato a svůj národ (a[23] peněženky, a[24] národy hráčů týmu)
+    pl: sn.P.map((a, i) => ({ gold: i === mySide && a[23] ? a[23][MYMEM] ?? a[0] : a[0], xp: a[1], age: a[2], hp: a[3], mhp: a[4], slots: a[5],
       tur: a[6].map(v => ({ a: (v / 3) | 0, i: v % 3 })), q: a[7].map(v => ({ a: v >> 3, ty: v & 7 })),
-      qf: a[8], spcd: a[9], kills: a[10] || 0, spBest: a[11] || 0, supers: a[12] || 0, built: a[13] || 0, up: a[14] || [0, 0, 0], hcd: a[15] || 0, acd: a[16] || 0, ord: a[17] || 0, af: Array.isArray(a[18]) ? a[18] : [0, 0, 0, 0, 0], emb: a[19] || 0, pick: a[20] || 0, rgcd: a[21] || 0, cry: a[22] || 0 })),
+      qf: a[8], spcd: a[9], kills: a[10] || 0, spBest: a[11] || 0, supers: a[12] || 0, built: a[13] || 0, up: a[14] || [0, 0, 0], hcd: a[15] || 0, acd: a[16] || 0, ord: a[17] || 0, af: i === mySide && a[24] ? a[24][MYMEM] || a[18] : Array.isArray(a[18]) ? a[18] : [0, 0, 0, 0, 0], emb: a[19] || 0, pick: a[20] || 0, rgcd: a[21] || 0, cry: a[22] || 0, afm: a[24] || null })),
     time: sn.Tm || 0, diff: sn.D, chal: sn.X, camp: sn.K, daily: sn.Dy, dark: sn.Dk || 0, chest: sn.Ch || 0, trex: sn.Tx || 0, rage: !!sn.Rg, speed: sn.Sp || 1, wait: !!sn.Wt, storm: !!sn.Sm, surv: sn.Sv ? sn.Sv[0] : 0, survT: sn.Sv ? sn.Sv[1] : 0,
-    units: sn.U.map(a => ({ id: a[0], side: a[1], a: a[2], ty: a[3], x: a[4], hp: a[5], mx: a[6], st: a[7], at: a[8], back: a[9], rg: a[10] })),
+    units: sn.U.map(a => ({ id: a[0], side: a[1], a: a[2], ty: a[3], x: a[4], hp: a[5], mx: a[6], st: a[7], at: a[8], back: a[9], rg: a[10], m: a[11] | 0 })),
     proj: sn.R.map(a => ({ id: a[0], x: a[1], y: a[2], p: a[3], dx: a[4], dy: a[5] })),
     over: sn.O,
   };

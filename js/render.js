@@ -6,7 +6,7 @@ let c = cv.getContext('2d');
 let scl = 1, ox = 0, oy = 0, T = 0, bgC = null;
 const US = 1.2;                                // měřítko jednotek
 const HPBAR = [64, 64, 96, 100, 84, 150, 74];
-const hpBarH = u => u.ty === 2 && u.a === 0 ? MOUNT[mountKind(teamCol(u.side))].hp : u.ty === 5 ? [96, 190, 150, 150, 220][u.a] : HPBAR[u.ty];   // bossové mají různou výšku               // výška ukazatele zdraví nad zemí
+const hpBarH = u => u.ty === 2 && u.a === 0 ? MOUNT[mountKind(teamColM(u.side, u.m))].hp : u.ty === 5 ? [96, 190, 150, 150, 220][u.a] : HPBAR[u.ty];   // bossové mají různou výšku               // výška ukazatele zdraví nad zemí
 
 let GFXL = 2;                                          // nastaví se z SET.gfx (sekce Nastavení)
 const GFX_DPR = [1, 1.5, 2, 2.5], GFX_FX = [150, 350, 600, 900], GFX_PART = [0.4, 0.7, 1, 1.3];
@@ -28,19 +28,22 @@ function resize() {
 const MX = x => mirror ? W - x : x;
 const facing = s => (s === 0 ? 1 : -1) * (mirror ? -1 : 1);
 const TEAMC = new Map();
-function teamCol(s) {
+// barvy a národ strany; afo = národy konkrétního hráče (v týmu má každý svůj)
+function teamCol(s, afo) {
   const me = SET.col || 0;
   let o = me;
   if (s !== mySide) {
     o = role === 'solo' || coop || TEAM || OPP.col == null ? 1 : OPP.col;
     if (o === me) o = me === 1 ? 0 : 1;    // stejné barvy by nešly rozlišit
   }
-  const af = V && V.pl ? V.pl[s].af : s === mySide ? cleanAf(SET.af) : [0, 0, 0, 0, 0];
+  const af = afo || (V && V.pl ? V.pl[s].af : s === mySide ? cleanAf(SET.af) : [0, 0, 0, 0, 0]);
   const sk = s === mySide ? SET.skin || 0 : role !== 'solo' && !coop ? OPP.skin || 0 : 0, key = o + ':' + af.join('') + ':' + sk;
   let t = TEAMC.get(key);
   if (!t) { const S2 = SKINS[sk] || {}; t = [...(S2.col || COLS[o].c)]; t.af = af; t.sk = S2.sk; TEAMC.set(key, t); }
   return t;
 }
+// jednotka hráče m: v týmu vypadá podle národa toho, kdo ji koupil
+function teamColM(s, m) { const p = V && V.pl && V.pl[s]; return p && p.afm && m != null ? teamCol(s, p.afm[m]) : teamCol(s); }
 const lerp = (a, b, t) => a + (b - a) * t;
 
 // ---------- primitiva ----------
