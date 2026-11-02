@@ -259,3 +259,4 @@ button.def { background: linear-gradient(180deg, #b91c1c, #7f1d1d); }
 
 /* online žebříček */
 table.lb td:nth-child(2), table.lb th:nth-child(2) { text-align: left; } table.lb tr.me td { background: rgba(229,192,74,.15); color: #fde68a; }
+#bUpdCheck.hidden { display: none; } #verInfo { margin-top: 12px; font-size: 13px; }
