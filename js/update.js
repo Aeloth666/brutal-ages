@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.7.3', d: '2026-11-02', cs: ['Šavlozubý tygr: krk plynule vyrůstá z hřbetu, vnitřek otevřené tlamy už nepřesahuje ven.'], en: ['Sabre-toothed tiger: the neck grows smoothly out of the back, the inside of the open mouth no longer sticks out.'] },
   { v: '2.7.2', d: '2026-11-02', cs: ['Šavlozubý tygr: nová hlava s krátkým čenichem a bradou, ze strany je vidět jen bližší šavle, silný krk a tlapky stojí na zemi.'], en: ['Sabre-toothed tiger: new head with a short muzzle and chin, only the near sabre shows from the side, a strong neck and paws on the ground.'] },
   { v: '2.7.1', d: '2026-11-02', cs: ['Šavlozubý tygr zmenšený na zhruba 1,6 m v kohoutku – pořád větší než skutečný, ale už ne obří.'], en: ['Sabre-toothed tiger shrunk to about 1.6 m at the shoulder – still bigger than the real one, but no longer giant.'] },
   { v: '2.7', d: '2026-11-02', cs: [

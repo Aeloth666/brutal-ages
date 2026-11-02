@@ -749,14 +749,14 @@ function mountHead(kind, at, ph = 0) {
     c.fillStyle = '#111'; circ(42, -50, 1.5); c.fillStyle = 'rgba(255,255,255,.6)'; circ(42.4, -50.4, 0.5);
     if (at > 0.2) { c.fillStyle = '#7f1d1d'; c.beginPath(); c.ellipse(50, -39, 3.8, 1.4 + at * 1.6, 0.15, 0, Math.PI * 2); c.fill(); c.fillStyle = '#fff'; poly([47.5, -40, 48.5, -38, 49.5, -40]); c.fill(); }
   } else if (kind === 'smilodon') {
-    c.beginPath(); c.moveTo(24, -63); c.bezierCurveTo(30, -66, 36, -68, 40, -66); c.lineTo(42, -50); c.bezierCurveTo(38, -44, 32, -40, 26, -38); c.closePath(); c.fillStyle = lg('smiNeck', 0, -68, 0, -38, [[0, CL], [1, C]]); c.fill();   // silný krk (obrys jen nahoře, ať nezůstane čára přes tělo)
-    c.strokeStyle = OL; c.lineWidth = 1.5; c.beginPath(); c.moveTo(24, -63); c.bezierCurveTo(30, -66, 36, -68, 40, -66); c.stroke();
-    c.fillStyle = '#2a1608'; for (const x of [28, 33]) { c.beginPath(); c.ellipse(x, -60, 1.2, 4, 0.3, 0, Math.PI * 2); c.fill(); }
     // šavlozubec ze strany: klenutá lebka, krátký čenich, výrazná brada; vidět je bližší šavle, vzdálená jen vykukuje za ní
     const op = Math.min(1, at * 1.6), HG = [42, -52];
     c.beginPath(); c.ellipse(41, -70, 4.2, 4, -0.4, 0, Math.PI * 2); fo(C, 1.3); c.fillStyle = '#e59a8f'; circ(41.3, -69.6, 1.8);   // ucho
     c.beginPath(); c.moveTo(52.5, -53); c.quadraticCurveTo(54.5, -45, 53.5, -38); c.quadraticCurveTo(56, -45, 55.5, -53); c.closePath(); fo('#cfc5ad', 0.9);   // vzdálená šavle
-    if (op > 0.1) { c.fillStyle = '#4a0d0d'; c.beginPath(); c.moveTo(HG[0], HG[1]); c.lineTo(61, -52.5); c.lineTo(HG[0] + Math.cos(op * 0.9) * 18, HG[1] + Math.sin(op * 0.9) * 18 + 2); c.closePath(); c.fill(); }
+    if (op > 0.1) {                                                                  // hrdlo: mezi horním rtem a přední hranou sklopené čelisti
+      const a = op * 0.9, jx = HG[0] + 15.5 * Math.cos(a) - 0.5 * Math.sin(a), jy = HG[1] + 15.5 * Math.sin(a) + 0.5 * Math.cos(a);
+      c.fillStyle = '#4a0d0d'; c.beginPath(); c.moveTo(HG[0] + 1, HG[1]); c.lineTo(59.5, -52); c.lineTo(jx, jy); c.closePath(); c.fill();
+    }
     c.save(); c.translate(...HG); c.rotate(op * 0.9); c.translate(-HG[0], -HG[1]);                                   // spodní čelist s bradou
     c.beginPath(); c.moveTo(41, -52); c.lineTo(58, -51.5); c.quadraticCurveTo(61, -51, 60, -47.5); c.lineTo(57.5, -44.5); c.quadraticCurveTo(49, -43.5, 42, -47.5); c.closePath();
     fo(lg('smiJaw', 0, -52, 0, -44, [[0, CL], [0.5, '#f6ead2'], [1, '#e8d8b8']]), 1.3);
@@ -810,6 +810,10 @@ function mount(team, kind, ph, walk, at) {
   if (!NO_LEGS) { leg(0); leg(1); if (under) { leg(2); leg(3); } }
   c.save(); c.translate(0, bob);
   mountTail(kind, sw);
+  if (kind === 'smilodon') {                                                                   // silný krk – pod tělem, ať plynule vyrůstá z hřbetu
+    c.beginPath(); c.moveTo(14, -64); c.bezierCurveTo(26, -68, 36, -70, 42, -66); c.lineTo(44, -52); c.bezierCurveTo(40, -46, 34, -42, 28, -40); c.lineTo(14, -44); c.closePath(); fo(lg('smiNeck2', 0, -70, 0, -40, [[0, CL], [1, C]]), 1.6);
+    c.fillStyle = '#2a1608'; for (const x of [30, 35]) { c.beginPath(); c.ellipse(x, -62, 1.2, 4, 0.3, 0, Math.PI * 2); c.fill(); }
+  }
   // dlouhá srst visící z břicha – kreslená pod tělem, ať horní okraj zakryje obrys břicha
   if (kind === 'mammoth' || kind === 'bear') {
     const [x0, x1, y0, L] = kind === 'mammoth' ? [-36, 38, -44, 19] : [-30, 20, -27, 9];
