@@ -1,0 +1,345 @@
+// =====================================================================
+//  SÍŤ (PeerJS / WebRTC)
+// =====================================================================
+// STUN zjistí veřejnou adresu; TURN (relay) přenáší data, když se telefony přímo nespojí –
+// typicky mobilní data za CGNAT operátora. Veřejný relay PeerJS zanikl (doména už neexistuje),
+// proto sem patří přístup k vlastnímu TURN serveru (např. Metered nebo ExpressTURN, oba mají bezplatný tarif).
+const TURN = [
+  // ExpressTURN – bezplatný tarif (jen port 3478, UDP i TCP)
+  { urls: ['turn:free.expressturn.com:3478', 'turn:free.expressturn.com:3478?transport=tcp'], username: '000000002108986961', credential: 'c82oF4+w73EReiEVo4CbNvwMJlo=' },
+];
+const ICE = { iceServers: [
+  { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
+  { urls: 'stun:global.stun.twilio.com:3478' },
+  ...TURN] };
+let peer = null, conn = null;
+// hostitel drží spojení se všemi hráči (souboj a co-op 1, 2 na 2 až 3): { c, slot, side, info, lastRx, away, lost, rm }
+let conns = [], TEAM = false, GSIDE = 1, rmInfo = null;
+// relace pro návrat po výpadku, info o soupeři, stav odvety
+let SESS = null, HOST_ID = null, OPP = { n: null, col: null };
+let lastRx = 0, oppAway = false, netLostAt = 0, waitSince = 0, reconTry = 0, netWait = false;
+let rmMe = false, rmOpp = false;
+const WAIT_MAX = 120;                       // s – jak dlouho čekat na návrat soupeře
+
+function status(html) { document.getElementById('status').innerHTML = html; }
+function mkCode() {
+  const a = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  return Array.from({ length: 5 }, () => a[(Math.random() * a.length) | 0]).join('');
+}
+function cleanupNet() {
+  for (const k of conns) try { k.c && k.c.close(); } catch (e) {}
+  try { conn && conn.close(); } catch (e) {}
+  try { peer && peer.destroy(); } catch (e) {}
+  peer = conn = null; conns = []; TEAM = false; rmInfo = null;
+  netLostAt = waitSince = 0; oppAway = false; netWait = false;
+}
+function sendTo(k, m) { if (k.c && k.c.open) try { k.c.send(m); } catch (e) {} }
+function send(m) {
+  if (conns.length) for (const k of conns) sendTo(k, m);
+  else if (conn && conn.open) try { conn.send(m); } catch (e) {}
+}
+const hello = () => ({ n: SET.name || 'Hráč', col: SET.col || 0, pid: SET.pid, af: cleanAf(SET.af), emb: SET.emb || 0, lvl: profLevel() });
+// oblíbené národy hráče: použijí se na začátku hry a po každé evoluci (dá se změnit během výběru)
+function setPrefs(p, af) { p.pref = cleanAf(af); p.prefSet = 1; setAgeFac(p, p.pref[p.age]); p.pick = FAC_PICK; }
+
+// připojený hráč: jediné spojení k hostiteli
+function bindConn(c) {
+  conn = c;
+  c.on('data', m => { if (c === conn) { lastRx = performance.now(); onData(m); } });
+  c.on('close', () => { if (c === conn) lost(); });
+  c.on('error', () => { if (c === conn) lost(); });
+}
+// hostitel: spojení s jedním z hráčů
+function bindHost(k) {
+  const c = k.c;
+  c.on('data', m => { if (c === k.c) { k.lastRx = lastRx = performance.now(); onData(m, k); } });
+  c.on('close', () => { if (c === k.c) lostK(k); });
+  c.on('error', () => { if (c === k.c) lostK(k); });
+}
+function lostK(k) {
+  if (!role) { conns = conns.filter(x => x !== k); lobbyUpdate(); return; }     // odešel z čekárny
+  if (V && V.over >= 0) { toMenu((k.info.n || 'Hráč') + ' odešel ze hry.'); return; }
+  k.c = null; if (!k.lost) k.lost = performance.now();
+}
+
+// co-op = oba hráči na jedné straně (společná pokladna) proti počítači; team = 2 na 2
+let coop = false, HOSTOPT = { coop: false, camp: null, team: false };
+function hostGame(opt = {}) {
+  cleanupNet();
+  document.getElementById('mpPanel').classList.remove('hidden');
+  HOSTOPT = { coop: !!opt.coop, camp: opt.camp ?? null, team: !!opt.team };
+  const code = mkCode();
+  SESS = mkCode() + mkCode();
+  status('Vytvářím hru…');
+  peer = new Peer(PREFIX + code, { config: ICE, debug: 0 });
+  hostGame.code = code;
+  const what = HOSTOPT.camp != null ? `Co-op mise „${CAMP[HOSTOPT.camp].n}“` : HOSTOPT.coop ? 'Co-op proti počítači' : HOSTOPT.team ? '2 na 2' : 'Souboj';
+  peer.on('open', () => { if (!role) { if (HOSTOPT.team) lobbyUpdate(); else status(`${what} · kód hry: <b>${code}</b><br>Pošli ho kámošovi a čekej na připojení…`); } });
+  peer.on('connection', c => {
+    const md = c.metadata || {};
+    // návrat hráče po výpadku – musí znát kód relace (a své id)
+    const back = role === 'host' && md.sess === SESS ? (conns.find(k => k.info.pid && k.info.pid === md.pid) || (!HOSTOPT.team && conns[0])) : null;
+    if (back) {
+      try { back.c && back.c.close(); } catch (e) {}
+      back.c = c; bindHost(back);
+      c.on('open', () => { if (c !== back.c) return; back.lost = 0; back.away = false; back.lastRx = performance.now(); sendTo(back, { t: 'hi', ...hello() }); });
+      return;
+    }
+    const max = HOSTOPT.team ? 3 : 1;
+    if (role || conns.length >= max) { c.on('open', () => c.close()); return; }
+    const slot = conns.length + 1;
+    const side = HOSTOPT.coop || HOSTOPT.camp != null ? 0 : HOSTOPT.team ? (slot === 2 ? 0 : 1) : 1;
+    const k = { c, slot, side, info: {}, lastRx: performance.now(), away: false, lost: 0, rm: false };
+    conns.push(k); bindHost(k);
+    c.on('open', () => {
+      if (c !== k.c) return;
+      k.lastRx = performance.now();
+      if (HOSTOPT.team) { sendTo(k, { t: 'hi', ...hello() }); lobbyUpdate(); }
+      else startGame('host', null, HOSTOPT.camp);
+    });
+  });
+  peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
+  peer.on('error', e => {
+    if (e.type === 'unavailable-id' && !role) hostGame(opt);
+    else if (!role) status('Chyba spojení: ' + e.type);
+  });
+}
+// čekárna 2 na 2: hostitel vidí týmy a spouští hru
+function lobbyUpdate() {
+  if (!HOSTOPT.team || role) return;
+  const pl = [{ n: SET.name || 'Hráč', side: 0 }, ...conns.map(k => ({ n: k.info.n || '…', side: k.side }))];
+  const team = s => pl.filter(p => p.side === s).map(p => esc(p.n)).join(', ') || '<i>nikdo</i>';
+  status(`2 na 2 · kód hry: <b>${hostGame.code}</b><br>
+    <span class="lobby"><span>🔵 Tým A: ${team(0)}</span><span>🔴 Tým B: ${team(1)}</span></span>
+    ${conns.length ? `<button id="bLobbyGo">Spustit hru (${pl.length} hráči)</button>` : 'Pošli kód kámošům (až 3) a čekej…'}`);
+  const b = document.getElementById('bLobbyGo'); if (b) b.onclick = () => startGame('host');
+  send({ t: 'lobby', pl });
+}
+
+function joinGame(code) {
+  code = code.trim().toUpperCase();
+  if (code.length !== 5) { status('Zadej 5místný kód.'); return; }
+  cleanupNet();
+  document.getElementById('mpPanel').classList.remove('hidden');
+  HOST_ID = PREFIX + code;
+  status('Připojuji…');
+  peer = new Peer({ config: ICE, debug: 0 });
+  peer.on('open', () => {
+    if (role) return;                       // opětovná registrace během hry – řeší guestRecon
+    const c = peer.connect(HOST_ID, { reliable: true, serialization: 'json' });
+    bindConn(c);
+    c.on('open', () => { status('Připojeno, startuje se…'); send({ t: 'hi', ...hello() }); });
+    setTimeout(() => { if (conn === c && !c.open && !role) status('Nepodařilo se spojit. Zkus to znovu nebo jinou síť.'); }, 20000);
+  });
+  peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
+  peer.on('error', e => {
+    if (role) return;
+    status(e.type === 'peer-unavailable' ? 'Hra s tímto kódem neexistuje.' : 'Chyba spojení: ' + e.type);
+  });
+}
+
+// připojený hráč se po výpadku zkouší vrátit do stejné hry
+function guestRecon() {
+  if (role !== 'guest' || !netLostAt) return;
+  try {
+    if (!peer || peer.destroyed) {
+      peer = new Peer({ config: ICE, debug: 0 });
+      peer.on('error', () => {});
+      peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
+      return;
+    }
+    if (peer.disconnected) { peer.reconnect(); return; }
+    if (!peer.open) return;
+    const c = peer.connect(HOST_ID, { reliable: true, serialization: 'json', metadata: { sess: SESS, pid: SET.pid } });
+    bindConn(c);
+    c.on('open', () => {
+      if (c !== conn) { c.close(); return; }
+      netLostAt = 0; lastRx = performance.now();
+      send({ t: 'hi', ...hello() });
+    });
+  } catch (e) {}
+}
+
+const infoOf = m => ({ n: m.n, col: m.col, pid: m.pid, af: cleanAf(m.af), emb: m.emb | 0, lvl: m.lvl | 0 });
+function onData(m, k) {
+  if (!m) return;
+  switch (m.t) {
+    case 'c': if (role === 'host' && k) applyCmd(k.side, m.c); break;
+    case 's': if (role === 'guest') onSnap(m.d); break;
+    case 'start':
+      if (role === 'host' || k) break;
+      SESS = m.sess; OPP = infoOf(m); rememberFriend(OPP); coop = !!m.coop; TEAM = !!m.team; GSIDE = m.side ?? (coop ? 0 : 1); setField(m.field);
+      startGame('guest', null, m.camp ?? null);
+      send({ t: 'hi', ...hello() }); partySend();
+      break;
+    case 'hi':
+      if (k) {                                           // hostitel: údaje o hráči na tomto spojení
+        k.info = infoOf(m); rememberFriend(k.info);
+        if (!TEAM && !HOSTOPT.team) OPP = k.info;
+        else if (k.side === 1 && !conns.some(x => x.side === 1 && x.slot < k.slot)) OPP = k.info;
+        if (role === 'host' && S && !coop && k.side === 1 && !S.pl[1].prefSet) { setPrefs(S.pl[1], k.info.af); S.pl[1].emb = k.info.emb; }
+        lobbyUpdate();
+      } else { OPP = infoOf(m); rememberFriend(OPP); }
+      break;
+    case 'lobby':
+      if (role) break;
+      status(`Připojeno k 2 na 2. Čekáme, až hostitel spustí hru…<br><span class="lobby"><span>🔵 Tým A: ${m.pl.filter(p => p.side === 0).map(p => esc(p.n)).join(', ')}</span><span>🔴 Tým B: ${m.pl.filter(p => p.side === 1).map(p => esc(p.n)).join(', ')}</span></span>`);
+      break;
+    case 'party': partyMerge(m.r); if (role && !coop && !TEAM && OPP.pid) curTour = tourPending(SET.pid, OPP.pid); break;
+    case 'away': if (k) k.away = !!m.v; else oppAway = !!m.v; break;
+    case 'chat':
+      if (k) {                                           // hostitel zprávu ukáže a přepošle ostatním
+        showChat(k.side, m.i, 'p' + k.slot);
+        for (const x of conns) if (x !== k) sendTo(x, { t: 'chat', i: m.i, side: k.side, who: k.slot });
+      } else if (m.side != null) showChat(m.side, m.i, 'p' + m.who);
+      else showChat(coop ? mySide : 1 - mySide, m.i, 'opp');
+      break;
+    case 'rm':
+      sfx('click');
+      if (k) { k.rm = true; hostRmCheck(); } else rmOpp = true;
+      break;
+    case 'rmc': rmInfo = { n: m.n | 0, of: m.of | 0 }; break;
+  }
+}
+// odveta: hostitel začne, až jsou připraveni všichni
+function hostRmCheck() {
+  const ready = (rmMe ? 1 : 0) + conns.filter(k => k.rm).length, of = conns.length + 1;
+  rmOpp = conns.every(k => k.rm); rmInfo = { n: ready, of };
+  send({ t: 'rmc', n: ready, of });
+  if (rmMe && rmOpp) hostRestart();
+}
+
+// hostitel spouští další hru: v co-op kampani po výhře rovnou další misi
+function hostRestart() {
+  let camp = HOSTOPT.camp;
+  if (coop && camp != null && V && V.over === 0 && camp + 1 < CAMP.length) camp = HOSTOPT.camp = camp + 1;
+  startGame('host', null, camp);
+}
+
+function lost() {
+  if (role !== 'host' && role !== 'guest') return;
+  if (V && V.over >= 0) { toMenu('Soupeř odešel ze hry.'); return; }
+  conn = null;
+  if (!netLostAt) netLostAt = performance.now();
+}
+
+// stav sítě se vyhodnocuje každý snímek: host při výpadku kohokoli zastaví simulaci
+function netTick(now) {
+  if (role !== 'host' && role !== 'guest') {
+    netWait = false;
+    if (conn && conn.open && now - (netTick.ping || 0) > 1000) { netTick.ping = now; send({ t: 'p' }); }   // připojený v čekárně
+    if (HOSTOPT.team && conns.some(k => now - k.lastRx > 8000)) {                                          // hostitel: zamrzlé odstraní
+      for (const k of conns) if (now - k.lastRx > 8000) try { k.c && k.c.close(); } catch (e) {}
+      conns = conns.filter(k => now - k.lastRx <= 8000);
+      conns.forEach((k, i) => { k.slot = i + 1; k.side = k.slot === 2 ? 0 : 1; });
+      lobbyUpdate();
+    }
+    return;
+  }
+  if (role === 'host') {
+    const L = conns.find(k => k.lost);
+    netLostAt = L ? L.lost : 0; oppAway = conns.some(k => k.away);
+  }
+  // krátké zakolísání mobilní sítě (do ~6 s) hru nezastaví, teprve delší ticho znamená výpadek
+  const stale = role === 'host' ? conns.some(k => now - k.lastRx > 6500) : now - lastRx > 5500;
+  const w = !!netLostAt || oppAway || stale || (role === 'guest' && V && V.wait);
+  if (w && !netWait) waitSince = now;
+  netWait = w;
+  if (w && V && V.over < 0 && now - waitSince > WAIT_MAX * 1000) { toMenu('Soupeř se nevrátil, hra skončila.'); return; }
+  if (role === 'guest') {
+    if (netLostAt && now - reconTry > 5000) { reconTry = now; guestRecon(); }
+    if (!netLostAt && now - (netTick.ping || 0) > 1000) { netTick.ping = now; send({ t: 'p' }); }
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  if (role === 'host' || role === 'guest') send({ t: 'away', v: document.hidden ? 1 : 0 });
+});
+
+// =====================================================================
+//  STAV KLIENTA
+// =====================================================================
+let role = null, mySide = 0, mirror = false, V = null, uiMode = 'units';
+let acc = 0, sendAcc = 0, netEv = [], fx = [];
+let snapPrev = null, snapCur = null, snapT = 0;
+const phMap = new Map();
+let curChal = null, curCamp = null, curDaily = false;
+
+function startGame(r, chal = null, camp = null, daily = false) {
+  rematchN = r !== 'solo' && role === r ? rematchN + 1 : 0;
+  curTour = r !== 'solo' && OPP.pid ? tourPending(SET.pid, OPP.pid) : null;
+  baseHp = null;
+  if (r === 'solo') coop = TEAM = false; else if (r === 'host') { coop = HOSTOPT.coop || HOSTOPT.camp != null; TEAM = HOSTOPT.team; }
+  role = r; mySide = r === 'guest' ? GSIDE : 0; mirror = mySide === 1;
+  document.querySelectorAll('.overlay:not(#rotate)').forEach(o => o.classList.add('hidden'));
+  uiMode = 'units'; fx = []; netEv = []; phMap.clear();
+  snapPrev = snapCur = null; V = null;
+  paused = false; endDone = false; chatOpen = false; bubbles = []; pools = [];
+  rec = []; recEv = []; recAcc = 0; recTail = 0; replay = null; evtBanner = null; shake = 0; bloodCode = null; bloodCodeUsed = false; splats = [];
+  rmMe = rmOpp = false; rmInfo = null; lastRx = performance.now(); netLostAt = 0; oppAway = false;
+  for (const k of conns) { k.rm = false; k.lastRx = lastRx; }
+  if (r !== 'guest') { S = newState(); acc = 0; aiWant = null; aiT = 1; aiEvoT = 0; aiBroke = 0; }
+  if (r === 'guest' && camp != null) { curCamp = camp; if (SET.weather !== 'real') wxForce(CAMP[camp].wx); }
+  if (r === 'solo' || (r === 'host' && coop)) {
+    curChal = chal; curCamp = camp; curDaily = daily;
+    const ch = chal != null ? CHAL[chal] : camp != null ? CAMP[camp] : daily ? DAILY : null, di = ch ? ch.diff : SET.diff, D = DIFF[di];
+    S.diff = di; Object.assign(S.pl[1], { gm: D.gm, xm: D.xm, gold: D.gold });
+    if (ch) {
+      const M = S.mods = ch.mods, me = S.pl[0], e = S.pl[1];
+      S.chal = chal; S.camp = camp; S.daily = daily ? 1 : 0;
+      // mise v pozdějším věku: oba začínají v něm, se zlatem a zkušenostmi toho věku
+      const toAge = (p, a) => { p.age = a; p.hp = p.mhp = AGES[a].baseHp; p.xp = AGES[a - 1].xp; p.gold = AGE_GOLD[a]; };
+      if (M.age) { toAge(me, M.age); toAge(e, M.age); e.gold = Math.round(AGE_GOLD[M.age] * D.gold / START_GOLD); }
+      if (M.gold != null) me.gold = M.gold;
+      if (M.eGold) e.gold += M.eGold;
+      if (M.gm) me.gm = M.gm;
+      if (M.eAge) { e.age = M.eAge; e.hp = e.mhp = AGES[M.eAge].baseHp; }
+      if (M.eHp) { e.hp *= M.eHp; e.mhp *= M.eHp; }
+    }
+    if ((camp != null || daily) && SET.weather !== 'real') wxForce(ch.wx);
+  }
+  if (r === 'host' && coop) { const e = S.pl[1]; e.gm *= 1.3; e.xm *= 1.2; e.gold = Math.round(e.gold * 1.5); }   // dva hráči = silnější počítač
+  if (r !== 'guest') {
+    setPrefs(S.pl[0], SET.af); S.pl[0].emb = SET.emb || 0;
+    if (r === 'host' && !coop) { const e1 = conns.find(k => k.side === 1); if (e1 && e1.info.pid) { setPrefs(S.pl[1], e1.info.af); S.pl[1].emb = e1.info.emb || 0; } }
+    else setPrefs(S.pl[1], Array.from({ length: 5 }, () => (Math.random() * 4) | 0));   // počítač má náhodné národy
+  }
+  if (r !== 'guest') S.rage = r === 'solo' && S.camp != null && EXTREME();   // vztek jen v kampani pro jednoho hráče
+  if (r !== 'guest') S.events = SET.evt !== false && S.camp == null && S.chal == null && !S.daily;
+  if (r !== 'guest') setField((S.camp != null && CAMP[S.camp].field) || (S.daily && DAILY.field) || pickField());
+  if (r === 'host') { for (const k of conns) sendTo(k, { t: 'start', sess: SESS, ...hello(), coop, camp, field: FIELD, side: k.side, team: TEAM }); partySend(); }
+}
+
+let curTour = null;
+function toMenu(msg) {
+  tut = null;
+  role = null; S = null; V = null; snapCur = snapPrev = null; paused = false; replay = null;
+  cleanupNet(); wxApply(); setField(FIELDS[SET.field] ? SET.field : 'meadow');
+  refreshMenu();
+  document.getElementById('menu').classList.remove('hidden');
+  status(msg || ''); document.getElementById('mstatus').innerHTML = msg ? esc(msg) : '';
+}
+
+function act(cmd) {
+  sfx('buy');
+  tutCmd(cmd);
+  if (role === 'guest') send({ t: 'c', c: cmd });
+  else applyCmd(mySide, cmd);
+}
+
+function onSnap(d) {
+  if (replay) return;                                  // během přehrávání záznamu stav nepřepisovat
+  if (d.O < 0 || recTail < 2.5) { recPush(d); if (d.O >= 0) recTail += 1 / SNAP_HZ; }
+  const v = decode(d);
+  snapPrev = snapCur || v; snapCur = v; snapT = performance.now();
+  d.E.forEach(addFx);
+}
+function interp(now) {
+  return lerpSnap(snapPrev, snapCur, Math.min(1, (now - snapT) / (1000 / SNAP_HZ)));
+}
+function lerpSnap(snapPrev, snapCur, a) {
+  const pu = new Map(snapPrev.units.map(u => [u.id, u]));
+  const pp = new Map(snapPrev.proj.map(p => [p.id, p]));
+  return { ...snapCur,
+    units: snapCur.units.map(u => { const o = pu.get(u.id); return o ? { ...u, x: o.x + (u.x - o.x) * a } : u; }),
+    proj: snapCur.proj.map(p => { const o = pp.get(p.id); return o ? { ...p, x: o.x + (p.x - o.x) * a, y: o.y + (p.y - o.y) * a } : p; }) };
+}

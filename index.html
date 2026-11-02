@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Brutal Ages</title>
+<meta name="description" content="Brutal Ages – brutální válka věků od jeskyní po budoucnost. Hra pro jednoho i pro kámoše online.">
+<meta property="og:title" content="Brutal Ages">
+<meta property="og:description" content="Brutal ages demand brutal wars.">
+<meta property="og:image" content="icons/icon-512.png">
+<link rel="stylesheet" href="style.css?v=202611020831">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#10151f">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="menu" class="overlay">
+  <div class="menu-grid">
+    <div class="brand">
+      <h1>BRUTAL AGES</h1>
+      <p class="sub">Brutal ages demand brutal wars.</p>
+      <p id="mstatus"></p>
+      <div id="updBar" class="upd hidden"></div>
+      <div id="apkBar" class="upd hidden"></div>
+    </div>
+    <div class="actions main-actions">
+      <button id="bResume" class="big resume hidden"></button>
+      <button id="bSP" class="big">🎮 Singleplayer</button>
+      <button id="bMP" class="big">🌐 Multiplayer</button>
+      <button id="bGS" class="big ghost">⚙ Nastavení hry</button>
+    </div>
+  </div>
+</div>
+
+<div id="spPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>🎮 Singleplayer</h2>
+      <button class="ghost panel-close">Zpět</button>
+    </div>
+    <div class="scroll menu-sub">
+      <button id="bCamp">🗺 Kampaň</button>
+      <button id="bSolo">⚔ Hrát proti počítači</button>
+      <div class="seg">
+        <button data-d="0">Lehká</button>
+        <button data-d="1">Normální</button>
+        <button data-d="2">Těžká</button>
+        <button data-d="3">Nemožná</button>
+      </div>
+      <div class="sub-row">
+        <button id="bDaily" class="ghost gold">📅 Denní výzva</button>
+        <button id="bChal" class="ghost gold">🎯 Výzvy</button>
+        <button id="bTut" class="ghost">🎓 Výuka</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mpPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>🌐 Multiplayer</h2>
+      <button class="ghost panel-close">Zpět</button>
+    </div>
+    <div class="scroll menu-sub">
+      <div class="seg seg2" id="netMode">
+        <button data-m="duel">⚔ Souboj 1 na 1</button>
+        <button data-m="coop">🤝 Spolu proti PC</button>
+        <button data-m="2v2">👥 2 na 2</button>
+      </div>
+      <button id="bHost">Založit online hru</button>
+      <div class="row">
+        <input id="code" maxlength="5" placeholder="KÓD" autocomplete="off" autocapitalize="characters">
+        <button id="bJoin">Připojit</button>
+      </div>
+      <p id="status"></p>
+      <div id="friends"></div>
+      <div class="sub-row">
+        <button id="bStats" class="ghost">📊 Žebříček a statistiky</button>
+        <button id="bTourOpen" class="ghost gold">🏆 Turnaj</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="gsPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>⚙ Nastavení hry</h2>
+      <button class="ghost panel-close">Zpět</button>
+    </div>
+    <div class="scroll menu-sub">
+      <div class="sub-row">
+        <button id="bProf" class="ghost gold">👤 Profil</button>
+        <button id="bFac" class="ghost gold">🏳️ Národ</button>
+        <button id="bAch" class="ghost gold">🏆 Úspěchy</button>
+      </div>
+      <p id="keysHelp" class="hidden">⌨ <b>Klávesy:</b> <kbd>1</kbd>–<kbd>9</kbd> tlačítka v liště · <kbd>H</kbd> hrdina · <kbd>Mezerník</kbd> speciál · <kbd>V</kbd> evoluce · <kbd>T</kbd> věže · <kbd>U</kbd> vylepšení · <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd> útok/drž/ústup · <kbd>R</kbd> vztek · <kbd>Tab</kbd> rychlost · <kbd>Esc</kbd> pauza</p>
+      <div class="set-grid">
+        <button id="bMusic" class="ghost">Hudba: ZAP</button>
+        <button id="bSfx" class="ghost">Zvuky: ZAP</button>
+        <button id="bVib" class="ghost">Vibrace: ZAP</button>
+        <button id="bBrutal" class="ghost">🩸 Brutal: VYP</button>
+        <button id="bWx" class="ghost">🌦 Počasí: VYP</button>
+        <button id="bEvt" class="ghost">⚡ Události: ZAP</button>
+        <button id="bAutoGfx" class="ghost">📉 Auto grafika: ZAP</button>
+      </div>
+      <div class="colors-head">Grafika</div>
+      <div class="seg" id="gfxOpts">
+        <button data-g="0">Nízká</button>
+        <button data-g="1">Střední</button>
+        <button data-g="2">Vysoká</button>
+        <button data-g="3">Ultra</button>
+      </div>
+      <p class="muted" id="gfxNote"></p>
+    </div>
+  </div>
+</div>
+
+<div id="achPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Úspěchy <span id="achCount"></span></h2>
+      <button class="ghost panel-close">Zavřít</button>
+    </div>
+    <div id="achList"></div>
+  </div>
+</div>
+
+<div id="chalPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Výzvy <span id="chalCount"></span></h2>
+      <button class="ghost panel-close">Zavřít</button>
+    </div>
+    <div class="scroll">
+      <div class="colors-head">Barva armády: <b id="colName"></b></div>
+      <div id="colors"></div>
+      <div id="chalList"></div>
+    </div>
+  </div>
+</div>
+
+<div id="campPanel" class="overlay hidden">
+  <div class="panel wide">
+    <div class="panel-head">
+      <h2>Kampaň <span id="campCount"></span></h2>
+      <button class="ghost panel-close">Zavřít</button>
+    </div>
+    <div class="camp-body">
+      <div id="campMap"></div>
+      <div id="campBrief"></div>
+    </div>
+  </div>
+</div>
+
+<div id="facPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Národy</h2>
+      <button class="ghost panel-close">Zavřít</button>
+    </div>
+    <div class="scroll"><div id="facList"></div></div>
+  </div>
+</div>
+
+<div id="profPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Profil</h2>
+      <button class="ghost panel-close">Zavřít</button>
+    </div>
+    <div class="scroll" id="profBody"></div>
+  </div>
+</div>
+
+<div id="tourPanel" class="overlay hidden">
+  <div class="panel wide">
+    <div class="panel-head">
+      <h2>Turnaj party</h2>
+      <button class="ghost panel-close">Zavřít</button>
+    </div>
+    <div class="scroll" id="tourBody"></div>
+  </div>
+</div>
+
+<div id="dailyPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Denní výzva</h2>
+      <button class="ghost panel-close">Zavřít</button>
+    </div>
+    <div class="scroll" id="dailyBody"></div>
+  </div>
+</div>
+
+<div id="wxPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Počasí a bojiště</h2>
+      <button class="ghost panel-close">Zavřít</button>
+    </div>
+    <div class="scroll">
+      <div id="wxOpts">
+        <button data-w="off">Vypnuto</button>
+        <button data-w="real" class="wide">📍 Podle skutečného počasí u mě</button>
+        <button data-w="clear">☀️ Jasno</button>
+        <button data-w="cloudy">☁️ Zataženo</button>
+        <button data-w="rain">🌧️ Déšť</button>
+        <button data-w="storm">⛈️ Bouřka</button>
+        <button data-w="snow">❄️ Sníh</button>
+        <button data-w="fog">🌫️ Mlha</button>
+        <button data-w="night">🌙 Noc</button>
+      </div>
+      <p id="wxNow"></p>
+      <div class="colors-head">Bojiště</div>
+      <div id="fieldOpts">
+        <button data-f="meadow">🌳 Louka</button>
+        <button data-f="desert">🌵 Poušť</button>
+        <button data-f="winter">❄️ Zima</button>
+        <button data-f="volcano">🌋 Sopka</button>
+        <button data-f="random">🎲 Náhodně</button>
+      </div>
+      <p class="muted">Počasí mění jen vzhled bojiště, na hru nemá vliv. Režim „podle skutečného počasí“ zjistí přibližnou polohu telefonu a pošle ji zaokrouhlenou (asi na 1 km) jen službě open-meteo.com, která vrátí aktuální počasí. Obnovuje se každých 15 minut.</p>
+    </div>
+  </div>
+</div>
+
+<div id="statPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Statistiky</h2>
+      <button class="ghost panel-close">Zavřít</button>
+    </div>
+    <div class="scroll">
+      <div id="statBody"></div>
+    </div>
+  </div>
+</div>
+
+<div id="rotate" class="overlay">Otoč telefon na šířku ↻</div>
+
+<div id="invPanel" class="overlay hidden">
+  <div class="panel inv">
+    <h2>📨 Pozvánka do hry</h2>
+    <p id="invText"></p>
+    <div class="row"><button id="bInvYes">✔ Přijmout</button><button id="bInvNo" class="ghost">Odmítnout</button></div>
+  </div>
+</div>
+
+<script src="lib/peerjs.min.js?v=202611020831"></script>
+<script src="js/build.js?v=202611020831"></script>
+<script src="js/core.js?v=202611020831"></script>
+<script src="js/net.js?v=202611020831"></script>
+<script src="js/render.js?v=202611020831"></script>
+<script src="js/units.js?v=202611020831"></script>
+<script src="js/world.js?v=202611020831"></script>
+<script src="js/hud.js?v=202611020831"></script>
+<script src="js/meta.js?v=202611020831"></script>
+<script src="js/audio.js?v=202611020831"></script>
+<script src="js/ui.js?v=202611020831"></script>
+<script src="js/modes.js?v=202611020831"></script>
+<script src="js/extras.js?v=202611020831"></script>
+<script src="js/main.js?v=202611020831"></script>
+<script src="js/update.js?v=202611020831"></script>
+</body>
+</html>

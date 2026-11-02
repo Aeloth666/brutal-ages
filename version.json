@@ -1,0 +1,31 @@
+﻿{
+    "build":  202611020829,
+    "name":  "2.0",
+    "apk":  11,
+    "apkName":  "2.0",
+    "apkUrl":  "https://aeloth666.github.io/brutal-ages/BrutalAges.apk",
+    "minApk":  11,
+    "files":  [
+                  "index.html",
+                  "manifest.webmanifest",
+                  "style.css",
+                  "sw.js",
+                  "icons/icon-192.png",
+                  "icons/icon-512.png",
+                  "js/audio.js",
+                  "js/build.js",
+                  "js/core.js",
+                  "js/extras.js",
+                  "js/hud.js",
+                  "js/main.js",
+                  "js/meta.js",
+                  "js/modes.js",
+                  "js/net.js",
+                  "js/render.js",
+                  "js/ui.js",
+                  "js/units.js",
+                  "js/update.js",
+                  "js/world.js",
+                  "lib/peerjs.min.js"
+              ]
+}
