@@ -8,7 +8,7 @@
 <meta property="og:title" content="Brutal Ages">
 <meta property="og:description" content="Brutal ages demand brutal wars.">
 <meta property="og:image" content="icons/icon-512.png">
-<link rel="stylesheet" href="style.css?v=202611020901">
+<link rel="stylesheet" href="style.css?v=202611020918">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#10151f">
 <link rel="icon" href="icons/icon-192.png">
@@ -85,7 +85,8 @@
       <p id="status"></p>
       <div id="friends"></div>
       <div class="sub-row">
-        <button id="bStats" class="ghost">📊 Žebříček a statistiky</button>
+        <button id="bLb" class="ghost gold">🌍 Online žebříček</button>
+        <button id="bStats" class="ghost">📊 Statistiky</button>
         <button id="bTourOpen" class="ghost gold">🏆 Turnaj</button>
       </div>
     </div>
@@ -270,6 +271,13 @@
   </div>
 </div>
 
+<div id="lbPanel" class="overlay hidden">
+  <div class="panel wide">
+    <div class="panel-head"><h2>🌍 Online žebříček</h2><button class="ghost panel-close">Zpět</button></div>
+    <div class="scroll" id="lbBody"></div>
+  </div>
+</div>
+
 <div id="invPanel" class="overlay hidden">
   <div class="panel inv">
     <h2>📨 Pozvánka do hry</h2>
@@ -278,21 +286,22 @@
   </div>
 </div>
 
-<script src="lib/peerjs.min.js?v=202611020901"></script>
-<script src="js/build.js?v=202611020901"></script>
-<script src="js/core.js?v=202611020901"></script>
-<script src="js/net.js?v=202611020901"></script>
-<script src="js/render.js?v=202611020901"></script>
-<script src="js/units.js?v=202611020901"></script>
-<script src="js/world.js?v=202611020901"></script>
-<script src="js/hud.js?v=202611020901"></script>
-<script src="js/meta.js?v=202611020901"></script>
-<script src="js/audio.js?v=202611020901"></script>
-<script src="js/ui.js?v=202611020901"></script>
-<script src="js/modes.js?v=202611020901"></script>
-<script src="js/extras.js?v=202611020901"></script>
-<script src="js/gen.js?v=202611020901"></script>
-<script src="js/main.js?v=202611020901"></script>
-<script src="js/update.js?v=202611020901"></script>
+<script src="lib/peerjs.min.js?v=202611020918"></script>
+<script src="js/build.js?v=202611020918"></script>
+<script src="js/core.js?v=202611020918"></script>
+<script src="js/net.js?v=202611020918"></script>
+<script src="js/render.js?v=202611020918"></script>
+<script src="js/units.js?v=202611020918"></script>
+<script src="js/world.js?v=202611020918"></script>
+<script src="js/hud.js?v=202611020918"></script>
+<script src="js/meta.js?v=202611020918"></script>
+<script src="js/audio.js?v=202611020918"></script>
+<script src="js/ui.js?v=202611020918"></script>
+<script src="js/modes.js?v=202611020918"></script>
+<script src="js/extras.js?v=202611020918"></script>
+<script src="js/gen.js?v=202611020918"></script>
+<script src="js/lb.js?v=202611020918"></script>
+<script src="js/main.js?v=202611020918"></script>
+<script src="js/update.js?v=202611020918"></script>
 </body>
 </html>

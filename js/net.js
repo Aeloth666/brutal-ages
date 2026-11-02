@@ -44,7 +44,7 @@ function send(m) {
   for (const s of specs) if (s.open) try { s.send(m); } catch (e) {}
 }
 const specStart = () => ({ t: 'start', sess: SESS, ...hello(), coop, camp: HOSTOPT.camp, field: FIELD, side: 0, team: TEAM, spec: 1 });
-const hello = () => ({ n: SET.name || 'Hráč', col: SET.col || 0, pid: SET.pid, af: cleanAf(SET.af), emb: SET.emb || 0, lvl: profLevel(), skin: SET.skin || 0 });
+const hello = () => ({ n: SET.name || 'Hráč', col: SET.col || 0, pid: SET.pid, af: cleanAf(SET.af), emb: SET.emb || 0, lvl: profLevel(), skin: SET.skin || 0, rating: Math.round(LB.r) });
 // oblíbené národy hráče: použijí se na začátku hry a po každé evoluci (dá se změnit během výběru)
 function setPrefs(p, af) { p.pref = cleanAf(af); p.prefSet = 1; setAgeFac(p, p.pref[p.age]); p.pick = FAC_PICK; }
 
@@ -171,7 +171,7 @@ function guestRecon() {
   } catch (e) {}
 }
 
-const infoOf = m => ({ n: m.n, col: m.col, pid: m.pid, af: cleanAf(m.af), emb: m.emb | 0, lvl: m.lvl | 0, skin: Math.min(SKINS.length - 1, m.skin | 0) });
+const infoOf = m => ({ n: m.n, col: m.col, pid: m.pid, af: cleanAf(m.af), emb: m.emb | 0, lvl: m.lvl | 0, skin: Math.min(SKINS.length - 1, m.skin | 0), rating: Math.max(100, Math.min(4000, +m.rating || 1000)) });
 function onData(m, k) {
   if (!m) return;
   switch (m.t) {

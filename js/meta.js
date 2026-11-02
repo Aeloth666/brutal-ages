@@ -77,6 +77,7 @@ function record(won, V) {
     const n = OPP.n || 'Kámoš', r = ST.vs[n] || (ST.vs[n] = [0, 0]);
     r[won ? 0 : 1]++;
     partyMatch(won); partySend();
+    lbResult(won);                                     // online žebříček (Elo)
   }
   store('aow-stats', ST);
   profGain(won, V);

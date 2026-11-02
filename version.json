@@ -1,6 +1,6 @@
 {
-    "build":  202611020901,
-    "name":  "2.1",
+    "build":  202611020918,
+    "name":  "2.2",
     "apk":  11,
     "apkName":  "2.0",
     "apkUrl":  "https://aeloth666.github.io/brutal-ages/BrutalAges.apk",
@@ -18,6 +18,7 @@
                   "js/extras.js",
                   "js/gen.js",
                   "js/hud.js",
+                  "js/lb.js",
                   "js/main.js",
                   "js/meta.js",
                   "js/modes.js",
