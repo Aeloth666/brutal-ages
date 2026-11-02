@@ -337,7 +337,7 @@ function toMenu(msg) {
   tut = null; specMode = false;
   role = null; S = null; V = null; snapCur = snapPrev = null; paused = false; replay = null;
   cleanupNet(); wxApply(); setField(FIELDS[SET.field] ? SET.field : 'meadow');
-  refreshMenu();
+  refreshMenu(); try { refreshHQ(); } catch (e) {}
   document.getElementById('menu').classList.remove('hidden');
   status(msg || ''); document.getElementById('mstatus').innerHTML = msg ? esc(msg) : '';
 }

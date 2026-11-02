@@ -1019,7 +1019,7 @@ function bloodBurst(x, y, n, sp, np) {   // np = krev ze zásahu (kaluže jen v�
 // jízdní zvířata doby kamenné (rozsekání podle druhu – údaje z MOUNT)
 const BEAST_M = Object.fromEntries(Object.entries(MOUNT).map(([k, M]) => { const [bx, by, rx, ry] = M.body, [hx, hy] = M.head;
   return [k, { kind: k, c: [bx, by], box: [bx - rx - 8, hx + 16, Math.min(by - ry, hy - 14) - 2, by + ry], L: M.L, hc: [hx, hy], hbox: [hx - 12, hx + 26, hy - 16, hy + 28],
-    neck: [M.neck[0], M.neck[1], M.neck[2]], legs: M.legs.map(([lx, front, near]) => [lx, M.hip, !!front, M.col[near ? 0 : 1], M.w]) }]; }));
+    neck: [M.neck[0], M.neck[1], M.neck[2]], legs: M.legs.map(([lx, front, near, ly]) => [lx, ly, !!front, M.col[near ? 0 : 1], M.lw[front ? 1 : 0][1]]) }]; }));
 const beastOf = f => f.k ? BEAST_M[f.k] : BEAST[f.a];
 const BEAST = [
   { c: [0, -36], box: [-58, 46, -58, -17], L: [12, 12], hc: [28, -42], hbox: [10, 46, -58, -24], neck: [14, -31, 5],
@@ -1053,6 +1053,7 @@ const bLegMid = hy => (hy - 2) / 2;
 function drawBeastLeg(f) {
   const B = beastOf(f), [, hy, knee, col, w] = B.legs[f.i];
   c.translate(0, -bLegMid(hy));
+  if (B.kind) { qLeg(B.kind, 0, hy, 0, false, knee, col, false); stump(0, hy, w * 0.9); return; }
   const [px, py] = !B.kind && f.a === 1 && !knee ? hindLeg(0, hy, 0, false, 0, 0, col, w) : ikLeg(0, hy, 0, false, 0, 0, B.L[0], B.L[1], knee, col, w, !B.kind && f.a === 0 ? -6.5 : -2);
   if (B.kind) mountFoot(B.kind, px, py, col); else if (f.a === 0) dinoFoot(px, py, '#2f5f27'); else hoof(px, py);
   stump(0, hy, w * 0.6);

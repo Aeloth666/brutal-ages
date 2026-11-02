@@ -279,9 +279,14 @@ table.lb td:nth-child(2), table.lb th:nth-child(2) { text-align: left; } table.l
 .badge { position: absolute; top: -6px; right: -6px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: #dc2626; color: #fff; font-size: 12px; font-weight: 800; line-height: 22px; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
 .badge.hidden { display: none; }
 .hq-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.tile { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 10px; background: #1e293b; border: 1px solid #334155; border-radius: 14px; text-align: center; }
+.tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 10px; background: #1e293b; border: 1px solid #334155; border-radius: 14px; text-align: center; }
 .tile:hover { border-color: #e5c04a; }
 .tile .ti { font-size: 34px; line-height: 1; }
 .tile b { font-size: 16px; } .tile small { font-size: 12px; color: #cbd5e1; }
 @media (max-width: 640px) { .hq-grid { grid-template-columns: repeat(2, 1fr); } }
 #rotate.show { display: flex; }
+
+/* changelog */
+#clBody .cl-v { margin: 14px 0 4px; font-weight: 800; color: #e5c04a; } #clBody .cl-v:first-child { margin-top: 0; }
+#clBody .cl-v small { color: #94a3b8; font-weight: 600; margin-left: 6px; }
+#clBody ul { margin: 0; padding-left: 20px; color: #e2e8f0; font-size: 14px; line-height: 1.45; } #clBody li { margin: 2px 0; }

@@ -73,17 +73,33 @@ function renderGen() {
 $('bGen').onclick = () => { renderGen(); openPanel('genPanel'); };
 
 // ---------- velitelství: rozcestník s odznaky ----------
-function refreshHQ() {
+// odznak = novinky: volné body generála, nové úkoly (nový den / týden), nově splněné úkoly a nové úspěchy.
+// Každá dlaždice ukáže svůj počet; otevřením dlaždice se její novinky označí jako viděné (body generála zmizí až po utracení).
+const HQS = load('aow-hqseen', { day: '', week: '', done: -1, ach: -1 });
+function hqNews() {
   questRoll();
-  const free = genFree(), qOpen = QST.d.filter(q => !q.ok).length + (QST.w && !QST.w.ok ? 1 : 0), got = ACH.filter(a => ACHS[a.id]).length;
+  const got = ACH.filter(a => ACHS[a.id]).length;
+  if (HQS.ach < 0) { HQS.ach = got; HQS.done = QST.done; store('aow-hqseen', HQS); }   // první spuštění: staré věci nejsou novinky
+  return { gen: Math.max(0, genFree()), quest: (HQS.day !== QST.day ? 1 : 0) + (HQS.week !== QST.week ? 1 : 0) + Math.max(0, QST.done - HQS.done), ach: Math.max(0, got - HQS.ach), got };
+}
+function tileBadge(id, n) {
+  const el = $(id); let s = el.querySelector('.badge');
+  if (!s) { s = document.createElement('span'); s.className = 'badge'; el.appendChild(s); }
+  s.textContent = n; s.classList.toggle('hidden', !n);
+}
+function refreshHQ() {
+  const N = hqNews(), qOpen = QST.d.filter(q => !q.ok).length + (QST.w && !QST.w.ok ? 1 : 0);
   $('hqProf').textContent = 'úroveň ' + profLevel() + ' · ' + rankOf(profLevel());
-  $('hqGen').textContent = free > 0 ? free + ' volných bodů' : 'strom dovedností';
-  $('hqQuest').textContent = qOpen ? qOpen + ' nesplněných úkolů' : 'vše splněno ✔';
-  $('hqAch').textContent = got + ' / ' + ACH.length;
-  const n = (free > 0 ? 1 : 0) + (qOpen ? 1 : 0), b = $('hqBadge');
-  b.textContent = free > 0 ? free : qOpen; b.classList.toggle('hidden', !(free > 0 || qOpen));
+  $('hqGen').textContent = N.gen > 0 ? N.gen + ' volných bodů' : 'strom dovedností';
+  $('hqQuest').textContent = (HQS.day !== QST.day ? 'nové úkoly! · ' : '') + (qOpen ? qOpen + ' nesplněných úkolů' : 'vše splněno ✔');
+  $('hqAch').textContent = N.got + ' / ' + ACH.length + (N.ach ? ' · ' + N.ach + ' nových' : '');
+  tileBadge('bGen', N.gen); tileBadge('bQuest', N.quest); tileBadge('bAch', N.ach);
+  const sum = N.gen + N.quest + N.ach, b = $('hqBadge');
+  b.textContent = sum; b.classList.toggle('hidden', !sum);
 }
 $('bHQ').onclick = () => { refreshHQ(); openPanel('hqPanel'); };
+$('bQuest').addEventListener('click', () => { HQS.day = QST.day; HQS.week = QST.week; HQS.done = QST.done; store('aow-hqseen', HQS); refreshHQ(); });
+$('bAch').addEventListener('click', () => { HQS.ach = ACH.filter(a => ACHS[a.id]).length; store('aow-hqseen', HQS); refreshHQ(); });
 setTimeout(() => { try { refreshHQ(); } catch (e) {} }, 300);
 
 // ---------- denní a týdenní úkoly ----------

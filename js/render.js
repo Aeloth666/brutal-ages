@@ -6,7 +6,7 @@ let c = cv.getContext('2d');
 let scl = 1, ox = 0, oy = 0, T = 0, bgC = null;
 const US = 1.2;                                // měřítko jednotek
 const HPBAR = [64, 64, 96, 100, 84, 150, 74];
-const hpBarH = u => u.ty === 5 ? [112, 190, 150, 150, 220][u.a] : HPBAR[u.ty];   // bossové mají různou výšku               // výška ukazatele zdraví nad zemí
+const hpBarH = u => u.ty === 2 && u.a === 0 ? MOUNT[mountKind(teamCol(u.side))].hp : u.ty === 5 ? [150, 190, 150, 150, 220][u.a] : HPBAR[u.ty];   // bossové mají různou výšku               // výška ukazatele zdraví nad zemí
 
 let GFXL = 2;                                          // nastaví se z SET.gfx (sekce Nastavení)
 const GFX_DPR = [1, 1.5, 2, 2.5], GFX_FX = [150, 350, 600, 900], GFX_PART = [0.4, 0.7, 1, 1.3];

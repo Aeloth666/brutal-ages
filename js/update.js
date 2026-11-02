@@ -94,3 +94,40 @@ function apkBanner(v) {
 setTimeout(updInit, 1500);
 verInfo();
 if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').onclick = () => { sfx('click'); updLog('kontroluji…'); updInit(true); }; }
+
+// ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
+const CHANGELOG = [
+  { v: '2.7', d: '2026-11-02', cs: [
+    'Zvířata nakreslená znovu podle skutečných proporcí: mamut, vlk, medvěd a pratur mají nohy se třemi klouby (koleno vpředu, hlezno vzadu) a chodidla na zemi.',
+    'Mamut je výrazně větší (jako skutečný), kůň je větší, medvěd má ploské tlapy a kulatou hlavu s krátkým čenichem.',
+    'Nový šavlozubý tygr: mohutné tělo, krátký ocas, šavle a skok s otevřenou tlamou.',
+    'Nový drak: esovitý krk, přirozená hlava s tlamou, která se otevírá na kloubu, rohy dozadu, křídla s prsty a vykrojenou blánou, nohy pod tělem.',
+    'Velitelství: odznak ukazuje, kde je novinka (volné body generála, nové úkoly, nové úspěchy) a po otevření zmizí.',
+    'Nastavení → O hře: tlačítko „Co je nového“.'], en: [
+    'Animals redrawn with real proportions: mammoth, wolf, bear and aurochs have three-jointed legs (knee forward, hock back) and feet on the ground.',
+    'The mammoth is much bigger (like the real one), the horse is bigger, the bear has flat paws and a round head with a short snout.',
+    'New sabre-toothed tiger: massive body, short tail, sabres and a pounce with open jaws.',
+    'New dragon: S-shaped neck, a natural head with a hinged opening jaw, swept-back horns, fingered wings with scalloped membranes, legs under the body.',
+    'Headquarters: the badge shows where something is new (free general points, new quests, new achievements) and clears once opened.',
+    'Settings → About: “What’s new” button.'] },
+  { v: '2.6.2', d: '2026-11-02', cs: ['Prodej věží: když máš víc věží, vybereš si, kterou prodat.'], en: ['Selling towers: with several towers you choose which one to sell.'] },
+  { v: '2.6.1', d: '2026-11-02', cs: ['Oprava aktualizace: dvě kontroly naráz (automatická a tlačítko) si mazaly stahovanou verzi a hra pak nenaběhla.'], en: ['Update fix: two checks at once (automatic and the button) deleted the downloaded version and the game failed to start.'] },
+  { v: '2.6', d: '2026-11-02', cs: [
+    'Přehlednější menu: Hrát sám, Hrát s kámoši, Velitelství a Nastavení s rozdělenými sekcemi.',
+    'Doba kamenná: jezdci na mamutovi, vlkovi, medvědovi a praturovi podle národa; věž Úlomet hází vosí hnízda.',
+    'Noví bossové: Šavlozubý tygr a Leonardův obrněný vůz.',
+    'Poškozená základna kouří a hoří, pod jednotkami jsou vidět aury (pokřik, bubeník, léčitel).',
+    'V moderní době svítí v noci baterky, text v horní liště se už nepřekrývá s tlačítky.',
+    'Online funkce zkouší spojení znovu a offline napíšou srozumitelnou hlášku.'], en: [
+    'Clearer menu: Play solo, Play with friends, Headquarters and Settings with separate sections.',
+    'Stone age: riders on mammoth, wolf, bear and aurochs depending on the nation; the Hive Thrower tower throws wasp nests.',
+    'New bosses: Sabre-toothed tiger and Leonardo’s armoured car.',
+    'A damaged base smokes and burns, auras show under units (war cry, drummer, healer).',
+    'Flashlights at night in the modern age, the top bar text no longer overlaps the buttons.',
+    'Online features retry the connection and show a clear message when offline.'] },
+];
+function renderChangelog() {
+  const en = typeof LANG !== 'undefined' && LANG === 'en';
+  $('clBody').innerHTML = CHANGELOG.map(e => `<div class="cl-v">${en ? 'Version' : 'Verze'} ${esc(e.v)}<small>${esc(e.d)}</small></div><ul>${(en ? e.en : e.cs).map(t => `<li>${esc(t)}</li>`).join('')}</ul>`).join('');
+}
+$('bChangelog').onclick = () => { sfx('click'); renderChangelog(); openPanel('clPanel'); };
