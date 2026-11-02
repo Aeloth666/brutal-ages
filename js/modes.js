@@ -274,6 +274,7 @@ function renderCampMap() {
     cells += `<g class="cell ${open ? 'open' : 'locked'} ${i === campSel ? 'sel' : ''} ${open && !st ? 'next' : ''}" data-i="${i}">
       <polygon points="${hexPts(x, y, 50)}" fill="${fill}" stroke="${stroke}" stroke-width="${i === campSel ? 5 : 3}"/>
       <text x="${x}" y="${y + 4}" class="ic">${open ? m.ic : '🔒'}</text>
+      ${WORLD.att === i ? `<text x="${x + 30}" y="${y - 26}" class="att">⚔</text>` : ''}
       <text x="${x}" y="${y + 36}" class="st">${st ? '★'.repeat(st) + '☆'.repeat(3 - st) : open ? (i + 1) : ''}</text>
       ${st ? `<path d="M${x + 16} ${y - 42} v-18 l14 5 l-14 5" fill="${me[2]}" stroke="#111" stroke-width="1.5"/>` : ''}
     </g>`;
@@ -292,15 +293,17 @@ function renderCamp() {
   const total = Object.values(CAMPS).reduce((a, b) => a + b, 0);
   $('campCount').textContent = `${Object.keys(CAMPS).length} / ${CAMP.length} území · ${total} ★`;
   const goal = m.mods.survive ? `Vydrž ${fmtTime(m.mods.survive)}` : m.mods.limit ? `Znič základnu do ${fmtTime(m.mods.limit)}` : 'Znič nepřátelskou základnu';
-  const extra = [m.mods.eHp && 'nepřítel má silnější základnu', m.mods.eGold && 'nepřítel má víc zlata', m.mods.noTower && 'nesmíš stavět věže', m.mods.boss != null && '👹 boss: ' + BOSSES[m.mods.boss].n].filter(Boolean);
+  const extra = [m.mods.eHp && 'nepřítel má silnější základnu', WORLD.att === campSel && '⚔ ÚZEMÍ JE POD ÚTOKEM', m.mods.eGold && 'nepřítel má víc zlata', m.mods.noTower && 'nesmíš stavět věže', m.mods.boss != null && '👹 boss: ' + BOSSES[m.mods.boss].n].filter(Boolean);
   const done = campSel === CAMP.length - 1 && st;
   $('campBrief').innerHTML = `
     <div class="cb-head"><span class="cb-ic">${m.ic}</span><div><small>Mise ${campSel + 1} · ${AGES[m.mods.age || 0].name}</small><h3>${m.n}</h3></div></div>
     <p class="cb-story">${done ? m.end : m.t}</p>
     <div class="cb-meta"><b>Cíl:</b> ${goal}${extra.length ? ' · ' + extra.join(', ') : ''}<br><b>Soupeř:</b> ${DIFF[m.diff].n} · <b>Počasí:</b> ${m.wx === 'night' ? 'Noc' : WX_KINDS[m.wx]}</div>
+    <div class="cb-meta"><b>Bonus území:</b> ${TERR[campSel].t}${!st ? ' (po dobytí)' : WORLD.att === campSel ? ' – neplatí, dokud území neubráníš' : ' ✔'}</div>
     <ul class="cb-stars">${rules.map((r, k) => `<li class="${st > k ? 'got' : ''}">${st > k ? '★' : '☆'} ${r}</li>`).join('')}</ul>
-    <div class="cb-btns"><button id="bCampGo">${st ? 'Hrát znovu' : 'Do boje!'}</button><button id="bCampCoop">🤝 S kámošem</button></div>`;
+    <div class="cb-btns">${WORLD.att === campSel ? '<button id="bCampDef" class="def">🛡 Bránit území</button>' : ''}<button id="bCampGo">${st ? 'Hrát znovu' : 'Do boje!'}</button><button id="bCampCoop">🤝 S kámošem</button></div>`;
   $('bCampGo').onclick = () => { $('campPanel').classList.add('hidden'); cleanupNet(); startGame('solo', null, campSel); };
+  if ($('bCampDef')) $('bCampDef').onclick = () => { $('campPanel').classList.add('hidden'); cleanupNet(); defNext = campSel; startGame('solo', null, campSel); };
   $('bCampCoop').onclick = () => { $('campPanel').classList.add('hidden'); hostGame({ coop: true, camp: campSel }); };
 }
 function openCamp(i) {

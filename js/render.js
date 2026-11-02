@@ -5,7 +5,7 @@ const cv = document.getElementById('c');
 let c = cv.getContext('2d');
 let scl = 1, ox = 0, oy = 0, T = 0, bgC = null;
 const US = 1.2;                                // měřítko jednotek
-const HPBAR = [64, 64, 96, 100, 84, 150];
+const HPBAR = [64, 64, 96, 100, 84, 150, 74];
 const hpBarH = u => u.ty === 5 ? BOSSES[u.a].y + 70 : HPBAR[u.ty];               // výška ukazatele zdraví nad zemí
 
 let GFXL = 2;                                          // nastaví se z SET.gfx (sekce Nastavení)
@@ -35,9 +35,10 @@ function teamCol(s) {
     o = role === 'solo' || coop || TEAM || OPP.col == null ? 1 : OPP.col;
     if (o === me) o = me === 1 ? 0 : 1;    // stejné barvy by nešly rozlišit
   }
-  const af = V && V.pl ? V.pl[s].af : s === mySide ? cleanAf(SET.af) : [0, 0, 0, 0, 0], key = o + ':' + af.join('');
+  const af = V && V.pl ? V.pl[s].af : s === mySide ? cleanAf(SET.af) : [0, 0, 0, 0, 0];
+  const sk = s === mySide ? SET.skin || 0 : role !== 'solo' && !coop ? OPP.skin || 0 : 0, key = o + ':' + af.join('') + ':' + sk;
   let t = TEAMC.get(key);
-  if (!t) { t = [...COLS[o].c]; t.af = af; TEAMC.set(key, t); }
+  if (!t) { const S2 = SKINS[sk] || {}; t = [...(S2.col || COLS[o].c)]; t.af = af; t.sk = S2.sk; TEAMC.set(key, t); }
   return t;
 }
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -99,12 +100,16 @@ const FIELDS = {
              h1: ['#e8c27a', '#d9ad62'], h2: ['#dcb06a', '#c99a50'], gnd: ['#d6a960', '#c4924c', '#9c6f38'], grass: ['#e4c07a', '#c99a50', '#b8a060', '#a8803e'], deco: 'cacti' },
   winter:  { n: 'Zima', sky: ['#7d9cc4', '#c3d4e8', '#eef3f9'], sun: 0.5, m1: ['#b8c6d8', '#ffffff'], m2: ['#9fb0c6', '#f4f8fc'],
              h1: ['#e9eff7', '#d5dfec'], h2: ['#dde6f1', '#c7d3e3'], gnd: ['#e4ebf4', '#a9b6c6', '#6f6252'], grass: ['#f4f8fc', '#d6e0ec', '#ffffff', '#b9c6d6'], deco: 'snowpines' },
+  swamp:   { n: 'Bažina', sky: ['#5b6f6a', '#9fb3a6', '#d9dcc4'], sun: 0.4, m1: ['#6f7f78', '#a9b8ad'], m2: ['#5d6b63', '#93a397'],
+             h1: ['#6b7d4a', '#5a6b3c'], h2: ['#566a38', '#47592c'], gnd: ['#4e4a2e', '#3a3622', '#26231a'], grass: ['#5f7a36', '#3f5524', '#7a9444', '#2e4a2a'], deco: 'swamp' },
+  forest:  { n: 'Les', sky: ['#3a7bbf', '#86bde0', '#e8edd0'], sun: 0.8, m1: ['#6f8fae', '#cfdde8'], m2: ['#5f7f9a', '#bfd0dc'],
+             h1: ['#3f7a3a', '#346a30'], h2: ['#2f6a2c', '#245a22'], gnd: ['#5a4430', '#463422', '#2e2216'], grass: ['#4e8f2e', '#2f6a1e', '#6aa83e', '#2a5a1a'], deco: 'forest' },
   volcano: { n: 'Sopka', sky: ['#2b0f12', '#7a2a17', '#d9663a'], sun: 0, m1: ['#3b2a2a', '#ff7a1a'], m2: ['#2e2020', '#e05a12'],
              h1: ['#4a3a33', '#3a2d28'], h2: ['#3d302a', '#2c221e'], gnd: ['#3a2a22', '#2a1d17', '#1a120e'], grass: ['#4a3a2a', '#2e231a', '#5a4630', '#ff6a14'], deco: 'dead' },
 };
 let FIELD = 'meadow';
 function setField(f) { f = FIELDS[f] ? f : 'meadow'; if (f !== FIELD) { FIELD = f; buildBg(); } }
-const pickField = () => SET.field === 'random' ? Object.keys(FIELDS)[(Math.random() * 4) | 0] : FIELDS[SET.field] ? SET.field : 'meadow';
+const pickField = () => SET.field === 'random' ? Object.keys(FIELDS)[(Math.random() * Object.keys(FIELDS).length) | 0] : FIELDS[SET.field] ? SET.field : 'meadow';
 
 function buildBg() {
   const F = FIELDS[FIELD];
@@ -142,6 +147,8 @@ function buildBg() {
     if (F.deco === 'trees') roundTree(x, y, s, '#5c9a48', '#4a8239');
     else if (F.deco === 'cacti') { if (srnd() < 0.5) cactus(x, y, s * 0.8); }
     else if (F.deco === 'snowpines') pine(x, y, s * 0.8, true);
+    else if (F.deco === 'forest') { pine(x, y, s * 1.1); pine(x + 18, y + 4, s * 0.9); }
+    else if (F.deco === 'swamp') { if (srnd() < 0.5) deadTree(x, y, s * 0.9); else reeds(x, y, s); }
     else if (srnd() < 0.5) deadTree(x, y, s);
   }
   hills(480 + L, 26, F.h2[0], F.h2[1], 1.6);
@@ -150,7 +157,12 @@ function buildBg() {
     if (F.deco === 'trees') pine(x, y, s);
     else if (F.deco === 'cacti') srnd() < 0.35 ? palm(x, y, s) : cactus(x, y, s);
     else if (F.deco === 'snowpines') pine(x, y, s, true);
+    else if (F.deco === 'forest') { pine(x, y, s * 1.3); if (srnd() < 0.6) roundTree(x + 26, y + 2, s, '#2f6a2c', '#245a22'); }
+    else if (F.deco === 'swamp') { reeds(x, y, s * 1.2); if (srnd() < 0.4) deadTree(x + 20, y, s); }
     else deadTree(x, y, s);
+  }
+  if (FIELD === 'swamp') {                             // kaluže bahnité vody na povrchu
+    for (let i = 0; i < 9; i++) { const x = 140 + srnd() * (W - 280); c.fillStyle = 'rgba(70,90,70,.75)'; ell(x, GY + 1, 30 + srnd() * 40, 4); c.fillStyle = 'rgba(190,210,190,.35)'; ell(x - 8, GY, 12, 1.2); }
   }
   // zem
   const gg = c.createLinearGradient(0, GY - 10, 0, H);
@@ -168,7 +180,7 @@ function buildBg() {
   for (let x = 0; x <= W; x += 10) c.lineTo(x, GY - 4 + Math.sin(x * 0.07) * 2);
   c.lineTo(W, GY + 8); c.fill();
   c.fillStyle = F.grass[2];
-  const blades = FIELD === 'meadow' ? 260 : FIELD === 'desert' ? 40 : FIELD === 'volcano' ? 30 : 0;
+  const blades = FIELD === 'meadow' || FIELD === 'forest' ? 260 : FIELD === 'swamp' ? 120 : FIELD === 'desert' ? 40 : FIELD === 'volcano' ? 30 : 0;
   for (let i = 0; i < blades; i++) {
     const x = srnd() * W, h = 4 + srnd() * 7;
     c.beginPath(); c.moveTo(x - 2, GY); c.lineTo(x + srnd() * 3 - 1, GY - 4 - h); c.lineTo(x + 2, GY); c.fill();
@@ -216,6 +228,11 @@ function buried(F) {
     c.restore();
   }
   c.restore();
+}
+function reeds(x, y, s) {
+  c.strokeStyle = '#4a5e2a'; c.lineWidth = 1.6 * s; c.lineCap = 'round';
+  for (let k = -2; k <= 2; k++) { c.beginPath(); c.moveTo(x + k * 3 * s, y); c.quadraticCurveTo(x + k * 4 * s, y - 14 * s, x + k * 6 * s, y - (22 + Math.abs(k) * -2) * s); c.stroke(); }
+  c.fillStyle = '#5c3a1e'; for (const k of [-1, 1]) { rr(x + k * 5 * s - 1.5 * s, y - 24 * s, 3 * s, 8 * s, 1.5 * s); c.fill(); }
 }
 function cactus(x, y, s) {
   c.fillStyle = '#4e8a3c';

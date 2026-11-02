@@ -141,11 +141,40 @@ function musicTick() {
   }
 }
 
+// bicí a nástroje typické pro každou dobu (jen v bitvě)
+function drums(m, t, s, age, r, spb) {
+  const kick = (v = 0.5, f = 110) => osc(m, t, f, 0.25, 'sine', v, { f2: 38 });
+  const snare = (v = 0.18) => { noise(m, t, 0.12, v, 'highpass', 1800); osc(m, t, 190, 0.08, 'triangle', v * 0.6, { f2: 120 }); };
+  const hat = (v = 0.06) => noise(m, t, 0.04, v, 'highpass', 7000);
+  const tom = (f, v = 0.4) => osc(m, t, f, 0.3, 'sine', v, { f2: f * 0.55 });
+  switch (age) {
+    case 0:                                          // kmenové bubny
+      if (s % 4 === 0) tom(95, 0.45); if (s === 6 || s === 10 || s === 14) tom(150, 0.3); if (s === 15) tom(200, 0.22);
+      break;
+    case 1:                                          // středověk: bordun dud a vojenský buben
+      if (s === 0) { osc(m, t, mtof(r + 12), spb * 16, 'sawtooth', 0.03, { lp: 900, sus: 1, a: 0.2, rel: 0.3 }); osc(m, t, mtof(r + 19), spb * 16, 'sawtooth', 0.02, { lp: 900, sus: 1, a: 0.2, rel: 0.3 }); }
+      if (s % 8 === 0) kick(0.35, 90); if (s === 4 || s === 12) snare(0.14); if (s === 13 || s === 14 || s === 15) snare(0.07);
+      break;
+    case 2:                                          // renesance: tympány a cembalo
+      if (s === 0 || s === 8) osc(m, t, mtof(r - 12), 0.6, 'sine', 0.45, { f2: mtof(r - 13) }); if (s === 7) osc(m, t, mtof(r - 5), 0.3, 'sine', 0.25);
+      if (s % 2 === 0) osc(m, t, mtof(r + 24 + [0, 7, 12, 7][(s / 2) % 4]), 0.15, 'square', 0.025, { lp: 3000 });
+      break;
+    case 3:                                          // válka: pochodový buben a kopák
+      if (s % 8 === 0) kick(0.5); if (s % 4 === 2) snare(0.16); if (s % 2 === 1) snare(0.05); if (s === 14 || s === 15) snare(0.12);
+      break;
+    case 4:                                          // budoucnost: elektronický beat a syntezátorové arpeggio
+      if (s % 4 === 0) kick(0.6, 150); if (s % 4 === 2) hat(0.08); if (s === 4 || s === 12) { noise(m, t, 0.15, 0.2, 'bandpass', 1200, { q: 2 }); }
+      osc(m, t, mtof(r + 24 + [0, 3, 7, 12, 7, 3, 0, -5][s % 8]), spb * 0.9, 'sawtooth', 0.03, { lp: 2600, lp2: 800 });
+      break;
+  }
+}
+
 function playStep(step, t, spb) {
   const m = AU.mus, menu = MUS.mode === 'menu', age = MUS.age;
   const prog = PROG[menu ? 'menu' : 'battle'];
   const bar = Math.floor(step / 16) % prog.length, s = step % 16;
   const ch = prog[bar], [r] = CH[ch], tones = chordNotes(ch);
+  if (!menu) drums(m, t, s, age, r, spb);
   const mel = [tones[0] + 24, tones[1] + 24, tones[2] + 24, tones[0] + 36, tones[1] + 36];
   // pad
   if (s === 0) {

@@ -152,7 +152,7 @@ function human(team, age, ty, ph, at, st, o = {}) {
   const OF = outfitOf(team, age), G = GORE;
   const P = (OF && OF.pants) || PANTS[age], BT = (OF && OF.boots) || BOOTS[age];
   const sleeve = OF && OF.sleeve ? (typeof OF.sleeve === 'function' ? OF.sleeve(team) : OF.sleeve) : null;
-  SK = (OF && OF.skin) || SKIN3;
+  SK = team.sk || (OF && OF.skin) || SKIN3;
   // zadní noha a ruka
   if (G && G.legB) stump(-1, -19, 2.8); else leg(ph + Math.PI, walk, P[1], BT, o.sit);
   const backAng = ty === 1 ? 1.25 : 0.25 - (walk ? Math.sin(ph) * 0.5 : 0);
@@ -170,6 +170,7 @@ function human(team, age, ty, ph, at, st, o = {}) {
   c.quadraticCurveTo(6.5, -36.5, 7.8, -31); c.lineTo(6.5, -18); c.closePath();
   fo(lg('torso' + team[0], -8, -37, 8, -18, [[0, team[2]], [0.35, team[0]], [1, team[1]]]));
   if (OF && OF.torso) OF.torso(team, ty); else torsoGear(team, age, ty);
+  if (o.elite) { c.strokeStyle = OL; c.lineWidth = 4; ln(-6.5, -35, 6, -20); c.strokeStyle = '#e5c04a'; c.lineWidth = 2.4; ln(-6.5, -35, 6, -20); }
   c.restore();
   if (G && G.leg) stump(1, -19, 3); else leg(ph, walk, P[0], BT, o.sit);
   // hlava
@@ -793,6 +794,15 @@ function mech(team, ph, walk, at) {
 
 function drawUnitLocal(team, a, ty, ph, at, st) {
   if (ty === 5) drawBoss(team, a, ph, at, st);
+  else if (ty === 6) {                                 // speciální jednotka národa: větší, zlatý lem a znak schopnosti
+    const d = SPECS[a][(team.af && team.af[a]) | 0];
+    c.fillStyle = 'rgba(229,192,74,.35)'; ell(0, 1, 15, 3.5);
+    c.save(); c.scale(1.15, 1.15); human(team, a, d.p ? 1 : 0, ph, at, st, { elite: 1 }); c.restore();
+    c.save(); c.translate(0, -74); if (c.getTransform().a < 0) c.scale(-1, 1);
+    c.font = '12px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = 'rgba(15,20,30,.75)'; circ(0, 0, 8); c.fillStyle = '#fff'; c.fillText(SPEC_IC[d.ab], 0, 0.5); c.textBaseline = 'alphabetic';
+    c.restore();
+  }
   else if (ty === 2) heavy(team, a, ph, at, st);
   else if (ty === 3) {
     const op = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter';

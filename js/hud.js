@@ -36,6 +36,8 @@ function hud(V) {
   if (uiMode === 'units') {
     const FN = facAt(p, p.age);
     A.units.forEach((u, i) => { const k = unitCost(p, i); add(FN.u[i] || u.n, okU(i) ? k.toLocaleString('cs') : 'ZAKÁZÁNO', { a: 'buy', ty: i }, okU(i) && p.gold >= k && p.q.length < 5, ['u', p.age, i]); });
+    { const sp = SPECS[p.age][(p.af && p.af[p.age]) | 0], k = unitCost(p, 6);   // speciální jednotka národa
+      add(sp.n, okU(6) ? k.toLocaleString('cs') : 'ZAKÁZÁNO', { a: 'buy', ty: 6 }, okU(6) && p.gold >= k && p.q.length < 5, ['u', p.age, 6]); }
     if (p.age === 4) add(SUPER.n, SUPER.c.toLocaleString('cs'), { a: 'buy', ty: 3 }, okU(3) && p.gold >= SUPER.c && p.q.length < 5, ['u', 4, 3]);
     // hrdina: vyvolání, nebo když už bojuje, jeho ničivý úder
     const H = { ...HEROES[p.age], n: heroName(p) }, hero = V.units.some(u => u.side === mySide && u.ty === 4);
@@ -73,7 +75,8 @@ function hud(V) {
   const lim = mm.survive || mm.limit, tl = lim ? ' · ' + fmtTime(Math.max(0, lim - V.time)) : '';
   if (ch) label = 'VÝZVA: ' + ch.n.toUpperCase() + tl;
   if (V.daily) label = DAILY.n.toUpperCase() + tl;
-  if (cm) label = `KAMPAŇ ${V.camp + 1}/${CAMP.length}: ${cm.n.toUpperCase()}` + tl;
+  if (specMode) label = '👁 DIVÁK · ' + (OPP.n || 'hostitel').toUpperCase() + ' vs SOUPEŘ';
+  else if (cm) label = (curDef != null ? 'OBRANA ÚZEMÍ: ' : `KAMPAŇ ${V.camp + 1}/${CAMP.length}: `) + cm.n.toUpperCase() + tl;
   c.fillText(label, W - 14, 72, 250);
   c.fillStyle = '#fca5a5'; c.font = '800 14px system-ui';
   c.fillText('Soupeř: ' + AGES[e.age].name, W - 14, 92);
@@ -183,7 +186,7 @@ function drawBtn(b) {
   c.fillStyle = 'rgba(255,255,255,.08)'; rr(b.x + 3, b.y + 3, b.w - 6, 26, 8); c.fill();
   c.save(); rr(b.x + 2, b.y + 2, b.w - 4, b.h - 32, 9); c.clip();
   const [k, a, i] = b.icon, cx0 = b.x + b.w / 2;
-  if (k === 'u') { const s = i === 2 ? 0.72 : i >= 3 ? 0.62 : 1.1; c.translate(cx0 - (i === 2 ? 4 : 0), b.y + 62); c.scale(s, s); drawUnitLocal(teamCol(mySide), a, i, 0, 0, 1); }
+  if (k === 'u') { const s = i === 2 ? 0.72 : i === 6 ? 0.95 : i >= 3 ? 0.62 : 1.1; c.translate(cx0 - (i === 2 ? 4 : 0), b.y + 62); c.scale(s, s); drawUnitLocal(teamCol(mySide), a, i, 0, 0, 1); }
   else if (k === 't') { c.translate(cx0 - 6, b.y + 42); c.scale(1.7, 1.7); TUR[a](i, a); }
   else if (k === 's') { const pr = AGES[a].sp.p; drawProj({ x: mirror ? W - cx0 : cx0, y: b.y + 36, p: pr === 'beam' ? 'laser' : pr, dx: mirror ? -1 : 1, dy: 1.2 }); }
   else if (k === 'e') { poly([cx0, b.y + 12, cx0 + 19, b.y + 34, cx0 + 8, b.y + 34, cx0 + 8, b.y + 58, cx0 - 8, b.y + 58, cx0 - 8, b.y + 34, cx0 - 19, b.y + 34]); fo(lg('evo', 0, b.y + 12, 0, b.y + 58, [[0, '#fef08a'], [1, '#ca8a04']]), 1.6); }
@@ -211,7 +214,7 @@ function drawBtn(b) {
 
 function drawOver(V) {
   const win = V.over === mySide, cm = V.camp != null ? CAMP[V.camp] : null;
-  const title = cm ? (win ? 'ÚZEMÍ DOBYTO!' : 'ÚTOK SELHAL') : win ? 'VÍTĚZSTVÍ!' : 'PROHRA';
+  const title = cm && curDef != null ? (win ? 'ÚZEMÍ UBRÁNĚNO!' : 'ÚZEMÍ PADLO') : cm ? (win ? 'ÚZEMÍ DOBYTO!' : 'ÚTOK SELHAL') : win ? 'VÍTĚZSTVÍ!' : 'PROHRA';
   c.fillStyle = 'rgba(8,10,16,.72)'; c.fillRect(0, 0, W, H);
   c.textAlign = 'center'; c.font = '900 72px system-ui';
   c.lineWidth = 10; c.strokeStyle = win ? '#7c2d12' : '#450a0a'; c.strokeText(title, W / 2, 250);
@@ -222,6 +225,7 @@ function drawOver(V) {
   c.fillText(`Zabito: ${me.kills}  ·  Čas: ${fmtTime(V.time)}  ·  Věk: ${AGES[me.age].name}${endDone ? '  ·  +' + lastXp + ' XP' : ''}`, W / 2, 290);
   let note = '', noteCol = '#fde68a';
   if (V.daily) note = win ? `${DAILY.n}:  ${'★'.repeat(lastStars)}${'☆'.repeat(3 - lastStars)}` : 'Dnes to nevyšlo – zkus to znovu.';
+  else if (cm && curDef != null) note = win ? 'Rudá horda odražena, bonus území zase platí.' : 'Území zůstává pod útokem – zkus to znovu.';
   else if (cm) note = win ? `${cm.n}:  ${'★'.repeat(lastStars)}${'☆'.repeat(3 - lastStars)}` : 'Rudá horda tě odrazila – zkus to znovu.';
   else if (ch) note = win ? `Výzva splněna! Odměna: barva armády ${COLS[ch.col].n}` : 'Výzva nesplněna – zkus to znovu.';
   else if (coop) note = (win ? 'Spolu jste to dali!' : 'Příště to dáte!') + ' Parťák: ' + (OPP.n || 'kámoš');
@@ -234,9 +238,10 @@ function drawOver(V) {
   overBtns = [];
   const online = role !== 'solo';
   const coNext = coop && cm && win && V.camp + 1 < CAMP.length;
-  const opts = cm && !online ? (win && V.camp + 1 < CAMP.length ? [['Další mise ▶', 'next'], ['Mapa', 'camp']] : [[win ? 'Hrát znovu' : 'Zkusit znovu', 'again'], ['Mapa', 'camp']])
+  const opts = specMode ? [['Menu', 'menu']] : cm && !online ? (win && curDef == null && V.camp + 1 < CAMP.length ? [['Další mise ▶', 'next'], ['Mapa', 'camp']] : [[win ? 'Hrát znovu' : 'Zkusit znovu', 'again'], ['Mapa', 'camp']])
     : [[online ? (rmMe ? 'Čekám…' : coNext ? 'Další mise ▶' : coop ? 'Znovu' : 'Odveta') : ch ? 'Zkusit znovu' : 'Hrát znovu', 'again'], ['Menu', 'menu']];
   if (rec.length > 30) opts.push(['🎬 Záznam', 'replay']);
+  if (lastBst) opts.push(['📊 Statistiky', 'bst']);
   opts.forEach(([t, k], i) => {
     const b = { x: W / 2 - opts.length * 110 + 10 + i * 220, y: 340, w: 200, h: 60, k };
     overBtns.push(b);
@@ -280,6 +285,7 @@ function render(dt) {
       fx.push({ smoke: 1, x: u.x - (u.side ? -1 : 1) * 6, y: GY - 2, vx: rnd(-10, 10), vy: rnd(-14, -6), r: rnd(2, 4), l: 0.7, ml: 0.7, col: 'rgba(150,120,90,.8)', col2: 'rgba(200,175,140,.6)' });
   }
   const order = [...V.units].sort((a, b) => (b.ty === 2) - (a.ty === 2));
+  if (V.pl[mySide].cry) { c.fillStyle = 'rgba(255,200,60,.12)'; c.fillRect(0, HUD, W, H - HUD); }
   for (const u of order) {
     const r = phMap.get(u.id) || { ph: Math.random() * 6, x: u.x };
     r.ph += Math.abs(u.x - r.x) * 0.11; r.x = u.x; r.seen = T; phMap.set(u.id, r);
@@ -307,6 +313,7 @@ function render(dt) {
   if (GFXL >= 3) ultraFront();
   wxFront(dt);
   if (V.dark > 0) { c.fillStyle = `rgba(6,8,24,${Math.min(0.62, V.dark * 0.12)})`; c.fillRect(0, 0, W, H); }
+  drawStorm(); drawNight(); drawEmotes(dt);
   if (evtBanner) drawEvtBanner(dt);
   if (GFXL >= 3) ultraGrade();
   hud(V);

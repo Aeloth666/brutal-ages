@@ -25,9 +25,10 @@ cv.addEventListener('pointerdown', e => {
       sfx('click');
       if (b.k === 'replay') startReplay();
       else if (b.k === 'menu') toMenu();
+      else if (b.k === 'bst') { renderBst(); openPanel('bstPanel'); }
       else if (b.k === 'camp') { const k = curCamp + (V.over === mySide ? 1 : 0); toMenu(); openCamp(Math.min(k, CAMP.length - 1)); }
       else if (b.k === 'next') startGame('solo', null, curCamp + 1);
-      else if (role === 'solo') startGame('solo', curChal, curCamp, curDaily);
+      else if (role === 'solo') { defNext = curDef; startGame('solo', curChal, curCamp, curDaily); }
       else if (!rmMe) {
         rmMe = true; send({ t: 'rm' });
         if (role === 'host') hostRmCheck();
@@ -37,7 +38,7 @@ cv.addEventListener('pointerdown', e => {
   }
   if (netWait) { if (hit(waitBtn)) { sfx('click'); toMenu(); } return; }
   if (chatOpen) {
-    for (const b of chatBtns) if (hit(b)) { sayChat(b.i); return; }
+    for (const b of chatBtns) if (hit(b)) { b.e != null ? sayEmote(b.e) : sayChat(b.i); return; }
     chatOpen = false; return;
   }
   if (hit(menuBtn)) { sfx('click'); paused = true; return; }
@@ -69,6 +70,7 @@ function joinOrSecret(v) {
   joinGame(v);
 }
 $('bJoin').onclick = () => joinOrSecret($('code').value);
+$('bWatch').onclick = () => joinGame($('code').value, true);       // divák
 $('code').addEventListener('keydown', e => { if (e.key === 'Enter') joinOrSecret(e.target.value); });
 // slepičí režim: 7× rychle klepnout na nápis
 let logoTaps = [];

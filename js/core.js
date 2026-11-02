@@ -81,7 +81,7 @@ const HERO_N = ['Náčelník', 'Král', 'Generál', 'Plukovník', 'Kyborg'];
 // hrdina podle věku: [zdraví ×, útok ×, cena ×] vůči těžké jednotce (vyladěno simulací proti smíšené armádě za stejné zlato)
 const HERO_M = [[2.2, 1.1, 4], [2.2, 1.1, 2.5], [3.8, 1.6, 2.5], [2.6, 1.25, 2.5], [2.6, 1.25, 2.5]];
 const HEROES = AGES.map((A, a) => { const h = A.units[2], [hm, dm, cm] = HERO_M[a]; return { n: HERO_N[a], c: Math.round(h.c * cm), hp: Math.round(h.hp * hm), d: Math.round(h.d * dm), r: 30, s: 40, cd: 1.0, t: 0 }; });
-const AI_HERO_T = [Infinity, 150, 100, 70];          // s: od kdy smí počítač vyvolat hrdinu (podle obtížnosti)
+const AI_HERO_T = [Infinity, 150, 100, 70, 45];          // s: od kdy smí počítač vyvolat hrdinu (podle obtížnosti)
 const HERO_CD = 60, HERO_ACD = 20;
 // národy: v každém věku 4 na výběr – bonus, názvy jednotek, hrdina a doplněk k přilbě (g)
 // bonusy: hp, melee, ranged, spd, build (čas výroby), base (hradby), tur (cena věží), gold (zlato za zabití),
@@ -111,8 +111,11 @@ const AGEFAC = [
 const FAC_PICK = 12;                          // s na výběr národu po startu a po evoluci
 const facAt = (p, a) => AGEFAC[a][(p.af && p.af[a]) || 0] || AGEFAC[a][0];
 const facOf = s => facAt(S.pl[s], S.pl[s].age);
-const turCost = (p, d) => Math.round(d.c * (facAt(p, p.age).tur || 1));
-const unitCost = (p, ty) => ty <= 2 ? Math.round(AGES[p.age].units[ty].c * (facAt(p, p.age).cheap || 1)) : uDef(p.age, ty).c;
+const GB = p => p.gb || GB0;                     // bonusy generála (strom dovedností, území, výbava) – jen hráč proti počítači
+const GB0 = { hp: 1, dmg: 1, cost: 1, build: 1, base: 1, tur: 1, gold: 1, xp: 1, sgold: 1, heroHp: 1, heroD: 1 };
+const turCost = (p, d) => Math.round(d.c * (facAt(p, p.age).tur || 1) * GB(p).tur);
+const unitCost = (p, ty) => Math.round((ty <= 2 ? AGES[p.age].units[ty].c * (facAt(p, p.age).cheap || 1)
+  : ty === 6 ? SPECS[p.age][(p.af && p.af[p.age]) | 0].c * (facAt(p, p.age).cheap || 1) : uDef(p.age, ty).c) * (ty === 4 ? 1 : GB(p).cost));
 const heroName = p => facAt(p, p.age).hero || HEROES[p.age].n;
 const cleanAf = a => Array.from({ length: 5 }, (_, i) => Math.min(3, Math.max(0, (Array.isArray(a) ? a[i] : 0) | 0)));
 // zvolí národ pro aktuální věk; bonus k hradbám se přepočítá
@@ -141,8 +144,27 @@ const BOSSES = [
   { n: 'Obří tank', c: 20000, hp: 10000, d: 330, r: 190, s: 15, cd: 2.4, t: 0, p: 'shell', sp: 45, y: 50 },
   { n: 'Titán', c: 55000, hp: 20000, d: 520, r: 210, s: 15, cd: 2.0, t: 0, p: 'ion', sp: 50, y: 110 },
 ];
-const uDef = (a, ty) => ty === 5 ? BOSSES[a] : ty === 3 ? SUPER : ty === 4 ? HEROES[a] : AGES[a].units[ty];
-const unitW = ty => ty === 5 ? 96 : ty === 2 ? 64 : ty === 3 ? 34 : ty === 4 ? 32 : 26;
+// speciální jednotka národa (ty 6): v každém věku jedna za každý národ (pořadí jako AGEFAC), ab = schopnost
+const SPEC_AB = { charge: 'Nájezd – první úder je trojnásobný', fast: 'Velmi rychlý', berserk: 'Čím méně zdraví, tím silněji útočí',
+  sniper: 'Obrovský dosah', tank: 'Velmi odolný', dodge: 'Uhne 40 % zásahů', bomb: 'Výbušné střely', healer: 'Léčí spojence kolem sebe',
+  thief: 'Zásahy kradou zlato', drum: 'Spojenci kolem útočí o 25 % silněji', flame: 'Plamen zasáhne víc nepřátel naráz',
+  boom: 'Při smrti vybuchne', leech: 'Zásahy ho léčí' };
+const SPEC_IC = { charge: '🐎', fast: '💨', berserk: '😡', sniper: '🎯', tank: '🛡️', dodge: '🥷', bomb: '💣', healer: '✚', thief: '💰', drum: '🥁', flame: '🔥', boom: '💥', leech: '🩸' };
+const SPECS = AGES.map((A, a) => {
+  const [m, r, h] = A.units, b = { c: Math.round(h.c * 0.75), hp: Math.round(h.hp * 0.75), d: Math.round(m.d * 1.8), r: 22, s: 46, cd: 1.0, t: Math.max(2.5, h.t * 0.8) };
+  const mk = (n, ab, o = {}) => ({ ...b, n, ab, ...o });
+  const snip = p => ({ r: Math.round(r.r * 1.6), d: Math.round(r.d * 2.6), cd: 1.6, hp: Math.round(b.hp * 0.55), p });
+  return [
+    [mk('Mamutí lovec', 'charge', { s: 54 }), mk('Vlčí běžec', 'fast', { s: 82, hp: Math.round(b.hp * 0.8) }), mk('Zuřivec', 'berserk'), mk('Orlí střelec', 'sniper', snip('arrow'))],
+    [mk('Templář', 'tank', { hp: Math.round(b.hp * 1.8), d: Math.round(b.d * 0.75), s: 38 }), mk('Berserkr', 'berserk'), mk('Ninja', 'dodge', { s: 70 }), mk('Chánova garda', 'charge', { s: 70 })],
+    [mk('Granátník', 'bomb', { r: 170, p: 'shell', sp: 40, d: Math.round(r.d * 1.5), cd: 1.8, hp: Math.round(b.hp * 0.7) }), mk('Kněz', 'healer', { d: Math.round(b.d * 0.5) }), mk('Pirát s papouškem', 'thief'), mk('Mehter bubeník', 'drum', { d: Math.round(b.d * 0.6) })],
+    [mk('Plamenometčík', 'flame', { r: 70, sw: 45, d: Math.round(b.d * 0.7) }), mk('Ženista', 'healer', { d: Math.round(b.d * 0.5) }), mk('Sabotér', 'boom', { s: 56 }), mk('Odstřelovač', 'sniper', snip('bullet'))],
+    [mk('Štítový dron', 'tank', { hp: Math.round(b.hp * 1.8), d: Math.round(b.d * 0.75), s: 38 }), mk('Parazit', 'leech'), mk('Samodestrukční droid', 'boom', { s: 64 }), mk('Medik', 'healer', { d: Math.round(b.d * 0.5) })],
+  ][a];
+});
+const uDef = (a, ty, f) => ty === 6 ? SPECS[a][f | 0] : ty === 5 ? BOSSES[a] : ty === 3 ? SUPER : ty === 4 ? HEROES[a] : AGES[a].units[ty];
+const uDefU = u => uDef(u.a, u.ty, u.f);
+const unitW = ty => ty === 5 ? 96 : ty === 2 ? 64 : ty === 3 ? 34 : ty === 4 ? 32 : ty === 6 ? 30 : 26;
 const unitY = u => u.ty === 5 ? BOSSES[u.a].y : u.ty >= 2 ? 34 : 28;          // kam míří střely
 const atkMul = s => 1 + UPS[0].k * S.pl[s].up[0];
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -158,6 +180,7 @@ const DIFF = [
   { n: 'Normální', think: [0.7, 1.1],   gm: 1.0,  xm: 1.0, evo: 6,  smart: 0.3, spMin: 4, gold: START_GOLD },
   { n: 'Těžká',    think: [0.45, 0.7],  gm: 1.35, xm: 1.25, evo: 0, smart: 0.7, spMin: 3, gold: 250 },
   { n: 'Nemožná',  think: [0.3, 0.45],  gm: 1.8,  xm: 1.6, evo: 0,  smart: 1,   spMin: 2, gold: 450 },
+  { n: 'Šílená',   think: [0.2, 0.3],   gm: 2.4,  xm: 2.0, evo: 0,  smart: 1,   spMin: 1, gold: 800 },   // odemkne se po dohrání kampaně
 ];
 
 function newPlayer() {
@@ -169,7 +192,7 @@ function newPlayer() {
 function newState() { return { pl: [newPlayer(), newPlayer()], units: [], proj: [], nid: 1, over: -1, ev: [], time: 0, mods: null, chal: null, camp: null, daily: 0, speed: 1, events: false, evT: 75, dark: 0, chest: null }; }
 
 // --- události v bitvě (jen pro hostitele / hru proti počítači) ---
-const EVENTS = { trex: '🦖 T-REX SE VRÁTIL!', quake: 'Zemětřesení!', chest: 'Truhla se zlatem!', merc: 'Žoldáci se přidali k slabším!', eclipse: 'Zatmění slunce', meteors: 'Déšť meteoritů!' };
+const EVENTS = { storm: 'Písečná bouře – střelci nedostřelí daleko!', trex: '🦖 T-REX SE VRÁTIL!', quake: 'Zemětřesení!', chest: 'Truhla se zlatem!', merc: 'Žoldáci se přidali k slabším!', eclipse: 'Zatmění slunce', meteors: 'Déšť meteoritů!' };
 // „palba z nebe“ podle doby – zasáhne obě strany (nezaměňovat se speciálem počítače)
 const SKYFIRE = ['Déšť meteoritů – zasáhne obě strany!', 'Zbloudilé šípy – zasáhnou obě strany!', 'Zbloudilá dělostřelba – zasáhne obě strany!',
   'Zbloudilý nálet – zasáhne obě strany!', 'Porucha orbitálního laseru – zasáhne obě strany!'];
@@ -199,9 +222,10 @@ function applyCmd(s, c) {
     case 'buy': {
       if (c.ty === 3 && p.age < 4) return;
       if (s === 0 && M.only != null && c.ty !== M.only) return;
-      const d = uDef(p.age, c.ty), k = d && unitCost(p, c.ty);
+      if (![0, 1, 2, 3, 6].includes(c.ty)) return;
+      const f = (p.af && p.af[p.age]) | 0, d = uDef(p.age, c.ty, f), k = d && unitCost(p, c.ty);
       if (!d || p.gold < k || p.q.length >= 5) return;
-      p.gold -= k; p.q.push({ a: p.age, ty: c.ty }); break;
+      p.gold -= k; p.q.push({ a: p.age, ty: c.ty, f }); break;
     }
     case 'turret': {
       const d = AGES[p.age].turrets[c.i];
@@ -246,7 +270,7 @@ function applyCmd(s, c) {
         if (p.acd > 0) return;
         p.acd = HERO_ACD;
         const dir = s ? -1 : 1, x = h.x + dir * 45;
-        splash(x, 90, uDef(h.a, 4).d * 2.5 * atkMul(s), s);
+        dmgSrc = 'h'; splash(x, 90, uDef(h.a, 4).d * 2.5 * atkMul(s) * GB(p).heroD, s);
         h.at = 1; S.ev.push([x, GY - 20, 'slam', s]); break;
       }
       const d = HEROES[p.age];
@@ -278,24 +302,30 @@ function spawnFree(s, ty) {
   return !S.units.some(u => u.side === s && Math.abs(u.x - SPAWN[s]) < (u.w + w) / 2 + 2);
 }
 function spawn(s, q) {
-  const d = uDef(q.a, q.ty);
-  const F = facOf(s), hp = Math.round(d.hp * (1 + UPS[1].k * S.pl[s].up[1]) * (F.hp || 1) * (q.ty === 2 ? F.heavy || 1 : 1));
-  S.units.push({ id: S.nid++, side: s, a: q.a, ty: q.ty, x: SPAWN[s], hp, mx: hp,
+  const d = uDef(q.a, q.ty, q.f), g = GB(S.pl[s]);
+  const F = facOf(s), hp = Math.round(d.hp * (1 + UPS[1].k * S.pl[s].up[1]) * (F.hp || 1) * (q.ty === 2 ? F.heavy || 1 : 1) * (q.ty === 4 ? g.heroHp * ((g.gear && g.gear[q.a][0]) || 1) : g.hp));
+  S.units.push({ id: S.nid++, side: s, a: q.a, ty: q.ty, f: q.f | 0, x: SPAWN[s], hp, mx: hp,
     w: unitW(q.ty), st: 0, at: 0, cd: 0.3 });
+  if (S.st) { S.st.made[s]++; if (q.ty === 6) S.st.spec[s]++; }
   if (q.ty === 3) S.pl[s].supers++;
   // pokřik národa (hráč ho slyší jen občas, hrdina a supervoják vždy)
   const p = S.pl[s]; S.ev.push([SPAWN[s], GY - 40, 'cry', s, q.a * 4 + ((p.af && p.af[q.a]) | 0), q.ty]);
 }
 
+let dmgSrc = 'u';                                  // odkud škoda je (u jednotky, t věže, s speciál, h hrdina) – pro statistiky
 function hurt(t, dmg, by, fromSpecial) {
   if (t.dead) return;
+  if (t.ty === 6 && uDefU(t).ab === 'dodge' && Math.random() < 0.4) return;   // ninja uhne
+  if (S.st && by >= 0) S.st.dmg[by][fromSpecial ? 's' : dmgSrc] += Math.min(dmg, Math.max(0, t.hp));
   t.hp -= dmg;
   if (t.hp <= 0) {
     t.dead = 1;
-    const d = uDef(t.a, t.ty), p = S.pl[by];
+    const d = uDefU(t), p = S.pl[by], g = p && GB(p);
+    if (t.ty === 6 && d.ab === 'boom') { const src = dmgSrc; dmgSrc = 'u'; splash(t.x, 70, d.d * 3, t.side); dmgSrc = src; S.ev.push([t.x, GY - 20, 'boom']); }
     if (p) {
-      p.gold += Math.round(d.c * KILL_GOLD * p.gm * (facOf(by).gold || 1));
-      p.xp += Math.round(d.c * KILL_XP * p.xm);
+      const loot = g.loot && (t.ty === 2 || t.ty === 5) ? 2 : 1, gg = Math.round(d.c * KILL_GOLD * p.gm * (facOf(by).gold || 1) * g.gold * loot);
+      p.gold += gg; if (S.st) S.st.gold[by] += gg;
+      p.xp += Math.round(d.c * KILL_XP * p.xm * g.xp);
       p.kills++;
       if (fromSpecial) { p.spk++; p.spBest = Math.max(p.spBest, p.spk); }
     }
@@ -309,6 +339,8 @@ function hitBase(s, dmg, by) {
   if (S.over >= 0) return;
   p.hp -= dmg;
   S.pl[by].xp += Math.round(dmg * 0.5);
+  if (S.st) S.st.dmg[by].b += dmg;
+  if (GB(p).bastion && !p.bastUsed && p.hp > 0 && p.hp < p.mhp * 0.2) { p.bastUsed = 1; p.hp = p.mhp * 0.5; S.ev.push([BX[s], GY - 90, 'bast', s]); }
   if (p.hp <= 0) { p.hp = 0; S.over = by; S.ev.push([BX[s], GY - 80, 'boom']); }
 }
 function splash(x, r, d, side, fromSpecial) {
@@ -317,25 +349,58 @@ function splash(x, r, d, side, fromSpecial) {
 function slotPos(s, k) { return { x: BX[s] + (s ? -1 : 1) * 70, y: GY - 172 + k * 36 }; }
 
 function attack(u, d0, tgt, dir) {
-  const F = facOf(u.side), WP = u.ty === 1 && F.g && WEAP[F.g], pp = (WP && WP.proj) || d0.p, d = { ...d0, d: d0.d * atkMul(u.side) * ((d0.p ? F.ranged : F.melee) || 1) * (u.rage ? 1.3 : 1) };
+  const F = facOf(u.side), WP = u.ty === 1 && F.g && WEAP[F.g], pp = (WP && WP.proj) || d0.p, P = S.pl[u.side], g = GB(P);
+  let k = (u.ty === 4 ? g.heroD * ((g.gear && g.gear[u.a][1]) || 1) : g.dmg) * (P.cryT > 0 ? 1.3 : 1);
+  if (u.ty === 6) {                                    // schopnosti speciálních jednotek
+    if (d0.ab === 'charge' && !u.hit) k *= 3;
+    if (d0.ab === 'berserk') k *= 2 - u.hp / u.mx;
+  }
+  if (S.units.some(a => a.side === u.side && a !== u && a.ty === 6 && !a.dead && Math.abs(a.x - u.x) < 120 && uDefU(a).ab === 'drum')) k *= 1.25;
+  u.hit = 1;
+  const d = { ...d0, d: d0.d * atkMul(u.side) * ((d0.p ? F.ranged : F.melee) || 1) * (u.rage ? 1.3 : 1) * k };
+  dmgSrc = u.ty === 4 ? 'h' : 'u';
   if (d.p) {
     const y0 = GY - (u.ty === 5 ? d.y : u.ty === 2 ? 50 : u.ty === 3 ? 62 : 38), x0 = u.x + dir * (u.w / 2 + 4);
     const base = tgt === 'base';
     S.proj.push({ id: S.nid++, x: x0, y: y0, tid: base ? -1 : tgt.id,
       tx: base ? BF[1 - u.side] - dir * 15 : tgt.x, ty: base ? GY - 60 : GY - 22,
-      d: d.d, side: u.side, p: pp, sp: d.sp || 0, v: SPD[pp] });
+      d: d.d, side: u.side, p: pp, sp: d.sp || 0, v: SPD[pp], src: u.ty === 4 ? 'h' : 'u' });
     if (pp !== 'stone' && pp !== 'arrow' && pp !== 'axe') S.ev.push([x0 + dir * 6, y0, 'muz']);
   } else if (tgt === 'base') {
     hitBase(1 - u.side, d.d, u.side); S.ev.push([BF[1 - u.side], GY - 30, 'hit']);
   } else if (d.sw) {                                     // boss: plošný úder (dupnutí, plamen)
     splash(tgt.x, d.sw, d.d, u.side); S.ev.push([tgt.x, GY - 20, 'slam', u.side]);
   } else {
+    const hp0 = tgt.hp;
     hurt(tgt, d.d, u.side); S.ev.push([tgt.x - dir * 6, GY - 26, u.rage ? 'rhit' : 'hit']);
+    if (u.ty === 6) {
+      const done = Math.max(0, hp0 - Math.max(0, tgt.hp));
+      if (d0.ab === 'leech') u.hp = Math.min(u.mx, u.hp + done * 0.5);
+      if (d0.ab === 'thief') { const g2 = Math.round(done * 0.35); P.gold += g2; if (S.st) S.st.gold[u.side] += g2; }
+    }
   }
 }
 
+// vlastnosti bojiště – platí pro obě strany
+const FIELD_FX = { swamp: { spd: 0.85, n: 'Bažina: všichni jsou o 15 % pomalejší' }, forest: { rng: 0.85, n: 'Les: střelci mají o 15 % menší dosah' },
+  winter: { spd: 0.92, n: 'Sníh: všichni jsou o 8 % pomalejší' }, desert: { storm: 1, n: 'Poušť: písečné bouře občas zkrátí dosah střelců' },
+  volcano: { lava: 1, n: 'Sopka: ze země občas vytryskne láva' }, meadow: { n: 'Louka: žádná omezení' } };
+const fieldSpd = u => (FIELD_FX[S.field] || {}).spd || 1;
+const fieldRng = () => ((FIELD_FX[S.field] || {}).rng || 1) * (S.storm > 0 ? 0.7 : 1);
+function fieldTick(dt) {
+  const F = FIELD_FX[S.field] || {};
+  if (S.storm > 0) S.storm -= dt;
+  if (F.storm && (S.stormT = (S.stormT ?? rnd(50, 80)) - dt) <= 0) { S.stormT = rnd(70, 110); S.storm = 12; S.ev.push([W / 2, 200, 'evt', 'storm']); }
+  if (F.lava && (S.lavaT = (S.lavaT ?? rnd(30, 50)) - dt) <= 0) {
+    S.lavaT = rnd(35, 60);
+    const x = rnd(300, W - 300), a = Math.max(S.pl[0].age, S.pl[1].age);
+    dmgSrc = 'u'; for (const u of S.units) if (!u.dead && Math.abs(u.x - x) < 55) hurt(u, AGES[a].sp.d * 0.8, -1);
+    S.ev.push([x, GY - 6, 'lava']);
+  }
+}
 function step(dt) {
   S.time += dt;
+  if (S.over < 0) fieldTick(dt);
   if (S.events && S.over < 0) {
     S.evT -= dt;
     if (S.evT <= 0) { S.evT = rnd(70, 120); battleEvent(); }
@@ -358,16 +423,35 @@ function step(dt) {
     if (p.pick > 0) p.pick = Math.max(0, p.pick - dt / (S.speed || 1));   // reálné sekundy i při 2×
     if (p.rgcd > 0) p.rgcd = Math.max(0, p.rgcd - dt);
     if (p.acd > 0) p.acd = Math.max(0, p.acd - dt);
+    if (GB(p).cry) {                                  // generálův pokřik: každých 45 s armáda útočí o 30 % silněji
+      p.cryC = (p.cryC ?? 30) - dt; if (p.cryT > 0) p.cryT -= dt;
+      if (p.cryC <= 0) { p.cryC = 45; p.cryT = 8; S.ev.push([BX[s], GY - 120, 'gcry', s]); }
+    }
     if (p.q.length) {
-      const q = p.q[0], d = uDef(q.a, q.ty);
+      const q = p.q[0], d = uDef(q.a, q.ty, q.f), bt = d.t * (facOf(s).build || 1) * GB(p).build;
       p.qt += dt;
-      if (p.qt >= d.t * (facOf(s).build || 1)) {
-        p.qt = d.t;
+      if (p.qt >= bt) {
+        p.qt = bt;
         if (spawnFree(s, q.ty)) { spawn(s, q); p.q.shift(); p.qt = 0; }
       }
     }
   }
 
+  // léčitelé: každou sekundu doplní zdraví spojencům kolem sebe
+  for (const u of S.units) if (u.ty === 6 && !u.dead && (u.ht = (u.ht || 0) - dt) <= 0) {
+    const d = uDefU(u);
+    if (d.ab !== 'healer') { u.ht = 1e9; continue; }
+    u.ht = 1;
+    for (const a of S.units) if (a.side === u.side && !a.dead && a.hp < a.mx && Math.abs(a.x - u.x) < 110) a.hp = Math.min(a.mx, a.hp + a.mx * 0.04 + d.d * 0.3);
+  }
+  // statistiky bitvy: každých 5 s velikost armády, zlato a zabití
+  if (S.st && (S.st.acc = (S.st.acc || 0) + dt) >= 5) {
+    S.st.acc = 0; S.st.t.push(Math.round(S.time));
+    for (let s = 0; s < 2; s++) {
+      S.st.army[s].push(S.units.reduce((n, u) => n + (u.side === s ? uDefU(u).c : 0), 0));
+      S.st.kills[s].push(S.pl[s].kills);
+    }
+  }
   const byId = new Map(S.units.map(u => [u.id, u]));
   const side = [[], []];
   for (const u of S.units) side[u.side].push(u);
@@ -382,14 +466,15 @@ function step(dt) {
       const u = F[i];
       if (u.dead) continue;
       if (fe && fe.dead) fe = E.find(e => !e.dead);
-      const d = uDef(u.a, u.ty);
+      const d = uDefU(u);
       u.at = Math.max(0, u.at - dt * 3);
       u.cd = Math.max(0, u.cd - dt);
       const de = fe ? (fe.x - u.x) * dir - (u.w + fe.w) / 2 : 1e9;
       const db = (BF[1 - s] - u.x) * dir - u.w / 2;
       let tgt = null;
-      if (fe && de <= d.r) tgt = fe;
-      else if (db <= d.r && db <= de) tgt = 'base';
+      const rr = d.r * (d.p ? fieldRng() : 1);
+      if (fe && de <= rr) tgt = fe;
+      else if (db <= rr && db <= de) tgt = 'base';
       // při ústupu se armáda seřadí do řady u základny (přední jednotka nejdál)
       const ord = S.pl[s].ord || 0, slot = RALLY + (F.length - 1 - i) * Math.min(26, 220 / F.length);
       const back = (u.x - (BX[s] + dir * slot)) * dir;
@@ -400,7 +485,7 @@ function step(dt) {
         u.st = 2;
         if (u.cd <= 0) { u.cd = d.cd * (u.rage ? 0.8 : 1); u.at = 1; attack(u, d, tgt, dir); }
       } else {
-        let mv = d.s * (facOf(s).spd || 1) * (u.rage ? 1.2 : 1) * dt;
+        let mv = d.s * (facOf(s).spd || 1) * (u.rage ? 1.2 : 1) * fieldSpd(u) * dt;
         if (ord === 2) mv = 0;
         if (ord === 1) mv = Math.min(mv, (BX[s] + dir * HOLD - u.x) * dir);   // drž linii u věží
         for (let j = i - 1; j >= 0; j--) if (!F[j].dead) {
@@ -422,7 +507,7 @@ function step(dt) {
         t.cd = d.cd;
         const o = slotPos(s, k);
         S.proj.push({ id: S.nid++, x: o.x, y: o.y, tid: fe.id, tx: fe.x, ty: GY - 22,
-          d: d.d * atkMul(s), side: s, p: d.p, sp: d.sp || 0, v: SPD[d.p] });
+          d: d.d * atkMul(s), side: s, p: d.p, sp: d.sp || 0, v: SPD[d.p], src: 't' });
         S.ev.push([o.x + (s ? -12 : 12), o.y, 'muz']);
       }
     });
@@ -438,6 +523,7 @@ function step(dt) {
       }
       continue;
     }
+    dmgSrc = pr.src || 'u';
     if (pr.tid >= 0) {
       const t = byId.get(pr.tid);
       if (t && !t.dead) { pr.tx = t.x; pr.ty = GY - unitY(t); } else pr.lost = 1;
@@ -522,10 +608,10 @@ function ai(dt) {
   if (p.q.length < 3) {
     if (aiWant === null) {
       const r = Math.random();
-      aiWant = p.age === 4 && r < 0.03 ? 3 : r < 0.5 ? 0 : r < 0.82 ? 1 : 2;
+      aiWant = p.age === 4 && r < 0.03 ? 3 : r < 0.08 ? 6 : r < 0.5 ? 0 : r < 0.82 ? 1 : 2;
     }
     if (aiWant === 3 && p.age < 4) aiWant = 0;
-    if (p.gold >= uDef(p.age, aiWant).c) { applyCmd(1, { a: 'buy', ty: aiWant }); aiWant = null; }
+    if (p.gold >= unitCost(p, aiWant)) { applyCmd(1, { a: 'buy', ty: aiWant }); aiWant = null; }
     else if (Math.random() < 0.15) aiWant = null;
   }
 }
@@ -534,10 +620,10 @@ function ai(dt) {
 function snap(ev) {
   return {
     P: S.pl.map(p => [Math.floor(p.gold), Math.floor(p.xp), p.age, Math.ceil(p.hp), p.mhp, p.slots,
-      p.tur.map(t => t.a * 3 + t.i), p.q.map(q => q.a * 4 + q.ty),
-      p.q.length ? Math.round(p.qt / uDef(p.q[0].a, p.q[0].ty).t * 100) / 100 : 0, Math.ceil(p.spcd),
-      p.kills, p.spBest, p.supers, p.built, p.up, Math.ceil(p.hcd), Math.ceil(p.acd), p.ord, p.af, p.emb, Math.ceil(p.pick), Math.ceil(p.rgcd || 0)]),
-    Tm: Math.floor(S.time), D: S.diff, X: S.chal, K: S.camp, Dy: S.daily, Dk: Math.ceil(S.dark), Ch: S.chest ? Math.round(S.chest.x) : 0, Tx: S.trex ? [Math.round(S.trex.x), S.trex.dir] : 0, Rg: S.rage ? 1 : 0, Sp: S.speed, Wt: netWait ? 1 : 0,
+      p.tur.map(t => t.a * 3 + t.i), p.q.map(q => q.a * 8 + q.ty),
+      p.q.length ? Math.round(p.qt / (uDef(p.q[0].a, p.q[0].ty, p.q[0].f).t * (facOf(S.pl.indexOf(p)).build || 1) * GB(p).build) * 100) / 100 : 0, Math.ceil(p.spcd),
+      p.kills, p.spBest, p.supers, p.built, p.up, Math.ceil(p.hcd), Math.ceil(p.acd), p.ord, p.af, p.emb, Math.ceil(p.pick), Math.ceil(p.rgcd || 0), p.cryT > 0 ? 1 : 0]),
+    Tm: Math.floor(S.time), D: S.diff, X: S.chal, K: S.camp, Dy: S.daily, Dk: Math.ceil(S.dark), Ch: S.chest ? Math.round(S.chest.x) : 0, Tx: S.trex ? [Math.round(S.trex.x), S.trex.dir] : 0, Rg: S.rage ? 1 : 0, Sp: S.speed, Wt: netWait ? 1 : 0, Sm: S.storm > 0 ? 1 : 0,
     U: S.units.map(u => [u.id, u.side, u.a, u.ty, Math.round(u.x * 10) / 10, Math.ceil(u.hp), u.mx, u.st,
       Math.round(u.at * 100) / 100, u.back ? 1 : 0, u.rage ? 1 : 0]),
     R: S.proj.map(p => [p.id, Math.round(p.x), Math.round(p.y), p.p, Math.round(p.dx || 0), Math.round(p.dy || 0)]),
@@ -547,9 +633,9 @@ function snap(ev) {
 function decode(sn) {
   return {
     pl: sn.P.map(a => ({ gold: a[0], xp: a[1], age: a[2], hp: a[3], mhp: a[4], slots: a[5],
-      tur: a[6].map(v => ({ a: (v / 3) | 0, i: v % 3 })), q: a[7].map(v => ({ a: v >> 2, ty: v & 3 })),
-      qf: a[8], spcd: a[9], kills: a[10] || 0, spBest: a[11] || 0, supers: a[12] || 0, built: a[13] || 0, up: a[14] || [0, 0, 0], hcd: a[15] || 0, acd: a[16] || 0, ord: a[17] || 0, af: Array.isArray(a[18]) ? a[18] : [0, 0, 0, 0, 0], emb: a[19] || 0, pick: a[20] || 0, rgcd: a[21] || 0 })),
-    time: sn.Tm || 0, diff: sn.D, chal: sn.X, camp: sn.K, daily: sn.Dy, dark: sn.Dk || 0, chest: sn.Ch || 0, trex: sn.Tx || 0, rage: !!sn.Rg, speed: sn.Sp || 1, wait: !!sn.Wt,
+      tur: a[6].map(v => ({ a: (v / 3) | 0, i: v % 3 })), q: a[7].map(v => ({ a: v >> 3, ty: v & 7 })),
+      qf: a[8], spcd: a[9], kills: a[10] || 0, spBest: a[11] || 0, supers: a[12] || 0, built: a[13] || 0, up: a[14] || [0, 0, 0], hcd: a[15] || 0, acd: a[16] || 0, ord: a[17] || 0, af: Array.isArray(a[18]) ? a[18] : [0, 0, 0, 0, 0], emb: a[19] || 0, pick: a[20] || 0, rgcd: a[21] || 0, cry: a[22] || 0 })),
+    time: sn.Tm || 0, diff: sn.D, chal: sn.X, camp: sn.K, daily: sn.Dy, dark: sn.Dk || 0, chest: sn.Ch || 0, trex: sn.Tx || 0, rage: !!sn.Rg, speed: sn.Sp || 1, wait: !!sn.Wt, storm: !!sn.Sm,
     units: sn.U.map(a => ({ id: a[0], side: a[1], a: a[2], ty: a[3], x: a[4], hp: a[5], mx: a[6], st: a[7], at: a[8], back: a[9], rg: a[10] })),
     proj: sn.R.map(a => ({ id: a[0], x: a[1], y: a[2], p: a[3], dx: a[4], dy: a[5] })),
     over: sn.O,

@@ -56,12 +56,13 @@ const colUnlocked = i => i < 2 || CHAL.some((ch, k) => ch.col === i && CHS[k]);
 //  STATISTIKY
 // =====================================================================
 const ST = load('aow-stats', { solo: [[0, 0], [0, 0], [0, 0], [0, 0]], vs: {}, kills: 0, games: 0, best: 0 });
+while (ST.solo.length < 5) ST.solo.push([0, 0]);                          // přibyla obtížnost Šílená
 function record(won, V) {
   const me = V.pl[mySide];
   ST.games++; ST.kills += me.kills;
   if (role === 'solo' || coop) {
     if (V.daily) dailyResult(won, V);
-    else if (V.camp != null) campResult(won, V);
+    else if (V.camp != null) curDef != null ? defResult(won) : campResult(won, V);
     else if (coop) ST.coop = (ST.coop || 0) + (won ? 1 : 0);
     else if (V.chal == null) {
       ST.solo[V.diff || 0][won ? 0 : 1]++;
@@ -79,6 +80,7 @@ function record(won, V) {
   }
   store('aow-stats', ST);
   profGain(won, V);
+  genRecord(won, V);
 }
 
 // =====================================================================
@@ -116,12 +118,19 @@ function drawChat(dt) {
   chatBtns = [];
   if (!chatOpen) return;
   const x0 = W - 474, y0 = HUD + 8;
-  rr(x0 - 10, y0 - 8, 470, 132, 14); c.fillStyle = 'rgba(15,21,34,.95)'; c.fill(); c.strokeStyle = '#e5c04a'; c.lineWidth = 2; c.stroke();
+  rr(x0 - 10, y0 - 8, 470, 186, 14); c.fillStyle = 'rgba(15,21,34,.95)'; c.fill(); c.strokeStyle = '#e5c04a'; c.lineWidth = 2; c.stroke();
   CHATS.forEach((t, i) => {
     const b = { x: x0 + (i % 3) * 152, y: y0 + ((i / 3) | 0) * 60, w: 144, h: 50, i };
     chatBtns.push(b);
     rr(b.x, b.y, b.w, b.h, 10); c.fillStyle = '#334155'; c.fill();
     c.fillStyle = '#fff'; c.font = '800 17px system-ui'; c.textAlign = 'center'; c.fillText(t, b.x + b.w / 2, b.y + 32, b.w - 8);
+  });
+  const em = BRUT() ? [...EMOTES, '🖕'] : EMOTES;
+  em.forEach((e, i) => {
+    const b = { x: x0 + i * (452 / em.length), y: y0 + 124, w: 452 / em.length - 6, h: 46, e: i };
+    chatBtns.push(b);
+    rr(b.x, b.y, b.w, b.h, 10); c.fillStyle = '#1e293b'; c.fill();
+    c.font = '28px system-ui'; c.textAlign = 'center'; c.fillText(e, b.x + b.w / 2, b.y + 34);
   });
 }
 

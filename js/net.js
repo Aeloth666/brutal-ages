@@ -15,6 +15,8 @@ const ICE = { iceServers: [
 let peer = null, conn = null;
 // hostitel drží spojení se všemi hráči (souboj a co-op 1, 2 na 2 až 3): { c, slot, side, info, lastRx, away, lost, rm }
 let conns = [], TEAM = false, GSIDE = 1, rmInfo = null;
+// diváci: dostávají jen obraz hry, nic neovládají (hostitel jich může mít víc)
+let specs = [], specMode = false;
 // relace pro návrat po výpadku, info o soupeři, stav odvety
 let SESS = null, HOST_ID = null, OPP = { n: null, col: null };
 let lastRx = 0, oppAway = false, netLostAt = 0, waitSince = 0, reconTry = 0, netWait = false;
@@ -28,6 +30,8 @@ function mkCode() {
 }
 function cleanupNet() {
   for (const k of conns) try { k.c && k.c.close(); } catch (e) {}
+  for (const s of specs) try { s.close(); } catch (e) {}
+  specs = [];
   try { conn && conn.close(); } catch (e) {}
   try { peer && peer.destroy(); } catch (e) {}
   peer = conn = null; conns = []; TEAM = false; rmInfo = null;
@@ -37,8 +41,10 @@ function sendTo(k, m) { if (k.c && k.c.open) try { k.c.send(m); } catch (e) {} }
 function send(m) {
   if (conns.length) for (const k of conns) sendTo(k, m);
   else if (conn && conn.open) try { conn.send(m); } catch (e) {}
+  for (const s of specs) if (s.open) try { s.send(m); } catch (e) {}
 }
-const hello = () => ({ n: SET.name || 'Hráč', col: SET.col || 0, pid: SET.pid, af: cleanAf(SET.af), emb: SET.emb || 0, lvl: profLevel() });
+const specStart = () => ({ t: 'start', sess: SESS, ...hello(), coop, camp: HOSTOPT.camp, field: FIELD, side: 0, team: TEAM, spec: 1 });
+const hello = () => ({ n: SET.name || 'Hráč', col: SET.col || 0, pid: SET.pid, af: cleanAf(SET.af), emb: SET.emb || 0, lvl: profLevel(), skin: SET.skin || 0 });
 // oblíbené národy hráče: použijí se na začátku hry a po každé evoluci (dá se změnit během výběru)
 function setPrefs(p, af) { p.pref = cleanAf(af); p.prefSet = 1; setAgeFac(p, p.pref[p.age]); p.pick = FAC_PICK; }
 
@@ -77,6 +83,11 @@ function hostGame(opt = {}) {
   peer.on('open', () => { if (!role) { if (HOSTOPT.team) lobbyUpdate(); else status(`${what} · kód hry: <b>${code}</b><br>Pošli ho kámošovi a čekej na připojení…`); } });
   peer.on('connection', c => {
     const md = c.metadata || {};
+    if (md.spec) {                                      // divák
+      c.on('open', () => { specs.push(c); if (role === 'host') try { c.send(specStart()); } catch (e) {} else try { c.send({ t: 'specwait' }); } catch (e) {} });
+      c.on('close', () => { specs = specs.filter(x => x !== c); });
+      return;
+    }
     // návrat hráče po výpadku – musí znát kód relace (a své id)
     const back = role === 'host' && md.sess === SESS ? (conns.find(k => k.info.pid && k.info.pid === md.pid) || (!HOSTOPT.team && conns[0])) : null;
     if (back) {
@@ -116,7 +127,7 @@ function lobbyUpdate() {
   send({ t: 'lobby', pl });
 }
 
-function joinGame(code) {
+function joinGame(code, spec) {
   code = code.trim().toUpperCase();
   if (code.length !== 5) { status('Zadej 5místný kód.'); return; }
   cleanupNet();
@@ -126,9 +137,9 @@ function joinGame(code) {
   peer = new Peer({ config: ICE, debug: 0 });
   peer.on('open', () => {
     if (role) return;                       // opětovná registrace během hry – řeší guestRecon
-    const c = peer.connect(HOST_ID, { reliable: true, serialization: 'json' });
+    const c = peer.connect(HOST_ID, { reliable: true, serialization: 'json', metadata: spec ? { spec: 1 } : undefined });
     bindConn(c);
-    c.on('open', () => { status('Připojeno, startuje se…'); send({ t: 'hi', ...hello() }); });
+    c.on('open', () => { status(spec ? '👁 Připojeno jako divák, čekám na začátek hry…' : 'Připojeno, startuje se…'); if (!spec) send({ t: 'hi', ...hello() }); });
     setTimeout(() => { if (conn === c && !c.open && !role) status('Nepodařilo se spojit. Zkus to znovu nebo jinou síť.'); }, 20000);
   });
   peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
@@ -160,7 +171,7 @@ function guestRecon() {
   } catch (e) {}
 }
 
-const infoOf = m => ({ n: m.n, col: m.col, pid: m.pid, af: cleanAf(m.af), emb: m.emb | 0, lvl: m.lvl | 0 });
+const infoOf = m => ({ n: m.n, col: m.col, pid: m.pid, af: cleanAf(m.af), emb: m.emb | 0, lvl: m.lvl | 0, skin: Math.min(SKINS.length - 1, m.skin | 0) });
 function onData(m, k) {
   if (!m) return;
   switch (m.t) {
@@ -168,7 +179,8 @@ function onData(m, k) {
     case 's': if (role === 'guest') onSnap(m.d); break;
     case 'start':
       if (role === 'host' || k) break;
-      SESS = m.sess; OPP = infoOf(m); rememberFriend(OPP); coop = !!m.coop; TEAM = !!m.team; GSIDE = m.side ?? (coop ? 0 : 1); setField(m.field);
+      specMode = !!m.spec;
+      SESS = m.sess; OPP = infoOf(m); if (!specMode) rememberFriend(OPP); coop = !!m.coop; TEAM = !!m.team; GSIDE = m.side ?? (coop ? 0 : 1); setField(m.field);
       startGame('guest', null, m.camp ?? null);
       send({ t: 'hi', ...hello() }); partySend();
       break;
@@ -199,6 +211,12 @@ function onData(m, k) {
       if (k) { k.rm = true; hostRmCheck(); } else rmOpp = true;
       break;
     case 'rmc': rmInfo = { n: m.n | 0, of: m.of | 0 }; break;
+    case 'specwait': if (!role) status('👁 Připojeno jako divák – hra ještě nezačala, čekám…'); break;
+    case 'bst': if (!k) lastBst = m.d; break;
+    case 'emo':
+      if (k) { showEmote(k.side, m.i | 0); for (const x of conns) if (x !== k) sendTo(x, { t: 'emo', i: m.i, side: k.side }); }
+      else showEmote(m.side ?? 1 - mySide, m.i | 0);
+      break;
   }
 }
 // odveta: hostitel začne, až jsou připraveni všichni
@@ -279,9 +297,11 @@ function startGame(r, chal = null, camp = null, daily = false) {
   for (const k of conns) { k.rm = false; k.lastRx = lastRx; }
   if (r !== 'guest') { S = newState(); acc = 0; aiWant = null; aiT = 1; aiEvoT = 0; aiBroke = 0; }
   if (r === 'guest' && camp != null) { curCamp = camp; if (SET.weather !== 'real') wxForce(CAMP[camp].wx); }
+  curDef = r === 'solo' && camp != null && defNext === camp ? camp : null; defNext = null;   // obrana dobytého území
+  lastBst = null;
   if (r === 'solo' || (r === 'host' && coop)) {
     curChal = chal; curCamp = camp; curDaily = daily;
-    const ch = chal != null ? CHAL[chal] : camp != null ? CAMP[camp] : daily ? DAILY : null, di = ch ? ch.diff : SET.diff, D = DIFF[di];
+    const ch = chal != null ? CHAL[chal] : camp != null ? (curDef != null ? defMission(camp) : CAMP[camp]) : daily ? DAILY : null, di = ch ? ch.diff : SET.diff, D = DIFF[di];
     S.diff = di; Object.assign(S.pl[1], { gm: D.gm, xm: D.xm, gold: D.gold });
     if (ch) {
       const M = S.mods = ch.mods, me = S.pl[0], e = S.pl[1];
@@ -303,15 +323,16 @@ function startGame(r, chal = null, camp = null, daily = false) {
     if (r === 'host' && !coop) { const e1 = conns.find(k => k.side === 1); if (e1 && e1.info.pid) { setPrefs(S.pl[1], e1.info.af); S.pl[1].emb = e1.info.emb || 0; } }
     else setPrefs(S.pl[1], Array.from({ length: 5 }, () => (Math.random() * 4) | 0));   // počítač má náhodné národy
   }
-  if (r !== 'guest') S.rage = r === 'solo' && S.camp != null && EXTREME();   // vztek jen v kampani pro jednoho hráče
+  if (r === 'solo' && !tut) genApply(S.pl[0]);                     // bonusy generála jen proti počítači
+  if (r !== 'guest') { S.st = newBst(); S.rage = r === 'solo' && S.camp != null && EXTREME(); }   // vztek jen v kampani pro jednoho hráče
   if (r !== 'guest') S.events = SET.evt !== false && S.camp == null && S.chal == null && !S.daily;
-  if (r !== 'guest') setField((S.camp != null && CAMP[S.camp].field) || (S.daily && DAILY.field) || pickField());
-  if (r === 'host') { for (const k of conns) sendTo(k, { t: 'start', sess: SESS, ...hello(), coop, camp, field: FIELD, side: k.side, team: TEAM }); partySend(); }
+  if (r !== 'guest') { setField((S.camp != null && CAMP[S.camp].field) || (S.daily && DAILY.field) || pickField()); S.field = FIELD; }
+  if (r === 'host') { for (const k of conns) sendTo(k, { t: 'start', sess: SESS, ...hello(), coop, camp, field: FIELD, side: k.side, team: TEAM }); for (const s of specs) if (s.open) try { s.send(specStart()); } catch (e) {} partySend(); }
 }
 
 let curTour = null;
 function toMenu(msg) {
-  tut = null;
+  tut = null; specMode = false;
   role = null; S = null; V = null; snapCur = snapPrev = null; paused = false; replay = null;
   cleanupNet(); wxApply(); setField(FIELDS[SET.field] ? SET.field : 'meadow');
   refreshMenu();
@@ -320,6 +341,7 @@ function toMenu(msg) {
 }
 
 function act(cmd) {
+  if (specMode) return;                               // divák nic neovládá
   sfx('buy');
   tutCmd(cmd);
   if (role === 'guest') send({ t: 'c', c: cmd });

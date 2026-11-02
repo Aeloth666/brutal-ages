@@ -1,23 +1,51 @@
-# Brutal Ages – webová verze
+# ⚔️ Brutal Ages
 
-Celá hra je statický web: stačí nahrát obsah této složky na libovolný hosting s HTTPS.
-HTTPS je potřeba kvůli hře online (WebRTC), skutečnému počasí (poloha) a offline režimu (service worker).
+**Brutal ages demand brutal wars.**
 
-## Možnosti nasazení
-- **Netlify Drop** – otevři https://app.netlify.com/drop a přetáhni tam složku `web`. Hotovo za minutu.
-- **GitHub Pages** – nahraj obsah složky do repozitáře, v Settings → Pages zvol větev a kořen `/`.
-- **itch.io** – nový projekt typu HTML, nahraj `BrutalAges-web.zip`, zaškrtni „This file will be played in the browser“
-  a nastav rozměr třeba 1280 × 640 a „Fullscreen button“.
-- **Vlastní server** – zkopíruj soubory do kořene webu (Apache, nginx, …). Žádný backend není potřeba.
+Brutální válka věků od jeskyní až po vesmírné mechy. Postav armádu, braň základnu, vyvíjej se a znič soupeře – sám proti počítači, v kampani, nebo s kámoši online.
 
-## Co funguje na webu
-- hra pro jednoho, kampaň, výzvy, turnaje, profil (data se ukládají do prohlížeče)
-- hra s kámoši online přes kód nebo pozvánku – i mezi webem a aplikací v telefonu
-- instalace na plochu (PWA) a hraní offline
-- na počítači ovládání klávesnicí (nápověda v Nastavení hry), na mobilu se hra přepne na celou obrazovku
+### ▶ [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · 📲 [Stáhnout pro Android (APK)](https://aeloth666.github.io/brutal-ages/BrutalAges.apk)
 
-## Lokální vyzkoušení
-Spusť v této složce třeba `npx serve` nebo `python -m http.server 8080` a otevři http://localhost:8080
-(offline režim se na localhostu kvůli vývoji nezapíná, přidej `?pwa` do adresy, pokud ho chceš zkusit).
+Aplikace se po instalaci aktualizuje sama – nové verze hry si stáhne při spuštění.
 
-Po změně hry ve složce `www` spusť znovu `build-web.ps1` – složka `web` se vytvoří znovu.
+---
+
+## Co ve hře najdeš
+
+- **5 věků** – doba kamenná, středověk, renesance, moderní doba a budoucnost, každý s vlastními jednotkami, věžemi, speciálním útokem a hrdinou.
+- **20 národů** – v každém věku 4 (např. Kmen Vlka, Vikingové, Samurajové, Piráti, Mimozemšťané, Roboti…), každý s vlastním bonusem, vzhledem, základnou, pokřikem a **speciální jednotkou** (ninja, berserkr, kněz, sabotér, parazit…).
+- **Kampaň** – 15 území napříč dějinami, **bossové** na konci každého věku (válečný mamut, drak, vzducholoď, obří tank, titán) a Rudá horda, která ti dobytá území občas napadne.
+- **🎖 Generál** – strom dovedností se třemi větvemi (Armáda, Obrana, Hospodářství), bonusy z dobytých území a výbava hrdinů.
+- **✅ Úkoly** – denní a týdenní úkoly, za které získáš body generála a **skiny armády**.
+- **Bojiště s vlastnostmi** – louka, poušť s písečnými bouřemi, zima, sopka s lávou, bažina a les; delší bitvy přejdou do noci.
+- **Multiplayer** – souboj 1 na 1, co-op proti počítači, 2 na 2, turnaje, pozvánky nedávným soupeřům, **divácký režim** a emoty.
+- **Statistiky po bitvě** – graf síly armád a přehled, kdo kolik zabil a čím.
+- Obtížnosti od lehké po **🔥 Šílenou** (odemkne se po dohrání kampaně), denní výzva, úspěchy, profil s hodnostmi.
+- **🩸 Brutal režim** pro otrlé (a pár tajemství, která si musíš najít sám 🥚).
+
+## Ovládání
+
+Na telefonu vše klepnutím. Na počítači navíc klávesy:
+
+| Klávesa | Akce |
+|---|---|
+| `1`–`9` | tlačítka ve spodní liště zleva |
+| `H` | hrdina / ničivý úder |
+| `Mezerník` | speciální útok |
+| `V` | evoluce |
+| `T` / `U` | věže / vylepšení |
+| `Q` `W` `E` | rozkaz útok / drž / ústup |
+| `Tab` | zrychlení hry |
+| `Esc` | pauza |
+
+## Instalace na Android
+
+1. Stáhni [BrutalAges.apk](https://aeloth666.github.io/brutal-ages/BrutalAges.apk).
+2. Otevři ho a povol instalaci z tohoto zdroje (Android se jednou zeptá).
+3. Hotovo – další aktualizace hry už přijdou samy.
+
+Hru jde také přidat na plochu přímo z prohlížeče (menu prohlížeče → *Přidat na plochu*) a hrát offline.
+
+---
+
+Hra pro kámoše. Grafika i zvuky jsou kreslené a syntetizované přímo v kódu, bez cizích obrázků a nahrávek.

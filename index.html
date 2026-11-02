@@ -8,7 +8,7 @@
 <meta property="og:title" content="Brutal Ages">
 <meta property="og:description" content="Brutal ages demand brutal wars.">
 <meta property="og:image" content="icons/icon-512.png">
-<link rel="stylesheet" href="style.css?v=202611020831">
+<link rel="stylesheet" href="style.css?v=202611020901">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#10151f">
 <link rel="icon" href="icons/icon-192.png">
@@ -49,11 +49,16 @@
         <button data-d="1">Normální</button>
         <button data-d="2">Těžká</button>
         <button data-d="3">Nemožná</button>
+        <button data-d="4" id="bInsane">🔥 Šílená</button>
       </div>
       <div class="sub-row">
         <button id="bDaily" class="ghost gold">📅 Denní výzva</button>
         <button id="bChal" class="ghost gold">🎯 Výzvy</button>
         <button id="bTut" class="ghost">🎓 Výuka</button>
+      </div>
+      <div class="sub-row">
+        <button id="bGen" class="ghost gold">🎖 Generál</button>
+        <button id="bQuest" class="ghost gold">✅ Úkoly a skiny</button>
       </div>
     </div>
   </div>
@@ -75,6 +80,7 @@
       <div class="row">
         <input id="code" maxlength="5" placeholder="KÓD" autocomplete="off" autocapitalize="characters">
         <button id="bJoin">Připojit</button>
+        <button id="bWatch" class="ghost" title="Sledovat hru jako divák">👁</button>
       </div>
       <p id="status"></p>
       <div id="friends"></div>
@@ -222,9 +228,11 @@
         <button data-f="desert">🌵 Poušť</button>
         <button data-f="winter">❄️ Zima</button>
         <button data-f="volcano">🌋 Sopka</button>
+        <button data-f="swamp">🐸 Bažina</button>
+        <button data-f="forest">🌲 Les</button>
         <button data-f="random">🎲 Náhodně</button>
       </div>
-      <p class="muted">Počasí mění jen vzhled bojiště, na hru nemá vliv. Režim „podle skutečného počasí“ zjistí přibližnou polohu telefonu a pošle ji zaokrouhlenou (asi na 1 km) jen službě open-meteo.com, která vrátí aktuální počasí. Obnovuje se každých 15 minut.</p>
+      <p class="muted">Počasí mění jen vzhled. Bojiště má vlastnosti: bažina a sníh zpomalují, v lese střelci nedostřelí tak daleko, v poušti přicházejí písečné bouře a na sopce tryská láva. Režim „podle skutečného počasí“ zjistí přibližnou polohu telefonu a pošle ji zaokrouhlenou (asi na 1 km) jen službě open-meteo.com, která vrátí aktuální počasí. Obnovuje se každých 15 minut.</p>
     </div>
   </div>
 </div>
@@ -243,6 +251,25 @@
 
 <div id="rotate" class="overlay">Otoč telefon na šířku ↻</div>
 
+<div id="genPanel" class="overlay hidden">
+  <div class="panel wide">
+    <div class="panel-head"><h2>🎖 Generál</h2><button class="ghost panel-close">Zpět</button></div>
+    <div class="scroll" id="genBody"></div>
+  </div>
+</div>
+<div id="questPanel" class="overlay hidden">
+  <div class="panel">
+    <div class="panel-head"><h2>✅ Úkoly a skiny</h2><button class="ghost panel-close">Zpět</button></div>
+    <div class="scroll" id="questBody"></div>
+  </div>
+</div>
+<div id="bstPanel" class="overlay hidden">
+  <div class="panel wide">
+    <div class="panel-head"><h2>📊 Statistiky bitvy</h2><button class="ghost panel-close">Zpět</button></div>
+    <div class="scroll" id="bstBody"></div>
+  </div>
+</div>
+
 <div id="invPanel" class="overlay hidden">
   <div class="panel inv">
     <h2>📨 Pozvánka do hry</h2>
@@ -251,20 +278,21 @@
   </div>
 </div>
 
-<script src="lib/peerjs.min.js?v=202611020831"></script>
-<script src="js/build.js?v=202611020831"></script>
-<script src="js/core.js?v=202611020831"></script>
-<script src="js/net.js?v=202611020831"></script>
-<script src="js/render.js?v=202611020831"></script>
-<script src="js/units.js?v=202611020831"></script>
-<script src="js/world.js?v=202611020831"></script>
-<script src="js/hud.js?v=202611020831"></script>
-<script src="js/meta.js?v=202611020831"></script>
-<script src="js/audio.js?v=202611020831"></script>
-<script src="js/ui.js?v=202611020831"></script>
-<script src="js/modes.js?v=202611020831"></script>
-<script src="js/extras.js?v=202611020831"></script>
-<script src="js/main.js?v=202611020831"></script>
-<script src="js/update.js?v=202611020831"></script>
+<script src="lib/peerjs.min.js?v=202611020901"></script>
+<script src="js/build.js?v=202611020901"></script>
+<script src="js/core.js?v=202611020901"></script>
+<script src="js/net.js?v=202611020901"></script>
+<script src="js/render.js?v=202611020901"></script>
+<script src="js/units.js?v=202611020901"></script>
+<script src="js/world.js?v=202611020901"></script>
+<script src="js/hud.js?v=202611020901"></script>
+<script src="js/meta.js?v=202611020901"></script>
+<script src="js/audio.js?v=202611020901"></script>
+<script src="js/ui.js?v=202611020901"></script>
+<script src="js/modes.js?v=202611020901"></script>
+<script src="js/extras.js?v=202611020901"></script>
+<script src="js/gen.js?v=202611020901"></script>
+<script src="js/main.js?v=202611020901"></script>
+<script src="js/update.js?v=202611020901"></script>
 </body>
 </html>

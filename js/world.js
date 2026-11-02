@@ -808,7 +808,13 @@ function addFx(e) {
     case 'evt': evtBanner = { t: (e[3] === 'meteors' ? SKYFIRE[e[4] | 0] : e[3] === 'boss' ? '👹 BOSS: ' + BOSSES[e[4] | 0].n.toUpperCase() + '!' : EVENTS[e[3]]) || '', l: e[3] === 'boss' ? 4 : 3 }; if (e[3] === 'quake') { shake = 1.2; vib([80, 40, 120]); } sfx('evt'); break;
     case 'chest': fx.push({ txt: '+' + e[4].toLocaleString('cs') + ' zlata', x, y: y - 20, vy: -30, l: 1.6, ml: 1.6 }); part(18, '#facc15', 140, 2.2, 0.8); sfx('buy'); break;
     case 'rhit': bloodBurst(x, y, 16, 220, true); if (Math.random() < 0.2) addPool(x, rnd(4, 8)); shake = Math.max(shake, 0.25); break;
-    case 'rage': fx.push({ ring: 1, x, y, l: 0.6, ml: 0.6, r: 80, col: '#ef4444' }); fx.push({ txt: '😡 VZTEK!', x, y: y - 30, vy: -30, l: 1.4, ml: 1.4 }); shake = 0.6; vib([60, 40, 120]); break;
+    case 'cry': if (e[5] !== 5 && (e[5] >= 3 || Math.random() < 0.45)) cry(e[4], x, e[3], e[5] >= 3); break;
+    case 'bast': fx.push({ ring: 1, x, y, l: 0.9, ml: 0.9, r: 160, col: '#4ade80' }); fx.push({ txt: '🛡 POSLEDNÍ BAŠTA!', x, y: y - 40, vy: -25, l: 2.2, ml: 2.2 }); sfx('evo'); break;
+    case 'gcry': if (e[3] === mySide) { fx.push({ txt: '📯 VÁLEČNÝ POKŘIK!', x, y: y - 20, vy: -25, l: 2, ml: 2 }); const p = V.pl[e[3]]; cry(p.age * 4 + ((p.af && p.af[p.age]) | 0), x, e[3], true); } break;
+    case 'lava': fx.push({ fire: 1, x, y, r: 55, l: 0.7, ml: 0.7 }); part(24, '#ff6a14', 260, 3, 0.9, -200); smoke(6, 14, 1.2); shake = Math.max(shake, 0.6); sfx('boom', x); break;
+    case 'rage':
+      if (V) { const p = V.pl[e[3]]; cry(p.age * 4 + ((p.af && p.af[p.age]) | 0), x, e[3], true); }
+      fx.push({ ring: 1, x, y, l: 0.6, ml: 0.6, r: 80, col: '#ef4444' }); fx.push({ txt: '😡 VZTEK!', x, y: y - 30, vy: -30, l: 1.4, ml: 1.4 }); shake = 0.6; vib([60, 40, 120]); break;
     case 'sp': vib(e[3] === mySide ? 40 : [70, 40, 70]); break;
     case 'evo':
       if (x === BX[mySide]) vib([30, 40, 90]);

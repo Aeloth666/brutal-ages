@@ -56,6 +56,7 @@ function checkAch(V) {
     const won = V.over === mySide;
     sfx(won ? 'win' : 'lose');
     vib(won ? [60, 60, 60, 60, 220] : 450);
+    if (S && S.st) { lastBst = S.st; if (role === 'host') send({ t: 'bst', d: S.st }); }
     record(won, V);
     if (won) for (const a of ACH) if (a.w && !ACHS[a.id] && a.w(me, V)) unlock(a);
   }
@@ -166,6 +167,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 function refreshMenu() {
   document.querySelectorAll('.seg button[data-d]').forEach(b => b.classList.toggle('on', +b.dataset.d === SET.diff));
+  const ins = $('bInsane'); if (ins && typeof CAMPS !== 'undefined') { ins.classList.toggle('locked', !CAMPS[CAMP.length - 1]); ins.textContent = CAMPS[CAMP.length - 1] ? '🔥 Šílená' : '🔒 Šílená'; }
   document.querySelectorAll('#netMode button').forEach(b => b.classList.toggle('on', b.dataset.m === (SET.net || 'duel')));
   $('bMusic').textContent = 'Hudba: ' + (SET.music ? 'ZAP' : 'VYP');
   $('bSfx').textContent = 'Zvuky: ' + (SET.sfx ? 'ZAP' : 'VYP');
@@ -211,7 +213,10 @@ function renderChal() {
   });
 }
 
-document.querySelectorAll('.seg button[data-d]').forEach(b => b.onclick = () => { SET.diff = +b.dataset.d; saveSet(); sfx('click'); });
+document.querySelectorAll('.seg button[data-d]').forEach(b => b.onclick = () => {
+  if (+b.dataset.d === 4 && !CAMPS[CAMP.length - 1]) { toasts.push({ a: { n: 'Nejdřív dohraj celou kampaň' }, h: '🔒 ŠÍLENÁ OBTÍŽNOST', l: 3 }); return; }
+  SET.diff = +b.dataset.d; saveSet(); sfx('click');
+});
 document.querySelectorAll('#netMode button').forEach(b => b.onclick = () => { SET.net = b.dataset.m; saveSet(); sfx('click'); });
 $('bMusic').onclick = () => { SET.music = !SET.music; saveSet(); };
 $('bSfx').onclick = () => { SET.sfx = !SET.sfx; saveSet(); sfx('click'); };
