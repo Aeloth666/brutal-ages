@@ -97,6 +97,17 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.8', d: '2026-11-02', cs: [
+    'Nový kůň: nohy se třemi klouby, tvarované tělo, dlouhá hlava s hřívou a uzdečkou, vlající ocas, rytíř na čabrace.',
+    'Nový T-Rex v události: vodorovné tělo vyvážené ocasem, mohutná stehna, velká hlava se zuby a malé ručky – a je větší.',
+    'Brutal mód: kůň se rozpadá ve správné velikosti, šavlozubý tygr se rozseká a mrtvý drak se zřítí k zemi.',
+    'Zvířata mají hlasy: mamut troubí, vlk vyje, medvěd řve, pratur bučí, kůň řehtá; boss tygr a drak zařvou při příchodu.',
+    'Jízdní zvířata zabírají v boji místo podle své velikosti (mamut nejvíc, vlk nejméně).'], en: [
+    'New horse: three-jointed legs, shaped body, long head with mane and bridle, flowing tail, knight on a caparison.',
+    'New T-Rex in the event: horizontal body balanced by the tail, massive thighs, big toothy head and tiny arms – and it is bigger.',
+    'Brutal mode: the horse falls apart at the right size, the sabre-toothed tiger gets torn apart and a dead dragon crashes to the ground.',
+    'Animals have voices: the mammoth trumpets, the wolf howls, the bear roars, the aurochs bellows, the horse neighs; the tiger and dragon bosses roar on arrival.',
+    'Mounts take up space in battle according to their size (mammoth the most, wolf the least).'] },
   { v: '2.7.3', d: '2026-11-02', cs: ['Šavlozubý tygr: krk plynule vyrůstá z hřbetu, vnitřek otevřené tlamy už nepřesahuje ven.'], en: ['Sabre-toothed tiger: the neck grows smoothly out of the back, the inside of the open mouth no longer sticks out.'] },
   { v: '2.7.2', d: '2026-11-02', cs: ['Šavlozubý tygr: nová hlava s krátkým čenichem a bradou, ze strany je vidět jen bližší šavle, silný krk a tlapky stojí na zemi.'], en: ['Sabre-toothed tiger: new head with a short muzzle and chin, only the near sabre shows from the side, a strong neck and paws on the ground.'] },
   { v: '2.7.1', d: '2026-11-02', cs: ['Šavlozubý tygr zmenšený na zhruba 1,6 m v kohoutku – pořád větší než skutečný, ale už ne obří.'], en: ['Sabre-toothed tiger shrunk to about 1.6 m at the shoulder – still bigger than the real one, but no longer giant.'] },

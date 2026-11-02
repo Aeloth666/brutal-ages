@@ -164,7 +164,9 @@ const SPECS = AGES.map((A, a) => {
 });
 const uDef = (a, ty, f) => ty === 6 ? SPECS[a][f | 0] : ty === 5 ? BOSSES[a] : ty === 3 ? SUPER : ty === 4 ? HEROES[a] : AGES[a].units[ty];
 const uDefU = u => uDef(u.a, u.ty, u.f);
-const unitW = ty => ty === 5 ? 96 : ty === 2 ? 64 : ty === 3 ? 34 : ty === 4 ? 32 : ty === 6 ? 30 : 26;
+// šířka jednotky v boji (rozestupy, dosah); jízdní zvířata podle velikosti – mamut je mnohem delší než vlk
+const unitW = (ty, s, a) => ty === 2 && a <= 1 && s != null ? mountW(s, a) : ty === 5 ? 96 : ty === 2 ? 64 : ty === 3 ? 34 : ty === 4 ? 32 : ty === 6 ? 30 : 26;
+const mountW = (s, a) => (MOUNT[a === 1 ? 'horse' : mountKind({ af: S.pl[s].af })] || {}).gw || 64;
 const unitY = u => u.ty === 5 ? BOSSES[u.a].y : u.ty >= 2 ? 34 : 28;          // kam míří střely
 const atkMul = s => 1 + UPS[0].k * S.pl[s].up[0];
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -299,15 +301,15 @@ function special(s) {
   }
 }
 
-function spawnFree(s, ty) {
-  const w = unitW(ty);
+function spawnFree(s, ty, a) {
+  const w = unitW(ty, s, a);
   return !S.units.some(u => u.side === s && Math.abs(u.x - SPAWN[s]) < (u.w + w) / 2 + 2);
 }
 function spawn(s, q) {
   const d = uDef(q.a, q.ty, q.f), g = GB(S.pl[s]);
   const F = facOf(s), hp = Math.round(d.hp * (1 + UPS[1].k * S.pl[s].up[1]) * (F.hp || 1) * (q.ty === 2 ? F.heavy || 1 : 1) * (q.ty === 4 ? g.heroHp * ((g.gear && g.gear[q.a][0]) || 1) : g.hp));
   S.units.push({ id: S.nid++, side: s, a: q.a, ty: q.ty, f: q.f | 0, x: SPAWN[s], hp, mx: hp,
-    w: unitW(q.ty), st: 0, at: 0, cd: 0.3 });
+    w: unitW(q.ty, s, q.a), st: 0, at: 0, cd: 0.3 });
   if (S.st) { S.st.made[s]++; if (q.ty === 6) S.st.spec[s]++; }
   if (q.ty === 3) S.pl[s].supers++;
   // pokřik národa (hráč ho slyší jen občas, hrdina a supervoják vždy)
@@ -435,7 +437,7 @@ function step(dt) {
       p.qt += dt;
       if (p.qt >= bt) {
         p.qt = bt;
-        if (spawnFree(s, q.ty)) { spawn(s, q); p.q.shift(); p.qt = 0; }
+        if (spawnFree(s, q.ty, q.a)) { spawn(s, q); p.q.shift(); p.qt = 0; }
       }
     }
   }

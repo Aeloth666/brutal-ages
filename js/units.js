@@ -138,7 +138,7 @@ function leg(phase, walk, col, boot, sit) {
 }
 
 // brutální režim: které části těla mrtvole chybí (nastavuje se jen při kreslení mrtvol)
-let GORE = null, NO_RIDER = false, NO_LEGS = false, NO_BHEAD = false;
+let GORE = null, NO_RIDER = false, NO_LEGS = false, NO_BHEAD = false, BOSS_STILL = false;   // BOSS_STILL: mrtvý boss (drak nemává)
 function stump(x, y, r) {
   c.beginPath(); c.ellipse(x, y, r, r * 0.7, 0, 0, Math.PI * 2); fo('#8b0a0a', 1);
   c.fillStyle = '#d61f1f'; ell(x - r * 0.2, y - r * 0.15, r * 0.55, r * 0.35);
@@ -614,9 +614,15 @@ const MOUNT = {
   smilodon: { body: [-2, -44, 40, 18], legs: [[-28, 0, 0, -40], [20, 1, 0, -38], [-21, 0, 1, -40], [26, 1, 1, -38]], hs: [18, 16, 10], fs: [16, 17, 5],
     lw: [[26, 11, 7.5], [16, 11, 8.5]], foot: 'paw', pawK: 2.2, col: ['#d9822b', '#a85a18', '#f2b062'], head: [50, -58], neck: [34, -54, 14], seat: [-4, -62], stride: 13, lift: 5, bob: 1.4, hp: 112 },
 };
+// kůň (středověk, v kohoutku ~1,6 m) a T-Rex (událost, kyčel ~3,6 m – kreslí se zvětšený)
+MOUNT.horse = { body: [-1, -43, 30, 12], legs: [[-22, 0, 0, -40], [17, 1, 0, -38], [-16, 0, 1, -40], [23, 1, 1, -38]], hs: [16, 16, 14], fs: [14, 15, 12],
+  lw: [[15, 6.4, 4.4], [12, 6, 4.4]], foot: 'hoof', col: ['#8b5a33', '#5e3a1f', '#b07a4a'], head: [42, -64], neck: [26, -56, 8], seat: [-3, -56], stride: 12, lift: 6, bob: 1.4, hp: 104 };
+MOUNT.trex = { body: [0, -42, 26, 12], legs: [[-3, 0, 0, -40], [3, 0, 1, -40]], hs: [17, 16, 11], fs: [17, 16, 11],
+  lw: [[24, 10, 7], [24, 10, 7]], foot: 'claw', col: ['#7b6a3a', '#55471f', '#a8975c'], head: [44, -48], neck: [30, -46, 10], seat: [0, -52], stride: 14, lift: 6, bob: 2, hp: 0 };
+for (const [k, w] of Object.entries({ mammoth: 100, wolf: 72, bear: 80, aurochs: 84, horse: 78 })) MOUNT[k].gw = w;   // šířka v boji (core.js unitW)
 const MOUNT_OF = ['mammoth', 'wolf', 'bear', 'aurochs'];                  // pořadí národů doby kamenné (AGEFAC[0])
 const mountKind = team => MOUNT_OF[(team && team.af && team.af[0]) | 0] || 'mammoth';
-const FOOT_H = { hoof: 5, paw: 3, pad: 7, plant: 8 };                     // výška chodidla nad zemí, odkud začíná noha
+const FOOT_H = { hoof: 5, paw: 3, pad: 7, plant: 8, claw: 4 };                     // výška chodidla nad zemí, odkud začíná noha
 
 // koleno ze dvou délek (inverzní kinematika); fwd = koleno vpředu
 function ik2(hx, hy, fx, fy, L1, L2, fwd) {
@@ -629,6 +635,18 @@ function taper(ax, ay, bx, by, wa, wb) {
   const dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
   c.beginPath(); c.moveTo(ax + nx * wa / 2, ay + ny * wa / 2); c.lineTo(bx + nx * wb / 2, by + ny * wb / 2); c.lineTo(bx - nx * wb / 2, by - ny * wb / 2); c.lineTo(ax - nx * wa / 2, ay - ny * wa / 2); c.closePath(); c.fill();
   circ(ax, ay, wa / 2); circ(bx, by, wb / 2);
+}
+// zužující se trubice podél kubické Bézierovy křivky p = [x0,y0, x1,y1, x2,y2, x3,y3]: šířka w0 → w1 (cestu jen vytvoří)
+function tubeP(p, w0, w1, n = 16) {
+  const P = [], N = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, u = 1 - t, x = u * u * u * p[0] + 3 * u * u * t * p[2] + 3 * u * t * t * p[4] + t * t * t * p[6], y = u * u * u * p[1] + 3 * u * u * t * p[3] + 3 * u * t * t * p[5] + t * t * t * p[7];
+    const dx = 3 * u * u * (p[2] - p[0]) + 6 * u * t * (p[4] - p[2]) + 3 * t * t * (p[6] - p[4]), dy = 3 * u * u * (p[3] - p[1]) + 6 * u * t * (p[5] - p[3]) + 3 * t * t * (p[7] - p[5]), L = Math.hypot(dx, dy) || 1;
+    P.push([x, y]); N.push([-dy / L, dx / L, (w0 + (w1 - w0) * t) / 2]);
+  }
+  c.beginPath(); P.forEach(([x, y], i) => c.lineTo(x + N[i][0] * N[i][2], y + N[i][1] * N[i][2]));
+  for (let i = n; i >= 0; i--) c.lineTo(P[i][0] - N[i][0] * N[i][2], P[i][1] - N[i][1] * N[i][2]);
+  c.closePath(); return { P, N };
 }
 // svalnatý článek: na jedné straně vyboulený (sval), kreslený jako obrys z křivek
 function muscle(ax, ay, bx, by, wa, wb, bulge) {
@@ -676,6 +694,12 @@ function mountFoot(kind, x, y, col, heel) {
     c.beginPath(); c.moveTo(hx - 6, y); c.bezierCurveTo(hx - 7, y - 6, hx - 5, y - 11, hx, y - 11); c.bezierCurveTo(hx + 5, y - 11, x - 1, y - 7, x + 3, y - 6); c.quadraticCurveTo(x + 7, y - 4.5, x + 7, y); c.closePath(); fo(col, 1.2);   // tlapa zakryje konec nohy
     c.fillStyle = '#e8dcc0'; for (const k of [2.5, 4.6, 6.6]) { c.beginPath(); c.moveTo(x + k - 1.4, y - 2.4); c.quadraticCurveTo(x + k + 2.6, y - 2, x + k + 2.2, y + 0.2); c.lineTo(x + k - 0.8, y - 0.6); c.closePath(); c.fill(); } return;
   }
+  if (F === 'claw') {                                                                 // tři prsty dopředu, drápy, ostruha vzadu
+    c.beginPath(); c.moveTo(x - 5, y); c.quadraticCurveTo(x - 6, y - 4, x - 1, y - 5); c.lineTo(x + 8, y - 3.5); c.quadraticCurveTo(x + 13, y - 2.6, x + 13, y); c.closePath(); fo(col, 1.2);
+    c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 0.8; ln(x + 3, y - 4, x + 5, y); ln(x + 7.5, y - 3.2, x + 9, y);
+    c.fillStyle = '#efe6cf'; for (const d of [5.5, 10, 13.5]) poly([x + d, y - 2.2, x + d + 2.6, y + 0.4, x + d - 0.6, y + 0.4]), c.fill();
+    poly([x - 5, y - 1.5, x - 8, y + 0.4, x - 4.5, y + 0.4]); c.fill(); return;
+  }
   // tlapa na prstech (vlk, tygr)
   const k = MOUNT[kind].pawK || 1;
   c.beginPath(); c.moveTo(x - 3 * k, y); c.quadraticCurveTo(x - 3.5 * k, y - 3.5 * k, x + 0.5 * k, y - 3.6 * k); c.quadraticCurveTo(x + 5.5 * k, y - 3 * k, x + 5.5 * k, y); c.closePath(); fo(col, 1);
@@ -696,6 +720,9 @@ function mountBody(kind) {
   } else if (kind === 'bear') {                 // hrb nad plecemi, mohutný zadek
     c.moveTo(-33, -27); c.bezierCurveTo(-39, -38, -35, -49, -22, -49); c.bezierCurveTo(-8, -49, 2, -53, 10, -55);
     c.bezierCurveTo(20, -57, 29, -51, 31, -43); c.bezierCurveTo(33, -33, 27, -24, 18, -22); c.bezierCurveTo(4, -19, -20, -19, -33, -27);
+  } else if (kind === 'horse') {                // kohoutek vpředu, rovný hřbet, zakulacená záď
+    c.moveTo(-30, -38); c.bezierCurveTo(-34, -47, -30, -53, -22, -53); c.bezierCurveTo(-10, -52, 4, -50, 12, -52);
+    c.bezierCurveTo(18, -54, 24, -56, 28, -52); c.bezierCurveTo(32, -46, 32, -38, 26, -33); c.bezierCurveTo(14, -30, -4, -31, -14, -32); c.bezierCurveTo(-22, -32, -28, -33, -30, -38);
   } else if (kind === 'smilodon') {             // mohutná plec, kratší svažitá záda
     c.moveTo(-42, -40); c.bezierCurveTo(-46, -52, -40, -60, -28, -60); c.bezierCurveTo(-12, -60, 4, -63, 16, -64);
     c.bezierCurveTo(30, -65, 40, -58, 42, -48); c.bezierCurveTo(44, -38, 38, -30, 28, -29);
@@ -708,6 +735,7 @@ function mountBody(kind) {
   c.closePath();
 }
 function mountHead(kind, at, ph = 0) {
+  if (kind === 'horse') return horseHead2(at);
   const [C, CD, CL] = MOUNT[kind].col;
   if (kind === 'mammoth') {
     // vysoká klenutá lebka, malé ucho, dlouhé zatočené kly, chobot
@@ -791,9 +819,26 @@ function mountHead(kind, at, ph = 0) {
     c.fillStyle = '#111'; circ(43, -53, 1.5); c.fillStyle = 'rgba(255,255,255,.6)'; circ(43.4, -53.4, 0.5);
   }
 }
+// hlava koně: dlouhý krk s hřívou, protáhlá hlava, uzdečka
+function horseHead2(at) {
+  const [C, CD, CL] = MOUNT.horse.col, MN = '#2b1a0e';
+  c.beginPath(); c.moveTo(14, -52); c.bezierCurveTo(20, -62, 27, -71, 34, -75); c.lineTo(37.5, -74.5); c.bezierCurveTo(41.5, -70, 46.5, -63, 49.5, -57.5);
+  c.quadraticCurveTo(52.5, -53, 48.5, -51.5); c.lineTo(43.5, -52.5); c.bezierCurveTo(39.5, -56, 36.5, -59, 33.5, -58); c.bezierCurveTo(30.5, -52, 30, -44, 26, -36); c.closePath();
+  fo(lg('horseNH', 0, -76, 0, -36, [[0, CL], [0.6, C], [1, CD]]), 1.4);
+  c.fillStyle = 'rgba(0,0,0,.12)'; c.beginPath(); c.ellipse(41, -60, 5, 3, 0.9, 0, Math.PI * 2); c.fill();                   // lícní kost
+  poly([34, -74.5, 34.6, -81, 37.8, -74.5]); fo(C, 1.1);                                                                     // ucho
+  c.fillStyle = MN; c.strokeStyle = OL; c.lineWidth = 1;                                                                      // hříva po hřebeni krku
+  c.beginPath(); c.moveTo(13, -51); for (let k = 0; k <= 8; k++) { const t = k / 8, x = 14 + t * 21, y = -52 - t * 22.5 + t * t * 0.5; c.lineTo(x - 1.5 - Math.sin(T * 3 + k) * 0.8, y + 6 - t * 1.5); c.lineTo(x + 1.3, y - 0.6); } c.lineTo(36.5, -73); c.closePath(); c.fill(); c.stroke();
+  poly([36, -73.5, 40.5, -70, 38, -68]); c.fill();                                                                            // čupřina
+  c.fillStyle = '#111'; circ(41.6, -66.2, 1.3); c.fillStyle = 'rgba(255,255,255,.6)'; circ(42, -66.6, 0.45);
+  c.fillStyle = '#2a1a10'; c.beginPath(); c.ellipse(49.3, -55, 1.2, 0.8, 0.5, 0, Math.PI * 2); c.fill();                     // nozdra
+  c.strokeStyle = '#3a2412'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(38, -71); c.lineTo(44, -57.5); c.moveTo(39.5, -60.5); c.lineTo(48, -56); c.stroke();   // uzdečka
+  c.strokeStyle = '#d4b04a'; c.lineWidth = 0.8; circ(45.5, -56.5, 1.2);
+}
 function mountTail(kind, sw) {
   const [C, CD, CL] = MOUNT[kind].col;
   c.lineCap = 'round';
+  if (kind === 'horse') { c.beginPath(); c.moveTo(-29, -49); c.bezierCurveTo(-40, -48, -42, -34 + sw * 2, -38 + sw * 3, -20); c.bezierCurveTo(-34, -28, -32, -38, -27, -43); c.closePath(); fo('#2b1a0e', 1.1); return; }
   if (kind === 'wolf') { c.beginPath(); c.moveTo(-26, -38); c.bezierCurveTo(-38, -40, -42, -28 + sw * 3, -38, -18 + sw * 3); c.bezierCurveTo(-34, -26, -30, -32, -26, -33); c.closePath(); fo(lg('wolfTail3', 0, -40, 0, -18, [[0, CL], [1, C]]), 1.1); c.fillStyle = '#e7e9ec'; circ(-38, -19 + sw * 3, 2.6); return; }
   if (kind === 'bear') { c.beginPath(); c.ellipse(-35, -40, 4, 3.4, 0.4, 0, Math.PI * 2); fo(CD, 1); return; }
   if (kind === 'smilodon') { c.beginPath(); c.moveTo(-40, -54); c.bezierCurveTo(-48, -54, -52, -48 + sw * 2, -50, -42 + sw * 2); c.bezierCurveTo(-46, -44, -44, -48, -40, -48); c.closePath(); fo(C, 1.2); c.fillStyle = '#2a1608'; circ(-50, -43 + sw * 2, 2.2); return; }   // šavlozubec měl krátký ocas
@@ -843,7 +888,18 @@ function mount(team, kind, ph, walk, at) {
   // hlava; u tygra až po bližších nohách, ať rameno nezakryje čelist
   const head = () => { if (NO_BHEAD) stump(M.neck[0], M.neck[1], M.neck[2] * 0.8); else { c.save(); c.translate(0, walk ? Math.sin(ph * 2) * 0.8 : 0); mountHead(kind, at, ph); c.restore(); } };
   if (kind !== 'smilodon') head();
-  if (kind !== 'smilodon') {
+  if (kind === 'horse') {
+    // čabraka v barvě týmu se zlatým lemem a znakem, sedí na ní rytíř
+    const [sx, sy] = M.seat;
+    c.save(); c.translate(sx, sy);
+    c.beginPath(); c.moveTo(-19, 2); c.quadraticCurveTo(0, -2, 17, 1); c.lineTo(19, 15);
+    for (let i = 0; i < 6; i++) c.quadraticCurveTo(16 - i * 6.4, 20, 13 - i * 6.4, 15.5);
+    c.lineTo(-20, 15); c.closePath(); fo(lg('capar2' + team[0], 0, 0, 0, 18, [[0, team[0]], [1, team[1]]]), 1.2);
+    c.strokeStyle = '#e5c04a'; c.lineWidth = 1.3; ln(-18, 4, 17, 3);
+    c.fillStyle = '#e5c04a'; circ(-1, 9, 2.8); c.fillStyle = team[1]; circ(-1, 9, 1.4);
+    c.restore();
+    if (!NO_RIDER) { c.save(); c.translate(sx + 1, sy + 17 + (walk ? Math.abs(Math.cos(ph)) * 0.8 : 0)); c.scale(0.85, 0.85); human(team, 1, 0, ph, at, 1, { sit: 1, plume: 1 }); c.restore(); }
+  } else if (kind !== 'smilodon' && kind !== 'trex') {
     // přikrývka v barvě týmu na hřbetě a jezdec
     const [sx, sy] = M.seat;
     c.save(); c.translate(sx, sy);
@@ -907,6 +963,51 @@ function dinoHead(at) {
   c.fillStyle = '#2f5f27'; circ(42, -53, 0.9);
 }
 
+// T-Rex (událost): vodorovné tělo vyvážené ocasem, mohutná stehna, velká hlava, malé ručky
+function trex(ph, walk, at) {
+  const M = MOUNT.trex, [C, CD, CL] = M.col, bob = legBob(ph, walk, M.bob), sw = walk ? Math.sin(ph) : 0;
+  if (!NO_LEGS) qLeg('trex', -3, -40 + bob, ph + Math.PI, walk, 0, CD, 0);
+  c.save(); c.translate(0, bob);
+  const arm = (x, col) => { for (const pass of [0, 1]) { c.fillStyle = pass ? col : OL; const g = pass ? 0 : 2; muscle(x, -36, x + 1, -30, 4.5 + g, 3 + g, 0.2); taper(x + 1, -30, x + 5, -28, 3 + g, 2.4 + g); } c.fillStyle = '#efe6cf'; poly([x + 5, -29, x + 7, -27, x + 5, -27.6]); c.fill(); poly([x + 5, -28, x + 6.6, -25.6, x + 4.6, -26.6]); c.fill(); };
+  arm(22, CD);
+  const tail = [6, -42, -30, -50 + sw, -56, -46 + sw * 3, -82, -40 + sw * 5];   // začíná uvnitř těla, ať konec nevyčnívá
+  const TL = tubeP(tail, 22, 2); fo(lg('trexT', 0, -56, 0, -34, [[0, CL], [0.5, C], [1, CD]]), 1.8);
+  c.save(); tubeP(tail, 22, 2); c.clip(); c.fillStyle = 'rgba(40,30,10,.45)'; for (let i = 2; i < 14; i += 2) { const [x, y] = TL.P[i], [nx, ny, w] = TL.N[i]; c.beginPath(); c.moveTo(x + nx * w, y + ny * w); c.lineTo(x - nx * w * 0.2 + 2, y - ny * w * 0.2); c.lineTo(x + nx * w + 3, y + ny * w); c.fill(); } c.restore();
+  // krk pod tělem, ať na spoji není čára
+  tubeP([12, -44, 24, -52, 32, -50, 37, -47], 16, 13); fo(lg('trexN', 0, -58, 0, -38, [[0, CL], [1, C]]), 1.8);
+  const body = () => { c.beginPath(); c.moveTo(-18, -50); c.bezierCurveTo(-6, -57, 12, -57, 24, -51); c.bezierCurveTo(31, -47, 32, -38, 25, -32); c.bezierCurveTo(14, -27, -4, -28, -15, -33); c.bezierCurveTo(-21, -37, -22, -46, -18, -50); c.closePath(); };
+  body(); fo(lg('trexB', 0, -57, 0, -28, [[0, CL], [0.5, C], [1, CD]]), 2);
+  c.save(); body(); c.clip();
+  c.fillStyle = '#d8c89a'; c.beginPath(); c.ellipse(10, -28, 22, 6, -0.1, 0, Math.PI * 2); c.fill();                                   // světlé břicho
+  c.fillStyle = 'rgba(40,30,10,.45)'; for (let k = 0; k < 6; k++) { const x = -14 + k * 7; c.beginPath(); c.moveTo(x, -56); c.quadraticCurveTo(x + 4, -50, x + 1, -43); c.quadraticCurveTo(x + 1.5, -50, x - 3, -55); c.fill(); }
+  c.fillStyle = 'rgba(255,255,255,.12)'; c.beginPath(); c.ellipse(2, -53, 20, 2.6, -0.05, 0, Math.PI * 2); c.fill();
+  c.restore();
+  // krk a hlava; spodní čelist se otevírá na kloubu, zuby jsou vidět i při zavřené tlamě
+  if (NO_BHEAD) stump(32, -48, 6);
+  else {
+    c.save(); c.translate(37, -47); c.rotate(0.06 - at * 0.12);
+    const jaw = at * 0.55, HG = [0, 3];
+    if (jaw > 0.05) { const jx = HG[0] + 26 * Math.cos(jaw) - 3 * Math.sin(jaw), jy = HG[1] + 26 * Math.sin(jaw) + 3 * Math.cos(jaw); c.fillStyle = '#4a0d0d'; c.beginPath(); c.moveTo(1, 3); c.lineTo(28, 3.5); c.lineTo(jx, jy); c.closePath(); c.fill(); }
+    c.save(); c.translate(...HG); c.rotate(jaw); c.translate(-HG[0], -HG[1]);
+    c.beginPath(); c.moveTo(-2, 3); c.lineTo(27, 4); c.quadraticCurveTo(30, 5.5, 27.5, 8); c.bezierCurveTo(18, 11.5, 6, 12, -3, 9.5); c.quadraticCurveTo(-6, 7, -2, 3); c.closePath(); fo(lg('trexJ', 0, 3, 0, 12, [[0, C], [1, '#c9b88a']]), 1.5);
+    c.fillStyle = '#f5efdc'; for (let k = 0; k < 7; k++) { const x = 4 + k * 3.4; poly([x, 4, x + 1.2, 1 - (k % 2) * 0.6, x + 2.4, 4]); c.fill(); }
+    c.restore();
+    c.beginPath(); c.moveTo(-6, -2); c.bezierCurveTo(-6, -11, 6, -14, 14, -12); c.bezierCurveTo(21, -11, 28, -8, 31, -5); c.quadraticCurveTo(33.5, -2, 31.5, 1.5);
+    c.lineTo(28.5, 3.5); c.lineTo(3, 3.5); c.quadraticCurveTo(-3, 4, -5, 8); c.bezierCurveTo(-9, 7.5, -8, 2, -6, -2); c.closePath();
+    fo(lg('trexH', 0, -14, 0, 4, [[0, CL], [1, C]]), 1.8);
+    c.fillStyle = '#f5efdc'; for (let k = 0; k < 8; k++) { const x = 3 + k * 3.3; poly([x, 3, x + 1.3, 6.5 - (k % 2) * 1.2, x + 2.6, 3]); c.fill(); }   // horní zuby přes ret
+    c.strokeStyle = '#3a2e10'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(29, 3.5); c.lineTo(3, 3.5); c.quadraticCurveTo(-3, 4, -5, 8); c.stroke();
+    c.fillStyle = 'rgba(40,30,10,.5)'; for (const [x, y] of [[14, -7], [19, -6], [24, -4.5]]) { c.beginPath(); c.ellipse(x, y, 1.6, 0.9, 0.2, 0, Math.PI * 2); c.fill(); }
+    c.fillStyle = CD; c.beginPath(); c.moveTo(4, -11); c.quadraticCurveTo(8, -15, 12, -11.5); c.closePath(); c.fill();                // hrbolek nad okem
+    c.fillStyle = '#1a1208'; c.beginPath(); c.ellipse(8, -7, 2.4, 1.7, 0, 0, Math.PI * 2); c.fill(); c.fillStyle = '#e8a33c'; c.beginPath(); c.ellipse(8.2, -7, 1.7, 1.2, 0, 0, Math.PI * 2); c.fill(); c.fillStyle = '#111'; ell(8.5, -7, 0.45, 1.1);
+    c.strokeStyle = '#3a2e10'; c.lineWidth = 1.4; c.beginPath(); c.moveTo(4, -9.5); c.quadraticCurveTo(8, -11, 12, -9); c.stroke();
+    c.fillStyle = '#2a1a08'; c.beginPath(); c.ellipse(29, -3.5, 1.4, 0.8, 0.4, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
+  arm(26, C);
+  c.restore();
+  if (!NO_LEGS) qLeg('trex', 3, -40 + bob, ph, walk, 0, C, 1);
+}
 function dino(team, ph, walk, at) {
   const G = '#5aa64a', GD = '#3f7d33', bob = legBob(ph, walk, 1.8), sw = walk ? Math.sin(ph) : 0;
   c.save(); c.translate(0, bob);
@@ -961,7 +1062,8 @@ function horseHead() {
 }
 
 // kůň v kohoutku ~1,6 m: kreslený o 18 % větší než původní předloha (jezdec zůstává ve své velikosti)
-function horse(team, ph, walk, at) { c.save(); c.scale(1.18, 1.18); horseArt(team, ph, walk, at); c.restore(); }
+function horse(team, ph, walk, at) { mount(team, 'horse', ph, walk, at); }
+// původní kresba koně (zůstává jen pro srovnání, hra ji nepoužívá)
 function horseArt(team, ph, walk, at) {
   const B = '#8b5a33', BD = '#5e3a1f', bob = legBob(ph, walk, 1.2), sw = walk ? Math.sin(ph) : 0;
   // vzdálenější nohy
@@ -1117,7 +1219,7 @@ const BOSS_ART = [
 
   // ---------------- drak: štíhlé tělo, esovitý krk, blanitá křídla s prsty, svalnaté nohy pod tělem ----------------
   (team, ph, at) => {
-    const y0 = -112 + Math.sin(T * 2.5) * 7, flap = Math.sin(T * 5.5);
+    const y0 = BOSS_STILL ? -112 : -112 + Math.sin(T * 2.5) * 7, flap = BOSS_STILL ? -0.5 : Math.sin(T * 5.5);
     c.save(); c.translate(0, y0);
     const SC = ['#24502a', '#357a3a', '#58a352'], BEL = ['#f3dd96', '#c49a45'], SPK = '#8f1d1d';
     // zužující se trubice podél Bézierovy křivky (krk, ocas): w0 → w1

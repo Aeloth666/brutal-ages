@@ -132,8 +132,8 @@ function drawFacPick(p) {
 let extraBtn = null, orderBtns = [], evtBanner = null, shake = 0;
 const TREX_TEAM = ['#6b4423', '#4a2c14', '#a07040'];
 function drawTrex(x, dir) {
-  c.save(); c.translate(x, GY); c.scale(dir * 3.3, 3.3);
-  NO_RIDER = true; dino(TREX_TEAM, T * 13, true, Math.sin(T * 5) > 0.6 ? 1 : 0); NO_RIDER = false;
+  c.save(); c.translate(x, GY); c.scale(dir * 4, 4);                  // kyčel ~4,8 m – T-Rex má budit respekt
+  trex(T * 9, true, Math.sin(T * 5) > 0.6 ? 1 : 0);
   c.restore();
   if (GFXL >= 1 && Math.random() < 0.5) fx.push({ smoke: 1, x: MX(x) - dir * 40, y: GY - 4, vx: -dir * 20, vy: -15, r: 8, l: 0.7, ml: 0.7, col: 'rgba(150,120,90,.8)', col2: 'rgba(200,175,140,.6)' });
 }

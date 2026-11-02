@@ -1,5 +1,7 @@
 # Brutal Ages – webová verze
 
+🇬🇧 English: [DEPLOYMENT.md](DEPLOYMENT.md)
+
 Celá hra je statický web: stačí nahrát obsah této složky na libovolný hosting s HTTPS.
 HTTPS je potřeba kvůli hře online (WebRTC), skutečnému počasí (poloha) a offline režimu (service worker).
 

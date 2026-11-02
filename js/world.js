@@ -843,7 +843,13 @@ function addFx(e) {
     case 'chest': if (SEASON && e[3] === mySide) achId(SEASON === 'xmas' ? 'gift' : 'candy');
       fx.push({ txt: '+' + e[4].toLocaleString('cs') + ' zlata', x, y: y - 20, vy: -30, l: 1.6, ml: 1.6 }); part(18, '#facc15', 140, 2.2, 0.8); sfx('buy'); break;
     case 'rhit': bloodBurst(x, y, 16, 220, true); if (Math.random() < 0.2) addPool(x, rnd(4, 8)); shake = Math.max(shake, 0.25); break;
-    case 'cry': if (e[5] !== 5 && (e[5] >= 3 || Math.random() < 0.45)) cry(e[4], x, e[3], e[5] >= 3); break;
+    case 'cry': {
+      const ag = e[4] >> 2;                               // e[4] = věk × 4 + národ
+      if (e[5] === 2 && ag <= 1) { sfx(ag === 0 ? MOUNT_OF[e[4] & 3] : 'horse', x); break; }   // jízdní zvíře se ozve samo
+      if (e[5] === 5) { if (ag <= 1) sfx(ag === 0 ? 'tiger' : 'dragon', x); break; }
+      if (e[5] >= 3 || Math.random() < 0.45) cry(e[4], x, e[3], e[5] >= 3);
+      break;
+    }
     case 'bast': if (e[3] === mySide) achId('bast');
       fx.push({ ring: 1, x, y, l: 0.9, ml: 0.9, r: 160, col: '#4ade80' }); fx.push({ txt: '🛡 POSLEDNÍ BAŠTA!', x, y: y - 40, vy: -25, l: 2.2, ml: 2.2 }); sfx('evo'); break;
     case 'gcry': if (e[3] === mySide) { achId('gcry'); fx.push({ txt: '📯 VÁLEČNÝ POKŘIK!', x, y: y - 20, vy: -25, l: 2, ml: 2 }); const p = V.pl[e[3]]; cry(p.age * 4 + ((p.af && p.af[p.age]) | 0), x, e[3], true); } break;
@@ -1028,22 +1034,24 @@ const BEAST = [
     legs: [[-14, -28, false, '#5e3a1f', 4.5], [12, -28, true, '#5e3a1f', 4.5], [-9, -28, false, '#8b5a33', 4.8], [17, -28, true, '#8b5a33', 4.8]] },
 ];
 function tearBeast(cp) {
-  const { x, side, a } = cp, k = a === 0 ? mountKind(teamCol(side)) : null, B = k ? BEAST_M[k] : BEAST[a], m = side === 0 ? 1 : -1;    // m: směr dopředu ve světě
+  const { x, side, a } = cp, k = cp.k || (a === 0 ? mountKind(teamCol(side)) : a === 1 ? 'horse' : null), B = k ? BEAST_M[k] : BEAST[a], m = side === 0 ? 1 : -1;    // m: směr dopředu ve světě
   cp.l = 0;                                                            // celé zvíře nahradí kusy
-  const base = { side, a, k, s: US, l: 9, ml: 9, gr: 0, bled: 0, rot: 0 };
-  fx.push({ ...base, gib: 'body', x: x + m * B.c[0] * US, y: GY + B.c[1] * US,
+  const sc = k === 'smilodon' ? 0.85 : 1, US0 = US * sc;               // tygr (boss) je kreslený zmenšený
+  const base = { side, a, k, s: US0, l: 9, ml: 9, gr: 0, bled: 0, rot: 0 };
+  fx.push({ ...base, gib: 'body', x: x + m * B.c[0] * US0, y: GY + B.c[1] * US0,
     vx: rnd(-50, 50), vy: -rnd(160, 260), vr: rnd(-2.5, 2.5) });
   // useknutá hlava s krkem odletí dopředu
-  fx.push({ ...base, gib: 'bhead', x: x + m * B.hc[0] * US, y: GY + B.hc[1] * US,
+  fx.push({ ...base, gib: 'bhead', x: x + m * B.hc[0] * US0, y: GY + B.hc[1] * US0,
     vx: m * rnd(90, 220) + rnd(-30, 30), vy: -rnd(380, 540), vr: rnd(-11, 11) });
-  bloodBurst(x + m * B.neck[0] * US, GY + B.neck[1] * US, 26, 260);
+  bloodBurst(x + m * B.neck[0] * US0, GY + B.neck[1] * US0, 26, 260);
   B.legs.forEach(([hx, hy], i) => {
-    fx.push({ ...base, gib: 'bleg', i, x: x + m * hx * US, y: GY + (hy - 11) * US,
+    fx.push({ ...base, gib: 'bleg', i, x: x + m * hx * US0, y: GY + (hy - 11) * US0,
       vx: m * (hx >= 0 ? 1 : -1) * rnd(70, 210) + rnd(-40, 40), vy: -rnd(260, 440), vr: rnd(-13, 13) });
-    bloodBurst(x + m * hx * US, GY + hy * US, 12, 200);
+    bloodBurst(x + m * hx * US0, GY + hy * US0, 12, 200);
   });
   bloodBurst(x, GY - 34 * US, 18, 220);
   addPool(x, rnd(18, 26)); addPool(x + m * 25, rnd(8, 12)); addPool(x - m * 25, rnd(8, 12));
+  if (k === 'smilodon') return;                                        // boss nikoho neveze
   // jezdec spadne zvlášť a dopadne jako obyčejný voják
   const rider = { corpse: 1, x: x - m * 3 * US, side, a, ty: 0, l: 1.3, ml: 1.3 };
   fx.push(rider); gore(rider);
@@ -1067,13 +1075,21 @@ function drawBeastHead(f) {
 function drawBeastBody(f) {
   const B = beastOf(f);
   c.translate(-B.c[0], -B.c[1]);
-  NO_RIDER = NO_LEGS = NO_BHEAD = true; heavy(teamCol(f.side), f.a, 0, 0, 1); NO_RIDER = NO_LEGS = NO_BHEAD = false;
+  NO_RIDER = NO_LEGS = NO_BHEAD = true; if (B.kind) mount(teamCol(f.side), B.kind, 0, false, 0); else heavy(teamCol(f.side), f.a, 0, 0, 1); NO_RIDER = NO_LEGS = NO_BHEAD = false;
   for (const [hx, hy, , , w] of B.legs) stump(hx, hy + 1.5, w * 0.62);
 }
 function gore(cp) {
   const { x, side, a, ty } = cp, sup = ty === 3, s = US * (sup ? 1.45 : 1);
   const back = -(side === 0 ? 1 : -1);                // mrtvola padá dozadu
-  if (ty === 5) { if (a <= 1) { bloodBurst(x, GY - 60, 40, 260); addPool(x, rnd(18, 26)); addPool(x + 30, rnd(10, 16)); } return; }
+  if (ty === 5) {
+    if (a === 0) { tearBeast({ ...cp, k: 'smilodon' }); cp.l = 0; return; }
+    if (a === 1) {                                       // drak: přestane mávat a zřítí se k zemi, cestou krvácí
+      cp.l = 0; const m = side === 0 ? 1 : -1;
+      fx.push({ gib: 'dragon', side, a, x, y: GY - 112 * US, vx: m * rnd(20, 60), vy: -rnd(40, 90), vr: m * rnd(0.3, 0.7), rot: 0, s: US, l: 12, ml: 12, gr: 0, bled: 0 });
+      bloodBurst(x, GY - 112 * US, 40, 260); return;
+    }
+    return;
+  }
   if (ty === 2) {
     if (a <= 1) return tearBeast(cp);
     if (a >= 3) return;                                 // tank a mech nikoho nevezou – jen výbuch
@@ -1108,7 +1124,7 @@ function gore(cp) {
   addPool(x + back * 22 * s, rnd(10, 16) * s);
 }
 // obrys kusu kolem jeho středu (lokální souřadnice) – pro výpočet, kde se dotkne země
-const GIB_BOX = { head: [-8, 8, -8, 8], arm: [-3, 3, -7, 8], leg: [-3, 6, -10, 11] };
+const GIB_BOX = { head: [-8, 8, -8, 8], arm: [-3, 3, -7, 8], leg: [-3, 6, -10, 11], dragon: [-60, 60, -30, 40] };
 function gibBottom(f) {
   let b;
   if (f.gib === 'bhead') {
@@ -1129,7 +1145,7 @@ function drawGib(f, dt) {
   if (f.rest) {
     // leží: žádná gravitace ani odskoky, jen dojede, překlopí se naplocho a drží se země
     f.vx *= Math.max(0, 1 - dt * 8); f.x += f.vx * dt;
-    const P = Math.PI, tgt = f.gib === 'body' ? Math.round(f.rot / (2 * P)) * 2 * P
+    const P = Math.PI, tgt = f.gib === 'body' || f.gib === 'dragon' ? Math.round(f.rot / (2 * P)) * 2 * P
       : f.gib === 'head' || f.gib === 'bhead' ? Math.round(f.rot / P) * P
       : Math.round((f.rot - P / 2) / P) * P + P / 2;
     f.rot += (tgt - f.rot) * Math.min(1, dt * 7);
@@ -1150,7 +1166,8 @@ function drawGib(f, dt) {
   c.globalAlpha = Math.min(1, f.l / 1.5);
   c.save(); c.translate(MX(f.x), f.y); c.scale(facing(f.side) * f.s, f.s); c.rotate(f.rot);
   const OFg = outfitOf(team, f.a); SK = (OFg && OFg.skin) || SKIN3;
-  if (f.gib === 'body') drawBeastBody(f);
+  if (f.gib === 'dragon') { BOSS_STILL = true; c.translate(0, 112); BOSS_ART[1](team, 0, 0); BOSS_STILL = false; }
+  else if (f.gib === 'body') drawBeastBody(f);
   else if (f.gib === 'bleg') drawBeastLeg(f);
   else if (f.gib === 'bhead') drawBeastHead(f);
   else if (f.gib === 'head') {

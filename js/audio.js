@@ -108,6 +108,14 @@ function sfx(k, x) {
     case 'win': [0, 4, 7, 12, 7, 12].forEach((n, i) => osc(dest, t + i * 0.14, mtof(67 + n), i === 5 ? 1.2 : 0.3, 'square', 0.12, { lp: 2400, rev: 1, sus: 1 })); break;
     case 'lose': [7, 3, 0, -5].forEach((n, i) => osc(dest, t + i * 0.25, mtof(60 + n), i === 3 ? 1.4 : 0.35, 'sawtooth', 0.1, { lp: 1200, rev: 1, sus: 1 })); break;
     case 'click': osc(dest, t, 660, 0.05, 'triangle', 0.15); break;
+    // zvířata (hlasy přes formanty – voice()): ozvou se při nástupu do boje
+    case 'mammoth': voice(dest, t, 380, 760, 0.25, 'a', 0.12, { vib: 7, vd: 0.03 }); voice(dest, t + 0.22, 760, 560, 0.75, 'a', 0.14, { vib: 9, vd: 0.05 }); noise(dest, t, 0.9, 0.12, 'bandpass', 1300, { q: 2 }); break;
+    case 'wolf': voice(dest, t, 330, 560, 0.5, 'u', 0.09, { vib: 5, vd: 0.01 }); voice(dest, t + 0.48, 560, 400, 1.1, 'o', 0.09, { vib: 5, vd: 0.015 }); break;
+    case 'bear': voice(dest, t, 100, 78, 0.9, 'o', 0.17, { trem: 28 }); noise(dest, t, 0.9, 0.35, 'lowpass', 520, { f2: 180 }); break;
+    case 'aurochs': voice(dest, t, 150, 128, 0.35, 'u', 0.13); voice(dest, t + 0.3, 128, 96, 0.95, 'o', 0.15, { vib: 4, vd: 0.02 }); break;
+    case 'horse': voice(dest, t, 900, 1150, 0.15, 'i', 0.07, { vib: 22, vd: 0.06 }); voice(dest, t + 0.13, 1150, 480, 0.8, 'e', 0.08, { vib: 24, vd: 0.08 }); noise(dest, t + 0.95, 0.18, 0.25, 'bandpass', 900, { q: 1 }); break;
+    case 'tiger': noise(dest, t, 0.25, 0.3, 'bandpass', 2400, { q: 1.5 }); voice(dest, t + 0.05, 170, 105, 1.2, 'a', 0.2, { trem: 18 }); noise(dest, t + 0.05, 1.2, 0.4, 'lowpass', 700, { f2: 200, rev: 1 }); break;
+    case 'dragon': voice(dest, t, 130, 70, 1.6, 'a', 0.22, { trem: 14 }); osc(dest, t, 65, 1.5, 'sawtooth', 0.2, { f2: 40, lp: 500 }); noise(dest, t + 0.3, 1.4, 0.35, 'highpass', 1500, { f2: 600, rev: 1 }); break;
   }
 }
 
