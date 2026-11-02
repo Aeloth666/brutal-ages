@@ -611,8 +611,8 @@ const MOUNT = {
     lw: [[20, 13, 10], [17, 12.5, 10]], foot: 'plant', col: ['#62402a', '#3f2716', '#87603e'], head: [42, -44], neck: [28, -44, 11], seat: [-4, -50], stride: 9, lift: 4, bob: 1.5, hp: 112 },
   aurochs: { body: [-2, -45, 34, 14], legs: [[-26, 0, 0, -40], [18, 1, 0, -39], [-20, 0, 1, -40], [24, 1, 1, -39]], hs: [16, 16, 12], fs: [14, 16, 10],
     lw: [[16, 6.6, 4.6], [12, 6.2, 4.6]], foot: 'hoof', col: ['#3f2e24', '#271b13', '#614737'], head: [46, -48], neck: [30, -52, 9], seat: [-4, -58], stride: 11, lift: 5, bob: 1.3, hp: 122 },
-  smilodon: { body: [-2, -44, 40, 18], legs: [[-28, 0, 0, -40], [20, 1, 0, -42], [-21, 0, 1, -40], [27, 1, 1, -42]], hs: [18, 16, 10], fs: [18, 18, 5],
-    lw: [[26, 11, 8], [20, 12, 10]], foot: 'paw', col: ['#d9822b', '#a85a18', '#f2b062'], head: [50, -58], neck: [34, -54, 14], seat: [-4, -62], stride: 13, lift: 5, bob: 1.4, hp: 112 },
+  smilodon: { body: [-2, -44, 40, 18], legs: [[-28, 0, 0, -40], [20, 1, 0, -38], [-21, 0, 1, -40], [26, 1, 1, -38]], hs: [18, 16, 10], fs: [16, 17, 5],
+    lw: [[26, 11, 7.5], [16, 11, 8.5]], foot: 'paw', pawK: 2.2, col: ['#d9822b', '#a85a18', '#f2b062'], head: [50, -58], neck: [34, -54, 14], seat: [-4, -62], stride: 13, lift: 5, bob: 1.4, hp: 112 },
 };
 const MOUNT_OF = ['mammoth', 'wolf', 'bear', 'aurochs'];                  // pořadí národů doby kamenné (AGEFAC[0])
 const mountKind = team => MOUNT_OF[(team && team.af && team.af[0]) | 0] || 'mammoth';
@@ -643,7 +643,7 @@ function muscle(ax, ay, bx, by, wa, wb, bulge) {
 // noha: spočítá klouby a nakreslí ji (nejdřív obrys, pak výplň, ať spoje nemají vnitřní čáry)
 function qLeg(kind, hx, hy, phase, walk, front, col, near) {
   const M = MOUNT[kind], [L1, L2, L3] = front ? M.fs : M.hs, [w1, w2, w3] = M.lw[front ? 1 : 0], s = walk ? Math.sin(phase) : 0, v = walk ? Math.cos(phase) : 0;
-  const lift = v > 0 ? M.lift * v : 0, fx = hx + M.stride * s + (front ? 2 : -3), fy = -lift, ft = FOOT_H[M.foot];
+  const lift = v > 0 ? M.lift * v : 0, fx = hx + M.stride * s + (front ? 2 : -3), fy = -lift, ft = FOOT_H[M.foot] * (M.pawK || 1);
   // spodní kloub: hlezno / zápěstí (u medvěda pata, u mamuta skoro nad chodidlem – sloupovité nohy)
   let jx, jy;
   if (M.foot === 'plant') { jx = fx - (front ? 2 : 5); jy = fy - ft; }
@@ -677,7 +677,7 @@ function mountFoot(kind, x, y, col, heel) {
     c.fillStyle = '#e8dcc0'; for (const k of [2.5, 4.6, 6.6]) { c.beginPath(); c.moveTo(x + k - 1.4, y - 2.4); c.quadraticCurveTo(x + k + 2.6, y - 2, x + k + 2.2, y + 0.2); c.lineTo(x + k - 0.8, y - 0.6); c.closePath(); c.fill(); } return;
   }
   // tlapa na prstech (vlk, tygr)
-  const k = kind === 'smilodon' ? 1.5 : 1;
+  const k = MOUNT[kind].pawK || 1;
   c.beginPath(); c.moveTo(x - 3 * k, y); c.quadraticCurveTo(x - 3.5 * k, y - 3.5 * k, x + 0.5 * k, y - 3.6 * k); c.quadraticCurveTo(x + 5.5 * k, y - 3 * k, x + 5.5 * k, y); c.closePath(); fo(col, 1);
   c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 0.7; for (const d of [1.2, 3.2]) ln(x + d * k, y - 2.6 * k, x + d * k, y);
   c.fillStyle = '#f2ead6'; for (const d of [1.5, 3.5, 5.3]) poly([x + d * k, y - 0.6, x + (d + 1.4) * k, y + 0.4, x + (d - 0.2) * k, y + 0.4]), c.fill();
@@ -749,23 +749,34 @@ function mountHead(kind, at, ph = 0) {
     c.fillStyle = '#111'; circ(42, -50, 1.5); c.fillStyle = 'rgba(255,255,255,.6)'; circ(42.4, -50.4, 0.5);
     if (at > 0.2) { c.fillStyle = '#7f1d1d'; c.beginPath(); c.ellipse(50, -39, 3.8, 1.4 + at * 1.6, 0.15, 0, Math.PI * 2); c.fill(); c.fillStyle = '#fff'; poly([47.5, -40, 48.5, -38, 49.5, -40]); c.fill(); }
   } else if (kind === 'smilodon') {
-    // šavlozubec: krátký čenich, mohutná čelist, šavle z horní čelisti, při útoku tlama dokořán
-    const op = Math.min(1, at * 1.6);
-    c.beginPath(); c.moveTo(30, -64); c.bezierCurveTo(34, -72, 44, -72, 48, -66); c.lineTo(46, -54); c.bezierCurveTo(40, -48, 32, -48, 28, -54); c.closePath(); fo(CD, 1.2);
-    c.beginPath(); c.ellipse(38, -70, 4.5, 4, -0.3, 0, Math.PI * 2); fo(C, 1.3); c.fillStyle = '#f3a7a0'; circ(38, -70, 2);   // ucho
-    c.save(); c.translate(48, -50); c.rotate(op * 0.9);                                              // spodní čelist
-    c.beginPath(); c.moveTo(-8, 0); c.quadraticCurveTo(4, 6, 14, 2); c.lineTo(13, 5); c.quadraticCurveTo(2, 10, -9, 5); c.closePath(); fo('#f6ead2', 1.2); c.restore();
-    if (op > 0.15) { c.fillStyle = '#5b1010'; c.beginPath(); c.moveTo(48, -51); c.lineTo(62, -48); c.lineTo(56 + op * 4, -40 + op * 6); c.closePath(); c.fill(); }
-    c.beginPath(); c.moveTo(32, -62); c.bezierCurveTo(36, -72, 52, -72, 58, -64); c.quadraticCurveTo(64, -60, 63, -54); c.quadraticCurveTo(60, -49, 54, -50);
-    c.lineTo(46, -50); c.bezierCurveTo(38, -48, 32, -54, 32, -62); c.closePath();
-    fo(lg('smiHead', 0, -72, 0, -48, [[0, CL], [1, C]]), 1.6);
-    c.fillStyle = '#f6ead2'; c.beginPath(); c.moveTo(50, -56); c.quadraticCurveTo(58, -60, 63, -55); c.quadraticCurveTo(60, -50, 54, -50); c.lineTo(48, -51); c.closePath(); c.fill();
-    c.fillStyle = '#2a1608'; for (const [x, y, r] of [[40, -66, 0.5], [44, -68, 0.3], [36, -60, 0.9]]) { c.beginPath(); c.ellipse(x, y, 1.2, 3.6, r, 0, Math.PI * 2); c.fill(); }
-    for (const x of [53, 57]) { c.beginPath(); c.moveTo(x - 2, -52); c.quadraticCurveTo(x + 1.5, -42, x - 0.5, -33); c.quadraticCurveTo(x + 3.5, -42, x + 2, -52); c.closePath(); fo('#fbf6e8', 1); }   // šavle
-    c.fillStyle = '#111'; ell(62, -57, 1.8, 1.3);
-    c.fillStyle = '#fde047'; ell(49, -62, 2.6, 1.8); c.fillStyle = '#111'; ell(49.5, -62, 0.8, 1.6);
-    c.strokeStyle = '#2a1608'; c.lineWidth = 1.5; ln(45, -65, 53, -64);
-    c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 0.7; for (const d of [-1, 1, 3]) ln(58, -53 + d * 0.6, 68, -54 + d * 1.6);
+    c.beginPath(); c.moveTo(24, -63); c.bezierCurveTo(30, -66, 36, -68, 40, -66); c.lineTo(42, -50); c.bezierCurveTo(38, -44, 32, -40, 26, -38); c.closePath(); c.fillStyle = lg('smiNeck', 0, -68, 0, -38, [[0, CL], [1, C]]); c.fill();   // silný krk (obrys jen nahoře, ať nezůstane čára přes tělo)
+    c.strokeStyle = OL; c.lineWidth = 1.5; c.beginPath(); c.moveTo(24, -63); c.bezierCurveTo(30, -66, 36, -68, 40, -66); c.stroke();
+    c.fillStyle = '#2a1608'; for (const x of [28, 33]) { c.beginPath(); c.ellipse(x, -60, 1.2, 4, 0.3, 0, Math.PI * 2); c.fill(); }
+    // šavlozubec ze strany: klenutá lebka, krátký čenich, výrazná brada; vidět je bližší šavle, vzdálená jen vykukuje za ní
+    const op = Math.min(1, at * 1.6), HG = [42, -52];
+    c.beginPath(); c.ellipse(41, -70, 4.2, 4, -0.4, 0, Math.PI * 2); fo(C, 1.3); c.fillStyle = '#e59a8f'; circ(41.3, -69.6, 1.8);   // ucho
+    c.beginPath(); c.moveTo(52.5, -53); c.quadraticCurveTo(54.5, -45, 53.5, -38); c.quadraticCurveTo(56, -45, 55.5, -53); c.closePath(); fo('#cfc5ad', 0.9);   // vzdálená šavle
+    if (op > 0.1) { c.fillStyle = '#4a0d0d'; c.beginPath(); c.moveTo(HG[0], HG[1]); c.lineTo(61, -52.5); c.lineTo(HG[0] + Math.cos(op * 0.9) * 18, HG[1] + Math.sin(op * 0.9) * 18 + 2); c.closePath(); c.fill(); }
+    c.save(); c.translate(...HG); c.rotate(op * 0.9); c.translate(-HG[0], -HG[1]);                                   // spodní čelist s bradou
+    c.beginPath(); c.moveTo(41, -52); c.lineTo(58, -51.5); c.quadraticCurveTo(61, -51, 60, -47.5); c.lineTo(57.5, -44.5); c.quadraticCurveTo(49, -43.5, 42, -47.5); c.closePath();
+    fo(lg('smiJaw', 0, -52, 0, -44, [[0, CL], [0.5, '#f6ead2'], [1, '#e8d8b8']]), 1.3);
+    c.restore();
+    c.beginPath(); c.moveTo(34, -60); c.bezierCurveTo(34, -72, 46, -76, 54, -70); c.bezierCurveTo(57, -67.5, 60, -64.5, 63, -62); c.quadraticCurveTo(66.5, -59.5, 65.5, -55.5);
+    c.quadraticCurveTo(64.5, -52, 60, -52); c.lineTo(48, -52); c.bezierCurveTo(43, -51.5, 39, -49, 36, -51.5); c.bezierCurveTo(32.5, -54, 33, -57, 34, -60); c.closePath();
+    fo(lg('smiHead2', 0, -75, 0, -50, [[0, CL], [1, C]]), 1.6);
+    c.save(); c.clip();
+    c.fillStyle = '#f6ead2'; c.beginPath(); c.ellipse(60, -54.5, 6.5, 3.6, -0.1, 0, Math.PI * 2); c.fill(); c.beginPath(); c.ellipse(46, -53, 7, 3, 0, 0, Math.PI * 2); c.fill();   // světlá tlama a líce
+    c.fillStyle = '#2a1608'; for (const [x, y, r, l] of [[44, -69, 0.2, 3.6], [48, -71, 0.1, 3], [40, -64, 0.7, 4], [38, -58, 0.9, 3.4]]) { c.beginPath(); c.ellipse(x, y, 1.1, l, r, 0, Math.PI * 2); c.fill(); }
+    c.restore();
+    c.fillStyle = C; for (let k = 0; k < 4; k++) poly([35 + k * 2.6, -52.5 + k * 0.4, 34 + k * 2.6, -48 + k * 0.3, 37.5 + k * 2.6, -51.5 + k * 0.4]), c.fill();   // lícní srst
+    c.fillStyle = '#3a1a14'; poly([63.5, -60.5, 66, -58.5, 63.5, -57]); c.fill();                                          // nos
+    c.strokeStyle = '#2a1608'; c.lineWidth = 1; c.beginPath(); c.moveTo(64.5, -56); c.quadraticCurveTo(63, -53, 60, -52.5); c.stroke();
+    c.fillStyle = '#1a1208'; c.beginPath(); c.ellipse(53, -64, 3, 1.9, -0.2, 0, Math.PI * 2); c.fill();                       // oko
+    c.fillStyle = '#fbbf24'; c.beginPath(); c.ellipse(53.2, -64, 2.3, 1.4, -0.2, 0, Math.PI * 2); c.fill(); c.fillStyle = '#111'; ell(53.6, -64, 0.6, 1.3);
+    c.strokeStyle = '#2a1608'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(48.5, -66.5); c.quadraticCurveTo(53, -68.5, 57, -66); c.stroke();   // obočí
+    c.beginPath(); c.moveTo(56, -53); c.quadraticCurveTo(59.5, -43, 57.5, -33.5); c.quadraticCurveTo(62, -43, 59.5, -53); c.closePath();    // bližší šavle
+    fo(lg('smiSab', 56, -53, 60, -34, [[0, '#fffdf5'], [1, '#e6dcc4']]), 1.1);
+    c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 0.6; for (const d of [-1, 0.5, 2]) ln(61, -55 + d * 0.8, 70, -56 + d * 1.8);   // vousy
   } else {
     c.beginPath(); c.moveTo(26, -60); c.bezierCurveTo(34, -62, 42, -60, 46, -55); c.lineTo(55, -38); c.quadraticCurveTo(56.5, -33, 51, -33); c.lineTo(46, -34);
     c.bezierCurveTo(40, -37, 34, -42, 30, -46); c.bezierCurveTo(28, -40, 30, -34, 28, -30); c.lineTo(24, -40); c.closePath();               // hlava a lalok
@@ -825,8 +836,9 @@ function mount(team, kind, ph, walk, at) {
     c.fillStyle = '#2a1608'; for (let k = 0; k < 8; k++) { const x = -38 + k * 9.5; c.beginPath(); c.moveTo(x, -66); c.quadraticCurveTo(x + 5, -54, x + 1, -42); c.quadraticCurveTo(x + 2, -54, x - 3, -64); c.closePath(); c.fill(); }
   }
   c.restore();
-  if (NO_BHEAD) stump(M.neck[0], M.neck[1], M.neck[2] * 0.8);
-  else { c.save(); c.translate(0, walk ? Math.sin(ph * 2) * 0.8 : 0); mountHead(kind, at, ph); c.restore(); }
+  // hlava; u tygra až po bližších nohách, ať rameno nezakryje čelist
+  const head = () => { if (NO_BHEAD) stump(M.neck[0], M.neck[1], M.neck[2] * 0.8); else { c.save(); c.translate(0, walk ? Math.sin(ph * 2) * 0.8 : 0); mountHead(kind, at, ph); c.restore(); } };
+  if (kind !== 'smilodon') head();
   if (kind !== 'smilodon') {
     // přikrývka v barvě týmu na hřbetě a jezdec
     const [sx, sy] = M.seat;
@@ -839,6 +851,7 @@ function mount(team, kind, ph, walk, at) {
   }
   c.restore();
   if (!NO_LEGS && !under) { leg(2); leg(3); }                                                                   // bližší nohy
+  if (kind === 'smilodon') { c.save(); c.translate(0, bob); head(); c.restore(); }
 }
 
 function heavy(team, age, ph, at, st) {
