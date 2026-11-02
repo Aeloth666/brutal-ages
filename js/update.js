@@ -25,6 +25,7 @@ async function updInit(manual) {
     const { path } = await WV.getServerBasePath();
     if (path && path.includes('/live/')) {
       await WV.persistServerBasePath();
+      achId('update');
       const cur = path.replace(/\/+$/, '').split('/live/')[1];          // Capacitor vrací cestu s lomítkem na konci
       const { files } = await FS.readdir({ path: 'live', directory: 'DATA' }).catch(() => ({ files: [] }));
       for (const f of files) { const n = f.name || f; if (n !== cur) FS.rmdir({ path: 'live/' + n, directory: 'DATA', recursive: true }).catch(() => {}); }

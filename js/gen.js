@@ -67,7 +67,7 @@ function renderGen() {
     <h3 class="gen-h">🎖 Výbava hrdinů <small>(výhry, kdy jsi skončil v daném věku)</small></h3>
     <div class="gen-gear">${AGES.map((A, a) => `<div><b>${A.name}: ${HERO_N[a]}</b> <small>${GEAR.w[a]} výher</small><br>${GEAR_N.map((n, k) => `<span class="${gearLv(a) > k ? 'on' : ''}">${n}${gearLv(a) > k ? '' : ' (' + GEAR_AT[k] + ')'}</span>`).join(' ')}</div>`).join('')}</div>
     <p class="muted">Zbraň: hrdina +15 % útoku · Zbroj: +20 % zdraví · Legendární kus: dalších +15 % obojího. Všechny bonusy platí jen proti počítači.</p>`;
-  document.querySelectorAll('#genBody .gen-n').forEach(b => b.onclick = () => { const k = b.dataset.k; if (GEN[k] === +b.dataset.i && genFree() >= GEN[k] + 1) { GEN[k]++; store('aow-gen', GEN); sfx('up'); renderGen(); } });
+  document.querySelectorAll('#genBody .gen-n').forEach(b => b.onclick = () => { const k = b.dataset.k; if (GEN[k] === +b.dataset.i && genFree() >= GEN[k] + 1) { GEN[k]++; store('aow-gen', GEN); sfx('up'); if (GEN[k] === 5) achId('gen5'); if (GEN.a + GEN.o + GEN.e === 15) achId('genAll'); renderGen(); } });
   $('bGenReset').onclick = () => { GEN.a = GEN.o = GEN.e = 0; store('aow-gen', GEN); sfx('click'); renderGen(); };
 }
 $('bGen').onclick = () => { renderGen(); openPanel('genPanel'); };
@@ -109,6 +109,7 @@ function questTrack(r) {
     q.p = D.set ? Math.max(q.p, v) : q.p + v;
     if (q.p >= qGoal(q)) {
       q.ok = 1; QST.pts += rew; QST.done++;
+      achId('q1'); if (QST.done >= 25) achId('q25');
       toasts.push({ a: { n: D.n(q.k) + ` · +${rew} ${rew === 1 ? 'bod' : 'body'} generála` }, h: '✅ ÚKOL SPLNĚN', l: 4 });
       const sk = SKINS.find(s => s.need === QST.done);
       if (sk) toasts.push({ a: { n: 'Nový skin armády: ' + sk.n }, h: '🎨 ODEMČENO', l: 4 });
@@ -127,7 +128,7 @@ function renderQuest() {
     <h3>🎨 Skiny armády <small>(odemykají se splněnými úkoly)</small></h3>
     <div class="skins">${SKINS.map((s, i) => { const lock = QST.done < s.need; return `<button class="skin ${(SET.skin || 0) === i ? 'on' : ''} ${lock ? 'locked' : ''}" data-i="${i}">
       <span class="sw" style="background:${s.col ? `linear-gradient(135deg,${s.col[2]},${s.col[0]},${s.col[1]})` : '#334155'}"></span>${s.n}<small>${lock ? '🔒 ' + s.need + ' úkolů' : s.d}</small></button>`; }).join('')}</div>`;
-  document.querySelectorAll('#questBody .skin').forEach(b => b.onclick = () => { const i = +b.dataset.i; if (QST.done < SKINS[i].need) return; SET.skin = i; saveSet(); TEAMC.clear(); sfx('click'); renderQuest(); });
+  document.querySelectorAll('#questBody .skin').forEach(b => b.onclick = () => { const i = +b.dataset.i; if (QST.done < SKINS[i].need) return; SET.skin = i; saveSet(); TEAMC.clear(); sfx('click'); if (i) achId('skin'); if (SKINS[i].sk) achId('skel'); renderQuest(); });
 }
 $('bQuest').onclick = () => { renderQuest(); openPanel('questPanel'); };
 
@@ -144,7 +145,7 @@ const SKINS = [
 // ---------- výsledek bitvy (volá record) ----------
 function genRecord(won, V) {
   const me = V.pl[mySide], online = role !== 'solo' && !coop;
-  if (won && (role === 'solo' || coop)) { GEAR.w[me.age]++; store('aow-gear', GEAR); if (GEAR_AT.includes(GEAR.w[me.age])) toasts.push({ a: { n: `${HERO_N[me.age]}: ${GEAR_N[GEAR_AT.indexOf(GEAR.w[me.age])]}` }, h: '🎖 VÝBAVA HRDINY', l: 4 }); }
+  if (won && (role === 'solo' || coop)) { GEAR.w[me.age]++; store('aow-gear', GEAR); if (GEAR_AT.includes(GEAR.w[me.age])) achId('gear'), toasts.push({ a: { n: `${HERO_N[me.age]}: ${GEAR_N[GEAR_AT.indexOf(GEAR.w[me.age])]}` }, h: '🎖 VÝBAVA HRDINY', l: 4 }); }
   questTrack({ won, kills: me.kills, built: me.built, age: me.age, online: role !== 'solo', stars: V.camp != null && curDef == null ? lastStars : 0,
     spec: S && S.st ? S.st.spec[mySide] : 0, fac: me.age * 4 + ((me.af && me.af[me.age]) | 0) });
   // Rudá horda občas zaútočí na dobyté území
@@ -161,7 +162,7 @@ function genRecord(won, V) {
 // obrana území skončila
 function defResult(won) {
   lastStars = 0;
-  if (won) { WORLD.att = null; store('aow-world', WORLD); toasts.push({ a: { n: CAMP[curDef].n + ' – bonus zase platí' }, h: '🛡 ÚZEMÍ UBRÁNĚNO', l: 4 }); }
+  if (won) { achId('def'); WORLD.att = null; store('aow-world', WORLD); toasts.push({ a: { n: CAMP[curDef].n + ' – bonus zase platí' }, h: '🛡 ÚZEMÍ UBRÁNĚNO', l: 4 }); }
 }
 
 // ---------- statistiky bitvy ----------
@@ -169,6 +170,7 @@ let lastBst = null;
 const newBst = () => ({ t: [0], army: [[0], [0]], kills: [[0], [0]], dmg: [{ u: 0, t: 0, s: 0, h: 0, b: 0 }, { u: 0, t: 0, s: 0, h: 0, b: 0 }], made: [0, 0], gold: [0, 0], spec: [0, 0] });
 function renderBst() {
   const B = lastBst; if (!B) return;
+  achId('stats');
   const me = mySide, op = 1 - me, names = [SET.name || 'Ty', role === 'solo' ? 'Počítač' : OPP.n || 'Soupeř'];
   const col = [teamCol(me)[0], teamCol(op)[0]];
   const row = (n, a, b) => `<tr><td>${n}</td><td>${(a | 0).toLocaleString('cs')}</td><td>${(b | 0).toLocaleString('cs')}</td></tr>`;
@@ -232,6 +234,7 @@ function sayEmote(i) {
   const now = performance.now(); if (now - chatLast < 900) return;
   chatLast = now; chatOpen = false;
   send({ t: 'emo', i, side: mySide }); showEmote(mySide, i);
+  achId(i === 6 ? 'finger' : 'emote');
 }
 function drawEmotes(dt) {
   for (const m of emotes) {

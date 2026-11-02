@@ -37,6 +37,7 @@ function lbResult(won) {
   const opp = OPP.rating || 1000, exp = 1 / (1 + Math.pow(10, (opp - LB.r) / 400));
   LB.r = Math.max(100, LB.r + 32 * ((won ? 1 : 0) - exp));
   won ? LB.w++ : LB.l++;
+  if (LB.r >= 1200) achId('elo1200');
   store('aow-lb', LB); lbPush();
 }
 
@@ -48,6 +49,7 @@ async function renderLb() {
   let list;
   try { list = await lbFetch(); } catch (e) { box.innerHTML = '<p class="muted">Žebříček se nepodařilo načíst – jsi online?</p>'; return; }
   const me = load('aow-fb', {}).uid;
+  if (list.length >= 3 && list.findIndex(p => p.uid === me) >= 0 && list.findIndex(p => p.uid === me) < 3) achId('podium');
   box.innerHTML = `<p class="muted">Hodnocení se počítá z online soubojů 1 na 1 (začíná se na 1000). Tvoje: <b>${Math.round(LB.r)}</b> · ${LB.w} výher, ${LB.l} proher</p>
     <table class="bst lb"><tr><th>#</th><th>Hráč</th><th>Hodnocení</th><th>V : P</th><th>Úroveň</th><th>★ kampaň</th></tr>
     ${list.map((p, i) => `<tr class="${p.uid === me ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td>${(EMBS[p.e] || {}).ic || ''} ${esc(p.n)}</td><td><b>${p.r}</b></td><td>${p.w} : ${p.l}</td><td>${p.lv}</td><td>${p.st}</td></tr>`).join('')}</table>`;

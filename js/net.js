@@ -179,7 +179,7 @@ function onData(m, k) {
     case 's': if (role === 'guest') onSnap(m.d); break;
     case 'start':
       if (role === 'host' || k) break;
-      specMode = !!m.spec;
+      specMode = !!m.spec; if (specMode) achId('spect');
       SESS = m.sess; OPP = infoOf(m); if (!specMode) rememberFriend(OPP); coop = !!m.coop; TEAM = !!m.team; GSIDE = m.side ?? (coop ? 0 : 1); setField(m.field);
       startGame('guest', null, m.camp ?? null);
       send({ t: 'hi', ...hello() }); partySend();

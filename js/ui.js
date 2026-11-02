@@ -35,7 +35,54 @@ const ACH = [
   { id: 'campAll', n: 'Pán světa',         d: 'Dokonči celou kampaň.',                       w: () => Object.keys(CAMPS).length >= CAMP.length },
   { id: 'camp45',  n: 'Perfekcionista',    d: 'Získej v kampani všech 45 hvězd.',            w: () => Object.values(CAMPS).reduce((a, b) => a + b, 0) >= CAMP.length * 3 },
   { id: 'rematch', n: 'Ještě jednou!',     d: 'Vyhraj odvetu proti kámošovi.',               w: () => role !== 'solo' && !coop && rematchN > 0 },
+  // ---- bossové ----
+  { id: 'bMam',    n: 'Mamutí steak',      d: 'Poraž Válečného mamuta. Na grilu vydrží týden.' },
+  { id: 'bDrag',   n: 'Drakobijce amatér', d: 'Poraž Draka. Princezna nebyla k dispozici.' },
+  { id: 'bZep',    n: 'Splasknutý balonek', d: 'Sestřel Obří vzducholoď.' },
+  { id: 'bTank',   n: 'Šrotiště',          d: 'Rozbij Obří tank. Výkup železa platí.' },
+  { id: 'bTitan',  n: 'Titanic',           d: 'Potop Titána. I ten největší jednou padne.' },
+  { id: 'bAll',    n: 'Sběratel trofejí',  d: 'Poraž všech 5 bossů. Kam to všechno pověsíš?' },
+  { id: 'bChick',  n: 'Kuřecí křidélka',   d: 'Poraž bosse ve slepičím režimu.', secret: 1 },
+  // ---- generál, úkoly, skiny ----
+  { id: 'gen5',    n: 'Kariérista',        d: 'Vylepši jednu větev Generála na maximum.' },
+  { id: 'genAll',  n: 'Generalissimus',    d: 'Vylepši všechny tři větve Generála na maximum.' },
+  { id: 'q1',      n: 'Poslušný voják',    d: 'Splň první úkol. Rozkaz je rozkaz.' },
+  { id: 'q25',     n: 'Workoholik',        d: 'Splň 25 úkolů. Nechceš si dát pauzu?' },
+  { id: 'skin',    n: 'Módní policie',     d: 'Obleč armádě nový skin.' },
+  { id: 'skel',    n: 'Kostlivec ve skříni', d: 'Nasaď armádě skin Kostlivci.', secret: 1 },
+  { id: 'gear',    n: 'Nablýskaný',        d: 'Získej hrdinovi první kus výbavy.' },
+  // ---- bitva ----
+  { id: 'spec10',  n: 'Elitní jednotka',   d: 'Vyrob v jedné bitvě 10 speciálních jednotek.', t: () => !!(S && S.st && S.st.spec[mySide] >= 10) },
+  { id: 'night',   n: 'Noční směna',       d: 'Bojuj, když na bojiště padne noc.',  t: (m, V) => nightK(V.time) >= 1 && V.over < 0 },
+  { id: 'storm',   n: 'Písek v botách',    d: 'Zažij písečnou bouři.',              t: (m, V) => !!V.storm },
+  { id: 'lava',    n: 'Horké nožičky',     d: 'Zažij výbuch lávy na sopce.' },
+  { id: 'bast',    n: 'Zachráněn zvonem',  d: 'Zachraň základnu Poslední baštou.' },
+  { id: 'gcry',    n: 'Křikem k vítězství', d: 'Zazni válečným pokřikem generála.' },
+  { id: 'turbo',   n: 'Spěchám na oběd',   d: 'Hraj na dvojnásobnou rychlost.',     t: (m, V) => V.speed > 1 && V.over < 0 },
+  { id: 'broke',   n: 'Chudý jako kostelní myš', d: 'Měj v bitvě po minutě úplně 0 zlata.', t: (m, V) => m.gold === 0 && V.time > 60 && V.over < 0 },
+  { id: 'close',   n: 'O chlup',           d: 'Vyhraj se základnou pod 5 % zdraví.', w: m => m.hp / m.mhp < 0.05 },
+  { id: 'caveman', n: 'Dědeček s kyjem',   d: 'Vyhraj v době kamenné nad soupeřem z budoucnosti.', w: (m, V) => m.age === 0 && V.pl[1 - mySide].age === 4 },
+  { id: 'swamp',   n: 'Král bažin',        d: 'Vyhraj v bažině. Smrdíš, ale vyhrál jsi.', w: () => FIELD === 'swamp' },
+  { id: 'insane',  n: 'Šílenec',           d: 'Poraž počítač na obtížnost Šílená.',  w: (m, V) => role === 'solo' && V.chal == null && V.camp == null && !V.daily && V.diff >= 4 },
+  { id: 'def',     n: 'Nedám!',            d: 'Ubraň dobyté území před Rudou hordou.' },
+  { id: 'loss',    n: 'Prohra je taky výsledek', d: 'Prohraj bitvu. Hlavně že ses zúčastnil.', l: () => true },
+  { id: 'loss10',  n: 'Pokorný',           d: 'Prohraj 10 bitev a pořád hraj dál.', l: () => (ST.lost = (ST.lost || 0) + 1) >= 10 },
+  // ---- online ----
+  { id: 'elo1200', n: 'Šachista',          d: 'Dosáhni online hodnocení 1200.' },
+  { id: 'podium',  n: 'Na bedně',          d: 'Buď v online žebříčku mezi prvními třemi.' },
+  { id: 'spect',   n: 'Gaučový generál',   d: 'Sleduj cizí bitvu jako divák. Popcorn s sebou.' },
+  { id: 'emote',   n: 'Provokatér',        d: 'Pošli soupeři emote.' },
+  { id: 'finger',  n: 'Gesto míru',        d: 'Pošli soupeři ten nejsprostší emote.', secret: 1 },
+  { id: 'stats',   n: 'Analytik',          d: 'Prohlédni si statistiky po bitvě.' },
+  { id: 'update',  n: 'Čerstvý jak rohlík', d: 'Hraj aktualizovanou verzi hry.', secret: 1 },
 ];
+const achId = id => { const a = ACH.find(a => a.id === id); if (a) unlock(a); };
+// bossové: id úspěchu podle věku bosse
+function achBoss(a) {
+  achId(['bMam', 'bDrag', 'bZep', 'bTank', 'bTitan'][a]);
+  if (SET.chicken) achId('bChick');
+  if (['bMam', 'bDrag', 'bZep', 'bTank', 'bTitan'].every(id => ACHS[id])) achId('bAll');
+}
 let rematchN = 0;
 let ACHS = {};
 try { ACHS = JSON.parse(localStorage.getItem('aow-ach') || '{}'); } catch (e) {}
@@ -59,6 +106,7 @@ function checkAch(V) {
     if (S && S.st) { lastBst = S.st; if (role === 'host') send({ t: 'bst', d: S.st }); }
     record(won, V);
     if (won) for (const a of ACH) if (a.w && !ACHS[a.id] && a.w(me, V)) unlock(a);
+    if (!won && role) { for (const a of ACH) if (a.l && (a.l(me, V) && !ACHS[a.id])) unlock(a); store('aow-stats', ST); }
   }
 }
 

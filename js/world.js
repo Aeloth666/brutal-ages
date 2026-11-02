@@ -782,6 +782,7 @@ function addFx(e) {
       if (SET.chicken) { part(10, '#f8fafc', 110, 2.2, 1, 120); sfx('cluck', x); }
       const cp = { corpse: 1, x, side: e[3], a: e[4], ty: e[5], l: e[5] === 5 ? 3 : 1.3, ml: e[5] === 5 ? 3 : 1.3 };
       if (e[5] === 5) {                                   // padlý boss: série výbuchů a velký nápis
+        if (e[3] !== mySide) achBoss(e[4]);
         shake = 2; vib([150, 60, 250]);
         for (let k = 0; k < 6; k++) fx.push({ fire: 1, x: x + rnd(-60, 60), y: GY - rnd(10, BOSSES[e[4]].y + 30), r: rnd(30, 50), l: 0.5 + k * 0.12, ml: 0.5 + k * 0.12 });
         fx.push({ ring: 1, x, y: GY - 40, l: 0.8, ml: 0.8, r: 220, col: '#fbbf24' });
@@ -809,9 +810,10 @@ function addFx(e) {
     case 'chest': fx.push({ txt: '+' + e[4].toLocaleString('cs') + ' zlata', x, y: y - 20, vy: -30, l: 1.6, ml: 1.6 }); part(18, '#facc15', 140, 2.2, 0.8); sfx('buy'); break;
     case 'rhit': bloodBurst(x, y, 16, 220, true); if (Math.random() < 0.2) addPool(x, rnd(4, 8)); shake = Math.max(shake, 0.25); break;
     case 'cry': if (e[5] !== 5 && (e[5] >= 3 || Math.random() < 0.45)) cry(e[4], x, e[3], e[5] >= 3); break;
-    case 'bast': fx.push({ ring: 1, x, y, l: 0.9, ml: 0.9, r: 160, col: '#4ade80' }); fx.push({ txt: '🛡 POSLEDNÍ BAŠTA!', x, y: y - 40, vy: -25, l: 2.2, ml: 2.2 }); sfx('evo'); break;
-    case 'gcry': if (e[3] === mySide) { fx.push({ txt: '📯 VÁLEČNÝ POKŘIK!', x, y: y - 20, vy: -25, l: 2, ml: 2 }); const p = V.pl[e[3]]; cry(p.age * 4 + ((p.af && p.af[p.age]) | 0), x, e[3], true); } break;
-    case 'lava': fx.push({ fire: 1, x, y, r: 55, l: 0.7, ml: 0.7 }); part(24, '#ff6a14', 260, 3, 0.9, -200); smoke(6, 14, 1.2); shake = Math.max(shake, 0.6); sfx('boom', x); break;
+    case 'bast': if (e[3] === mySide) achId('bast');
+      fx.push({ ring: 1, x, y, l: 0.9, ml: 0.9, r: 160, col: '#4ade80' }); fx.push({ txt: '🛡 POSLEDNÍ BAŠTA!', x, y: y - 40, vy: -25, l: 2.2, ml: 2.2 }); sfx('evo'); break;
+    case 'gcry': if (e[3] === mySide) { achId('gcry'); fx.push({ txt: '📯 VÁLEČNÝ POKŘIK!', x, y: y - 20, vy: -25, l: 2, ml: 2 }); const p = V.pl[e[3]]; cry(p.age * 4 + ((p.af && p.af[p.age]) | 0), x, e[3], true); } break;
+    case 'lava': achId('lava'); fx.push({ fire: 1, x, y, r: 55, l: 0.7, ml: 0.7 }); part(24, '#ff6a14', 260, 3, 0.9, -200); smoke(6, 14, 1.2); shake = Math.max(shake, 0.6); sfx('boom', x); break;
     case 'rage':
       if (V) { const p = V.pl[e[3]]; cry(p.age * 4 + ((p.af && p.af[p.age]) | 0), x, e[3], true); }
       fx.push({ ring: 1, x, y, l: 0.6, ml: 0.6, r: 80, col: '#ef4444' }); fx.push({ txt: '😡 VZTEK!', x, y: y - 30, vy: -30, l: 1.4, ml: 1.4 }); shake = 0.6; vib([60, 40, 120]); break;
