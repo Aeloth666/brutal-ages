@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.7.1', d: '2026-11-02', cs: ['Šavlozubý tygr zmenšený na zhruba 1,6 m v kohoutku – pořád větší než skutečný, ale už ne obří.'], en: ['Sabre-toothed tiger shrunk to about 1.6 m at the shoulder – still bigger than the real one, but no longer giant.'] },
   { v: '2.7', d: '2026-11-02', cs: [
     'Zvířata nakreslená znovu podle skutečných proporcí: mamut, vlk, medvěd a pratur mají nohy se třemi klouby (koleno vpředu, hlezno vzadu) a chodidla na zemi.',
     'Mamut je výrazně větší (jako skutečný), kůň je větší, medvěd má ploské tlapy a kulatou hlavu s krátkým čenichem.',

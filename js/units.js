@@ -1091,11 +1091,11 @@ const BOSS_ART = [
   // ---------------- šavlozubý tygr (Smilodon: mohutné tělo, krátký ocas, šavle) ----------------
   (team, ph, at, st, walk) => {
     const pounce = at > 0 ? Math.sin(at * Math.PI) : 0;
-    c.save(); c.scale(1.45, 1.45);
+    c.save(); c.scale(0.85, 0.85);                     // ~1,6 m v kohoutku (skutečný šavlozubec ~1,1 m, boss je o něco větší)
     c.translate(pounce * 12, -pounce * 6); c.rotate(-pounce * 0.1);
     mount(team, 'smilodon', ph * 0.8, walk, at);
     c.restore();
-    if (pounce > 0.3) for (let k = 0; k < 3; k++) { c.fillStyle = 'rgba(160,130,90,' + 0.4 * pounce + ')'; circ(-30 + k * 26, -4, 7 + k * 3); }   // prach při skoku
+    if (pounce > 0.3) for (let k = 0; k < 3; k++) { c.fillStyle = 'rgba(160,130,90,' + 0.4 * pounce + ')'; circ(-20 + k * 18, -3, 5 + k * 2); }   // prach při skoku
   },
 
   // ---------------- drak: štíhlé tělo, esovitý krk, blanitá křídla s prsty, svalnaté nohy pod tělem ----------------
