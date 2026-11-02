@@ -4,7 +4,7 @@
 //  Po instalaci nového APK se aplikace sama vrátí k verzi zabalené v APK (Capacitor to hlídá).
 // =====================================================================
 const UPD_URL = 'https://aeloth666.github.io/brutal-ages/';
-let updReady = null, apkVer = '';
+let updReady = null, apkVer = '', updBusy = false;
 // diagnostika: poslední kontrola aktualizace (ukazuje se v Nastavení hry)
 const UPD = load('aow-upd', {});
 function updLog(step, err) { UPD.t = Date.now(); UPD.step = step; UPD.err = err ? String(err).slice(0, 160) : ''; store('aow-upd', UPD); verInfo(); }
@@ -15,7 +15,12 @@ function verInfo() {
     (nativeApp ? `<br>Aktualizace – poslední kontrola: ${when}${UPD.step ? ' · ' + esc(UPD.step) : ''}${UPD.err ? ' · <span style="color:#fca5a5">' + esc(UPD.err) + '</span>' : ''}` : '');
 }
 
+// jen jedna kontrola naráz – dvě souběžná stahování do stejné složky si ji navzájem mazala a hra pak nenašla index.html
 async function updInit(manual) {
+  if (updBusy) return; updBusy = true;
+  try { await updRun(manual); } finally { updBusy = false; }
+}
+async function updRun(manual) {
   if (!nativeApp || !window.Capacitor || !Capacitor.Plugins) return;
   const P = Capacitor.Plugins, FS = P.Filesystem, WV = P.WebView;
   if (!FS || !WV) { updLog('chybí doplněk', !FS ? 'Filesystem' : 'WebView'); return; }
@@ -55,6 +60,10 @@ async function updInit(manual) {
       }
       await FS.writeFile({ path: dir + '/ok', data: String(v.build), directory: 'DATA', encoding: 'utf8' });
     } catch (e) { updLog('stahování selhalo', e && e.message); FS.rmdir({ path: dir, directory: 'DATA', recursive: true }).catch(() => {}); return; }
+  }
+  // přepnout jen na úplnou verzi: chybí-li index.html, složku smazat a stáhnout příště znovu
+  if (!(await FS.stat({ path: dir + '/index.html', directory: 'DATA' }).then(() => true, () => false))) {
+    updLog('stažená verze je neúplná'); FS.rmdir({ path: dir, directory: 'DATA', recursive: true }).catch(() => {}); return;
   }
   const { uri } = await FS.getUri({ path: dir, directory: 'DATA' });
   updReady = { path: decodeURIComponent(uri.replace(/^file:\/\//, '')), name: v.name || '' };

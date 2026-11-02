@@ -272,7 +272,7 @@ table.lb td:nth-child(2), table.lb th:nth-child(2) { text-align: left; } table.l
 /* přehlednější menu: sekce, dlaždice velitelství */
 .msec { margin: 14px 0 6px; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #e5c04a; opacity: .9; border-bottom: 1px solid #263046; padding-bottom: 4px; }
 .msec:first-child { margin-top: 2px; }
-.menu-sub > button small { display: block; font-size: 12px; font-weight: 600; opacity: .75; }
+.menu-sub > button small { display: block; font-size: 12px; font-weight: 600; opacity: .92; }
 .main-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .main-row .big { font-size: 18px; }
 .hq { position: relative; }
@@ -282,6 +282,6 @@ table.lb td:nth-child(2), table.lb th:nth-child(2) { text-align: left; } table.l
 .tile { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 10px; background: #1e293b; border: 1px solid #334155; border-radius: 14px; text-align: center; }
 .tile:hover { border-color: #e5c04a; }
 .tile .ti { font-size: 34px; line-height: 1; }
-.tile b { font-size: 16px; } .tile small { font-size: 12px; opacity: .75; }
+.tile b { font-size: 16px; } .tile small { font-size: 12px; color: #cbd5e1; }
 @media (max-width: 640px) { .hq-grid { grid-template-columns: repeat(2, 1fr); } }
 #rotate.show { display: flex; }
