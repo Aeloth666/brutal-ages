@@ -24,7 +24,7 @@ function hud(V) {
     const x = 124 + i * QW, y = 70 + (19 - QB);
     rr(x, y, QB, QB, 4); c.fillStyle = '#0b1020'; c.fill(); c.strokeStyle = '#334155'; c.stroke();
     const q = p.q[i];
-    if (q) { c.save(); c.beginPath(); c.rect(x, y, QB, QB); c.clip(); c.translate(x + QB / 2, y + QB - 1); const s = (q.ty === 2 ? 0.2 : q.ty === 3 ? 0.18 : 0.34) * QB / 19; c.scale(s, s); drawUnitLocal(teamCol(mySide), q.a, q.ty, 0, 0, 1); c.restore(); }
+    if (q) drawIcon(unitIcon(teamCol(mySide), q.a, q.ty), x + QB / 2, y + QB - 1, QB - 3, QB - 2);
   }
   rr(124, 93, 103, 6, 3); c.fillStyle = '#0b1020'; c.fill();
   if (p.qf > 0) { rr(124, 93, 103 * p.qf, 6, 3); c.fillStyle = '#22c55e'; c.fill(); }
@@ -191,6 +191,31 @@ function drawOrders(p) {
 }
 const fmtTime = t => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
 
+// ikonky jednotek (tlačítka, fronta): jednotka se jednou nakreslí do velkého plátna, ořízne podle skutečného obrysu
+// a uloží – v tlačítku se pak vždy vejde celá, ať je to voják, nebo mamut s jezdcem
+const ICONS = new Map();
+function unitIcon(team, a, ty) {
+  const key = team.slice(0, 3).join('') + '|' + (team.af || []).join('') + '|' + (team.sk || '') + '|' + a + '|' + ty;
+  let ic = ICONS.get(key); if (ic) return ic;
+  const big = document.createElement('canvas'); big.width = 720; big.height = 520;
+  const save = c; c = big.getContext('2d'); GC.clear(); c.translate(360, 430); c.scale(2, 2);
+  try { drawUnitLocal(team, a, ty, 0, 0, 1); } catch (e) {}
+  c = save; GC.clear();
+  const d = big.getContext('2d').getImageData(0, 0, big.width, big.height).data;
+  let x0 = big.width, y0 = big.height, x1 = 0, y1 = 0;
+  for (let y = 0; y < big.height; y += 2) for (let x = 0; x < big.width; x += 2) if (d[(y * big.width + x) * 4 + 3] > 20) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 <= x0) { x0 = 0; y0 = 0; x1 = 2; y1 = 2; }
+  const cv2 = document.createElement('canvas'); cv2.width = x1 - x0 + 2; cv2.height = y1 - y0 + 2;
+  cv2.getContext('2d').drawImage(big, x0, y0, cv2.width, cv2.height, 0, 0, cv2.width, cv2.height);
+  ic = { cv: cv2, w: cv2.width, h: cv2.height }; ICONS.set(key, ic);
+  if (ICONS.size > 120) ICONS.delete(ICONS.keys().next().value);
+  return ic;
+}
+// vykreslí ikonku: střed dole v (cx, bottom), vejde se do maxW × maxH; vojáci se nezvětšují víc než na 1×
+function drawIcon(ic, cx, bottom, maxW, maxH) {
+  const k = Math.min(maxW / ic.w, maxH / ic.h, 0.55);
+  c.drawImage(ic.cv, cx - ic.w * k / 2, bottom - ic.h * k, ic.w * k, ic.h * k);
+}
 function drawBtn(b) {
   c.save();
   c.globalAlpha = b.ok ? 1 : 0.42;
@@ -201,7 +226,7 @@ function drawBtn(b) {
   c.fillStyle = 'rgba(255,255,255,.08)'; rr(b.x + 3, b.y + 3, b.w - 6, 26, 8); c.fill();
   c.save(); rr(b.x + 2, b.y + 2, b.w - 4, b.h - 32, 9); c.clip();
   const [k, a, i] = b.icon, cx0 = b.x + b.w / 2;
-  if (k === 'u') { const s = i === 2 ? 0.72 : i === 6 ? 0.95 : i >= 3 ? 0.62 : 1.1; c.translate(cx0 - (i === 2 ? 4 : 0), b.y + 62); c.scale(s, s); drawUnitLocal(teamCol(mySide), a, i, 0, 0, 1); }
+  if (k === 'u') drawIcon(unitIcon(teamCol(mySide), a, i), cx0, b.y + 63, b.w - 12, 58);
   else if (k === 't') { c.translate(cx0 - 6, b.y + 42); c.scale(1.7, 1.7); TUR[a](i, a); }
   else if (k === 's') { const pr = AGES[a].sp.p; drawProj({ x: mirror ? W - cx0 : cx0, y: b.y + 36, p: pr === 'beam' ? 'laser' : pr, dx: mirror ? -1 : 1, dy: 1.2 }); }
   else if (k === 'e') { poly([cx0, b.y + 12, cx0 + 19, b.y + 34, cx0 + 8, b.y + 34, cx0 + 8, b.y + 58, cx0 - 8, b.y + 58, cx0 - 8, b.y + 34, cx0 - 19, b.y + 34]); fo(lg('evo', 0, b.y + 12, 0, b.y + 58, [[0, '#fef08a'], [1, '#ca8a04']]), 1.6); }

@@ -4,6 +4,11 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Version 2.17.2 – 3. 11. 2026
+
+- Unit pictures in the buttons and in the queue always fit completely (even a mammoth or a horse with a rider).
+- Trees in the background stand on the hills instead of floating in the air.
+
 ## Version 2.17 – 3. 11. 2026
 
 - Settings → Graphics → 📈 FPS counter: a small frames-per-second counter in the bottom left corner (in the menu and in the game). Green = smooth, yellow = occasional stutter, red = struggling.

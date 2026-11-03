@@ -146,7 +146,7 @@ function buildBg() {
   mountains(380 + L, 110, F.m2[0], F.m2[1], 13);
   hills(430 + L, 34, F.h1[0], F.h1[1], 0.9);
   for (let x = 20; x < W; x += 38 + srnd() * 50) {
-    const y = 440 + L + Math.sin(x * 0.011) * 22, s = 0.7 + srnd() * 0.3;
+    const y = hillY(430 + L, 34, 0.9, x) + 7, s = 0.7 + srnd() * 0.3;
     if (F.deco === 'trees') roundTree(x, y, s, '#5c9a48', '#4a8239');
     else if (F.deco === 'cacti') { if (srnd() < 0.5) cactus(x, y, s * 0.8); }
     else if (F.deco === 'snowpines') pine(x, y, s * 0.8, true);
@@ -156,7 +156,7 @@ function buildBg() {
   }
   hills(480 + L, 26, F.h2[0], F.h2[1], 1.6);
   for (let x = 10; x < W; x += 60 + srnd() * 90) {
-    const y = 488 + L + Math.sin(x * 0.02) * 12, s = 0.8 + srnd() * 0.5;
+    const y = hillY(480 + L, 26, 1.6, x) + 7, s = 0.8 + srnd() * 0.5;
     if (F.deco === 'trees') pine(x, y, s);
     else if (F.deco === 'cacti') srnd() < 0.35 ? palm(x, y, s) : cactus(x, y, s);
     else if (F.deco === 'snowpines') pine(x, y, s, true);
@@ -268,11 +268,12 @@ function mountains(base, amp, col, snow, n) {
   c.fillStyle = snow;
   for (const [x, y] of pts) { if (y > base - amp * 0.6) continue; c.beginPath(); c.moveTo(x, y); c.lineTo(x - 18, y + 22); c.lineTo(x - 6, y + 18); c.lineTo(x + 2, y + 26); c.lineTo(x + 18, y + 22); c.fill(); }
 }
+const hillY = (base, amp, f, x) => base + Math.sin(x * 0.006 * f + base) * amp + Math.sin(x * 0.017 * f) * amp * 0.35;
 function hills(base, amp, col, col2, f) {
   const g = c.createLinearGradient(0, base - amp, 0, GY);
   g.addColorStop(0, col); g.addColorStop(1, col2);
   c.fillStyle = g; c.beginPath(); c.moveTo(0, GY);
-  for (let x = 0; x <= W; x += 20) c.lineTo(x, base + Math.sin(x * 0.006 * f + base) * amp + Math.sin(x * 0.017 * f) * amp * 0.35);
+  for (let x = 0; x <= W; x += 20) c.lineTo(x, hillY(base, amp, f, x));
   c.lineTo(W, GY); c.fill();
 }
 function roundTree(x, y, s, col, col2) {

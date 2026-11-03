@@ -4,6 +4,11 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.17.2 – 3. 11. 2026
+
+- Obrázky jednotek v tlačítkách a ve frontě se vždy vejdou celé (i mamut nebo kůň s jezdcem).
+- Stromy v pozadí stojí na kopcích, už nevisí ve vzduchu.
+
 ## Verze 2.17 – 3. 11. 2026
 
 - Nastavení → Grafika → 📈 Ukazatel FPS: malé počítadlo snímků za sekundu v levém dolním rohu (v menu i ve hře). Zelená = plynulé, žlutá = občas trhá, červená = nestíhá.

@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.17.2', d: '2026-11-03', cs: ['Obrázky jednotek v tlačítkách a ve frontě se vždy vejdou celé (i mamut nebo kůň s jezdcem).', 'Stromy v pozadí stojí na kopcích, už nevisí ve vzduchu.'], en: ['Unit pictures in the buttons and in the queue always fit completely (even a mammoth or a horse with a rider).', 'Trees in the background stand on the hills instead of floating in the air.'] },
   { v: '2.17', d: '2026-11-03', cs: ['Nastavení → Grafika → 📈 Ukazatel FPS: malé počítadlo snímků za sekundu v levém dolním rohu (v menu i ve hře). Zelená = plynulé, žlutá = občas trhá, červená = nestíhá.'], en: ['Settings → Graphics → 📈 FPS counter: a small frames-per-second counter in the bottom left corner (in the menu and in the game). Green = smooth, yellow = occasional stutter, red = struggling.'] },
   { v: '2.16.1', d: '2026-11-03', cs: ['Opravena chyba při spuštění z verze 2.16 (chyběl ukazatel zdraví bosse).'], en: ['Fixed a startup error from version 2.16 (the boss health bar was missing).'] },
   { v: '2.16', d: '2026-11-03', cs: [
