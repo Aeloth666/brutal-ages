@@ -80,7 +80,7 @@ function hqNews() {
   questRoll();
   const got = ACH.filter(a => ACHS[a.id]).length;
   if (HQS.ach < 0) { HQS.ach = got; HQS.done = QST.done; store('aow-hqseen', HQS); }   // první spuštění: staré věci nejsou novinky
-  return { fr: typeof FRQN !== 'undefined' ? FRQN : 0, gen: Math.max(0, genFree()), quest: (HQS.day !== QST.day ? 1 : 0) + (HQS.week !== QST.week ? 1 : 0) + Math.max(0, QST.done - HQS.done), ach: Math.max(0, got - HQS.ach), got };
+  return { fr: typeof FRQN !== 'undefined' ? FRQN + CINVN : 0, gen: Math.max(0, genFree()), quest: (HQS.day !== QST.day ? 1 : 0) + (HQS.week !== QST.week ? 1 : 0) + Math.max(0, QST.done - HQS.done), ach: Math.max(0, got - HQS.ach), got };
 }
 function tileBadge(id, n) {
   const el = $(id); let s = el.querySelector('.badge');

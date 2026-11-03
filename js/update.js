@@ -97,6 +97,11 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.13', d: '2026-11-03', cs: [
+    'Pozvánky do klanu: v klanu je tlačítko 📨 Pozvat do klanu s výběrem z přátel a nedávných soupeřů. Pozvánka dorazí i hráči, který zrovna nehraje – uvidí ji v Klanu a v Přátelích.',
+    'Žádosti o přátelství a pozvánky do klanu pro hráče, kteří ještě nemají novou verzi, se zapamatují a odešlou samy, jakmile si ji spustí (do 30 dní).'], en: [
+    'Clan invitations: the clan has a 📨 Invite to clan button with a choice of friends and recent opponents. The invitation reaches players who are not playing right now – they see it in Clan and Friends.',
+    'Friend requests and clan invitations for players without the new version are remembered and sent automatically once they start it (within 30 days).'] },
   { v: '2.12', d: '2026-11-03', cs: [
     'Přezdívky jsou jedinečné: v Profilu se jméno ukládá tlačítkem a obsazené jméno (bez ohledu na velká písmena a diakritiku) hra odmítne. Výchozí „Hráč“ je volné pro všechny.',
     'Kdo už jméno používá, zabere si ho po spuštění nové verze; kdo ho mezitím ztratil, dostane upozornění.',

@@ -5,6 +5,7 @@
 const ME = load('aow-me', { id: '' });                   // moje ID hráče (6 znaků, zobrazuje se jako BA-XXXXXX)
 let MYFR = load('aow-fr', []);                           // přátelé: [{ uid, id, n, pid }]
 let FRQ = {}, FRQN = 0, pubLast = 0;                     // příchozí žádosti (z /freq), jejich počet a čas posledního zápisu profilu
+let CINV = {}, CINVN = 0;                                // pozvánky do klanu (z /cinv) a jejich počet
 const ID_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const fmtId = id => id ? 'BA-' + id : '…';
 const normId = s => String(s || '').toUpperCase().replace(/^BA-?/, '').replace(/[^A-Z0-9]/g, '');
@@ -80,13 +81,56 @@ async function frRequest(p, acc) {
   const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit');
   await fbPut(`freq/${p.uid}/${a.uid}`, { n: (SET.name || 'Hráč').slice(0, 14), id: await ensureId(), pid: SET.pid, t: Date.now(), ...(acc ? { acc: 1 } : {}) });
 }
-// žádost nedávnému soupeři: najde jeho profil podle herního identifikátoru (pid)
-async function frRequestPid(pid) {
+// uid hráče podle herního identifikátoru (pid) – nedávní soupeři znají jen pid
+async function uidOfPid(pid) {
   const res = await fbFetch(`${FB.db}/pub.json?orderBy=${encodeURIComponent('"pid"')}&equalTo=${encodeURIComponent(JSON.stringify(pid))}&limitToFirst=1`);
   const r = res.ok ? await res.json() : null, e = r && Object.entries(r)[0];
-  if (!e) throw new Error('Hráč ještě nemá Přátele (potřebuje novou verzi a jednou je otevřít)');
-  if (MYFR.some(f => f.uid === e[0])) return 'friend';
-  await frRequest({ uid: e[0], ...e[1] }); return 'sent';
+  return e ? { uid: e[0], ...e[1] } : null;
+}
+// pozvat do mého klanu (hráč je dán uid, nebo pid u nedávného soupeře)
+async function clanInvite(p) {
+  if (!CLAN.tag) throw new Error('Nejsi v žádném klanu');
+  const t = p.uid ? p : await uidOfPid(p.pid);
+  if (!t) { pendAdd({ k: 'cl', pid: p.pid, n: p.n, tag: CLAN.tag }); return 'later'; }
+  const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit');
+  const cn = await fbGet('clans/' + CLAN.tag + '/n');
+  await fbPut(`cinv/${t.uid}/${a.uid}`, { tag: CLAN.tag, cn: String(cn || CLAN.tag).slice(0, 20), n: (SET.name || 'Hráč').slice(0, 14), t: Date.now() });
+}
+// přijmout / odmítnout pozvánku do klanu (z jiného klanu se nejdřív odejde)
+async function clanInvAnswer(uid, yes) {
+  const a = await fbAuth(); if (!a) return;
+  const q = CINV[uid]; delete CINV[uid]; CINVN = Object.keys(CINV).length;
+  await fbPut(`cinv/${a.uid}/${uid}`, null).catch(() => {});
+  if (yes && q) { if (CLAN.tag && CLAN.tag !== q.tag) await clanLeave(); await clanJoin(q.tag); }
+  if (typeof refreshHQ === 'function') refreshHQ();
+}
+// žádost nedávnému soupeři: najde jeho profil podle herního identifikátoru (pid)
+// vrací 'friend' (už je přítel), 'sent' (odesláno) nebo 'later' (pošle se, až si soupeř spustí novou verzi)
+async function frRequestPid(pid, n) {
+  const p = await uidOfPid(pid);
+  if (!p) { pendAdd({ k: 'fr', pid, n }); return 'later'; }
+  if (MYFR.some(f => f.uid === p.uid)) return 'friend';
+  await frRequest(p); return 'sent';
+}
+function pendAdd(x) {
+  ME.pend = (ME.pend || []).filter(q => !(q.k === x.k && q.pid === x.pid));
+  ME.pend.push({ ...x, t: Date.now() }); store('aow-me', ME);
+}
+// zkusí poslat odložené žádosti a pozvánky (volá se s načítáním žádostí)
+async function pendFlush() {
+  if (!ME.pend || !ME.pend.length) return;
+  const keep = [];
+  for (const q of ME.pend) {
+    if (Date.now() - q.t > 30 * 864e5) continue;
+    try {
+      const p = await uidOfPid(q.pid);
+      if (!p) { keep.push(q); continue; }
+      if (q.k === 'fr' && !MYFR.some(f => f.uid === p.uid)) await frRequest(p);
+      if (q.k === 'cl' && CLAN.tag === q.tag) await clanInvite(p);
+      toasts.push({ a: { n: (q.k === 'fr' ? 'Žádost o přátelství odeslána: ' : 'Pozvánka do klanu odeslána: ') + p.n }, h: '📨 ODESLÁNO', l: 4 });
+    } catch (e) { keep.push(q); }
+  }
+  ME.pend = keep; store('aow-me', ME);
 }
 function frAdd(p) {
   if (!p || !p.uid || MYFR.some(f => f.uid === p.uid)) return;
@@ -98,6 +142,7 @@ async function frPoll() {
   if (!FB.key) return;
   try {
     const a = await fbAuth(); if (!a) return;
+    await pendFlush();
     const r = await fbGetA('freq/' + a.uid) || {};
     FRQ = {};
     for (const [uid, q] of Object.entries(r)) {
@@ -105,6 +150,11 @@ async function frPoll() {
       FRQ[uid] = q;
     }
     FRQN = Object.keys(FRQ).length;
+    // pozvánky do klanu – nová pozvánka se ohlásí jednou
+    const ci = await fbGetA('cinv/' + a.uid).catch(() => null) || {}, seen = ME.ci || 0;
+    CINV = Object.fromEntries(Object.entries(ci).filter(([, q]) => q && q.tag && q.tag !== CLAN.tag)); CINVN = Object.keys(CINV).length;
+    for (const q of Object.values(CINV)) if (q.t > seen) toasts.push({ a: { n: q.n + ' tě zve do klanu [' + q.tag + ']' }, h: '🛡 POZVÁNKA DO KLANU', l: 5 });
+    if (CINVN) { ME.ci = Math.max(seen, ...Object.values(CINV).map(q => q.t)); store('aow-me', ME); }
     if (typeof refreshHQ === 'function') refreshHQ();
   } catch (e) {}
 }
@@ -128,6 +178,7 @@ async function renderFr(msg) {
     <div class="row"><input id="frQ" maxlength="20" placeholder="Jméno nebo ID (BA-…)" autocomplete="off"><button id="bFrFind">🔍 Hledat</button></div>
     <p id="frMsg" class="muted">${msg || ''}</p>
     <div id="frRes"></div>
+    ${CINVN ? `<div class="msec">🛡 Pozvánky do klanu</div>` + Object.entries(CINV).map(([uid, q]) => `<div class="friend"><span><b>${esc(q.n)}</b> zve do <span class="ctag">[${esc(q.tag)}]</span> ${esc(q.cn)}</span><span><button data-cyes="${uid}">🛡 Přidat se</button> <button class="ghost" data-cno="${uid}">✕</button></span></div>`).join('') : ''}
     ${reqs.length ? `<div class="msec">📨 Žádosti o přátelství</div>` + reqs.map(([uid, q]) => `<div class="friend"><span><b>${esc(q.n)}</b> <small>${fmtId(q.id)}</small></span><span><button data-yes="${uid}">✔ Přijmout</button> <button class="ghost" data-no="${uid}">✕</button></span></div>`).join('') : ''}
     <div class="msec">👥 Přátelé</div>
     ${MYFR.length ? MYFR.map(f => `<div class="friend"><span><b>${esc(f.n)}</b> <small>${fmtId(f.id)}</small></span><span><button data-cmp="${f.uid}">📊 Porovnat</button> <button class="ghost" data-inv="${f.uid}">📨 Pozvat</button> <button class="ghost mini" data-del="${f.uid}" title="Odebrat z přátel">✕</button></span></div>`).join('')
@@ -151,6 +202,8 @@ async function renderFr(msg) {
   $('bFrFind').onclick = find; $('frQ').onkeydown = e => { if (e.key === 'Enter') find(); };
   b.querySelectorAll('[data-yes]').forEach(x => x.onclick = async () => { sfx('click'); await frAnswer(x.dataset.yes, true); renderFr('Přítel přidán.'); });
   b.querySelectorAll('[data-no]').forEach(x => x.onclick = async () => { sfx('click'); await frAnswer(x.dataset.no, false); renderFr(); });
+  b.querySelectorAll('[data-cyes]').forEach(x => x.onclick = async () => { sfx('click'); try { await clanInvAnswer(x.dataset.cyes, true); renderFr('Jsi v klanu [' + CLAN.tag + '].'); } catch (e) { renderFr('❌ ' + e.message); } });
+  b.querySelectorAll('[data-cno]').forEach(x => x.onclick = async () => { sfx('click'); await clanInvAnswer(x.dataset.cno, false); renderFr(); });
   b.querySelectorAll('[data-cmp]').forEach(x => x.onclick = () => { sfx('click'); frView = x.dataset.cmp; renderFr(); });
   b.querySelectorAll('[data-inv]').forEach(x => x.onclick = () => { const f = MYFR.find(f => f.uid === x.dataset.inv); if (!f || !f.pid) return; sfx('click');
     $('friendsPanel').classList.add('hidden'); $('hqPanel').classList.add('hidden'); openPanel('mpPanel'); inviteFriend({ pid: f.pid, n: f.n }); });

@@ -300,7 +300,7 @@ table.lb td:nth-child(2), table.lb th:nth-child(2) { text-align: left; } table.l
 /* přátelé */
 .fr-me { text-align: center; margin: 2px 0 10px; } .fr-me .bigcode { font-size: 22px; letter-spacing: 3px; color: #fde68a; user-select: text; }
 button.mini { padding: 3px 9px; font-size: 13px; min-height: 0; }
-#frBody .friend { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #263046; flex-wrap: wrap; }
-#frBody .friend small { color: #94a3b8; margin-left: 4px; } #frBody .friend button { padding: 6px 11px; font-size: 14px; }
+#frBody .friend, #clanBody .friend { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #263046; flex-wrap: wrap; }
+#frBody .friend small, #clanBody .friend small { color: #94a3b8; margin-left: 4px; } #frBody .friend button, #clanBody .friend button { padding: 6px 11px; font-size: 14px; }
 table.cmp td.win { color: #4ade80; font-weight: 800; } table.cmp { margin-top: 8px; }
 #frQ { letter-spacing: normal; text-transform: none; text-align: left; font-size: 15px; font-weight: 600; }

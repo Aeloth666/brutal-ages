@@ -81,11 +81,14 @@ async function renderClan() {
   try {
     if (!CLAN.tag) {
       b.innerHTML = `<p class="muted">Klan = parta kámošů se společnou zkratkou v žebříčku, společným přehledem a týdenní klanovou výzvou.</p>
+        ${typeof CINVN !== 'undefined' && CINVN ? '<h3>🛡 Pozvánky do klanu</h3>' + Object.entries(CINV).map(([uid, q]) => `<div class="friend"><span><b>${esc(q.n)}</b> zve do <span class="ctag">[${esc(q.tag)}]</span> ${esc(q.cn)}</span><span><button data-cyes="${uid}">🛡 Přidat se</button> <button class="ghost" data-cno="${uid}">✕</button></span></div>`).join('') : ''}
         <h3>Založit klan</h3><div class="row"><input id="clanName" maxlength="20" placeholder="Název klanu"><input id="clanTag" maxlength="4" placeholder="ZKR" style="max-width:90px" autocapitalize="characters"><button id="bClanNew">Založit</button></div>
         <h3>Přidat se ke klanu</h3><div class="row"><input id="clanJoinTag" maxlength="4" placeholder="ZKRATKA" autocapitalize="characters"><button id="bClanJoin">Přidat se</button></div>
         <p id="clanMsg" class="muted"></p>`;
       $('bClanNew').onclick = async () => { sfx('click'); msg('Zakládám…'); try { await clanCreate($('clanName').value, $('clanTag').value); renderClan(); } catch (e) { msg('❌ ' + e.message); } };
       $('bClanJoin').onclick = async () => { sfx('click'); msg('Hledám klan…'); try { await clanJoin($('clanJoinTag').value); renderClan(); } catch (e) { msg('❌ ' + e.message); } };
+      b.querySelectorAll('[data-cyes]').forEach(x => x.onclick = async () => { sfx('click'); try { await clanInvAnswer(x.dataset.cyes, true); renderClan(); } catch (e) { msg('❌ ' + e.message); } });
+      b.querySelectorAll('[data-cno]').forEach(x => x.onclick = async () => { sfx('click'); await clanInvAnswer(x.dataset.cno, false); renderClan(); });
       return;
     }
     await clanSync();
@@ -96,11 +99,25 @@ async function renderClan() {
     const ww = mem.reduce((n, m) => n + (m.wk === wk ? m.ww || 0 : 0), 0), pct = Math.min(100, Math.round(ww / CLAN_GOAL * 100));
     if (ww >= CLAN_GOAL) achId('clanGoal');
     b.innerHTML = `<div class="clan-head"><span class="ctag big">[${esc(CLAN.tag)}]</span> <b>${esc(c.n)}</b> <small class="muted">${mem.length} ${mem.length === 1 ? 'člen' : mem.length < 5 ? 'členové' : 'členů'}</small></div>
-      <p class="muted">Pozvi kámoše: ať v Multiplayeru → 🛡 Klan zadá zkratku <b>${esc(CLAN.tag)}</b>.</p>
+      <p class="muted">Kámoše pozveš tlačítkem níž, nebo ať v Hrát s kámoši → 🛡 Klan zadá zkratku <b>${esc(CLAN.tag)}</b>.</p>
+      <button id="bClanInv">📨 Pozvat do klanu</button><div id="clanInvList"></div>
       <h3>🎯 Týdenní klanová výzva</h3><div class="q-row ${ww >= CLAN_GOAL ? 'ok' : ''}"><span>Vyhrajte společně ${CLAN_GOAL} online soubojů</span><small>${Math.min(ww, CLAN_GOAL)} / ${CLAN_GOAL}</small><i style="width:${pct}%"></i></div>
       <table class="bst lb"><tr><th>Člen</th><th>Hodnocení</th><th>V : P</th><th>Výher tento týden</th><th>♾ vln</th></tr>
       ${mem.map(m => `<tr class="${m.uid === me ? 'me' : ''}"><td>${m.uid === c.o ? '👑 ' : ''}${esc(m.n)}</td><td><b>${m.r}</b></td><td>${m.w} : ${m.l}</td><td>${m.wk === wk ? m.ww || 0 : 0}</td><td>${m.sv || 0}</td></tr>`).join('')}</table>
       <button id="bClanLeave" class="ghost">${c.o === me && mem.length <= 1 ? 'Zrušit klan' : 'Opustit klan'}</button><p id="clanMsg" class="muted"></p>`;
+    // výběr, koho pozvat: přátelé a nedávní soupeři, kteří ještě nejsou v klanu
+    $('bClanInv').onclick = () => {
+      sfx('click');
+      const box = $('clanInvList'), inClan = new Set(mem.map(m => m.uid));
+      const L = [...MYFR.filter(f => !inClan.has(f.uid)).map(f => ({ uid: f.uid, n: f.n, k: '👥 přítel' })),
+        ...FRIENDS.filter(f => !MYFR.some(x => x.pid === f.pid)).map(f => ({ pid: f.pid, n: f.n, k: 'nedávný soupeř' }))];
+      box.innerHTML = L.length ? L.map((p, i) => `<div class="friend"><span><b>${esc(p.n)}</b> <small>${p.k}</small></span><button data-ci="${i}">📨 Pozvat</button></div>`).join('')
+        : '<p class="muted">Nemáš koho pozvat – přidej si přátele (Velitelství → 👥 Přátelé) nebo si zahraj s někým online.</p>';
+      box.querySelectorAll('[data-ci]').forEach(x => x.onclick = async () => {
+        sfx('click'); x.disabled = true; x.textContent = '…';
+        try { x.textContent = (await clanInvite(L[+x.dataset.ci])) === 'later' ? '⏳ Odešle se později' : '✔ Pozváno'; } catch (e) { x.textContent = '❌'; msg('❌ ' + e.message); }
+      });
+    };
     $('bClanLeave').onclick = async () => { if (!confirm('Opravdu opustit klan [' + CLAN.tag + ']?')) return; sfx('click'); try { await clanLeave(); renderClan(); } catch (e) { msg('❌ ' + e.message); } };
   } catch (e) { b.innerHTML = '<p class="muted">Klany se nepodařilo načíst – jsi online? (' + esc(e.message) + ')</p>'; }
 }

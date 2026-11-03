@@ -402,7 +402,11 @@ function renderFriends() {
   // nedávný soupeř → žádost o přátelství
   box.querySelectorAll('[data-add]').forEach(b => b.onclick = async () => {
     sfx('click'); b.disabled = true; b.textContent = '…';
-    try { b.textContent = (await frRequestPid(L[+b.dataset.add].pid)) === 'friend' ? '✔ Přítel' : '📨 Žádost odeslána'; }
+    try {
+      const f = L[+b.dataset.add], r = await frRequestPid(f.pid, f.n);
+      b.textContent = r === 'friend' ? '✔ Přítel' : r === 'sent' ? '📨 Žádost odeslána' : '⏳ Odešle se později';
+      if (r === 'later') status(`${esc(f.n)} ještě nemá novou verzi hry. Žádost se pošle sama, jakmile si ji spustí.`);
+    }
     catch (e) { b.textContent = '❌'; status(esc(e.message)); }
   });
 }
