@@ -135,6 +135,7 @@ button.big { font-size: 22px; padding: 16px 18px; border-radius: 14px; }
 #bMP { background: #1d4ed8; border-bottom-color: #1e3a8a; }
 #mstatus { min-height: 20px; margin: 4px 0 0; color: #cbd5e1; font-size: 14px; line-height: 1.4; }
 .menu-sub { display: flex; flex-direction: column; gap: 8px; }
+.menu-sub > * { flex-shrink: 0; }   /* v posuvném panelu se položky nesmí smrštit (jinak obsah přeteče přes další) */
 .sub-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .sub-row button { flex: 1; }
 .set-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -290,3 +291,8 @@ table.lb td:nth-child(2), table.lb th:nth-child(2) { text-align: left; } table.l
 #clBody .cl-v { margin: 14px 0 4px; font-weight: 800; color: #e5c04a; } #clBody .cl-v:first-child { margin-top: 0; }
 #clBody .cl-v small { color: #94a3b8; font-weight: 600; margin-left: 6px; }
 #clBody ul { margin: 0; padding-left: 20px; color: #e2e8f0; font-size: 14px; line-height: 1.45; } #clBody li { margin: 2px 0; }
+
+/* čekárna 2 na 2: přesun hráče do druhého týmu */
+.lobby .lp { white-space: nowrap; }
+.lobby button.mini { padding: 1px 7px; font-size: 13px; min-height: 0; margin-left: 2px; }
+#bLobbyBot, #bLobbySwap { margin-top: 6px; }

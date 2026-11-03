@@ -73,7 +73,7 @@ let coop = false, HOSTOPT = { coop: false, camp: null, team: false };
 function hostGame(opt = {}) {
   cleanupNet();
   document.getElementById('mpPanel').classList.remove('hidden');
-  HOSTOPT = { coop: !!opt.coop, camp: opt.camp ?? null, team: !!opt.team };
+  HOSTOPT = { coop: !!opt.coop, camp: opt.camp ?? null, team: !!opt.team, hside: 0, bot: true };   // hside: tým hostitele v 2 na 2, bot: počítač doplní menší tým
   const code = mkCode();
   SESS = mkCode() + mkCode();
   status('Vytvářím hru…');
@@ -99,7 +99,7 @@ function hostGame(opt = {}) {
     const max = HOSTOPT.team ? 3 : 1;
     if (role || conns.length >= max) { c.on('open', () => c.close()); return; }
     const slot = conns.length + 1;
-    const side = HOSTOPT.coop || HOSTOPT.camp != null ? 0 : HOSTOPT.team ? (slot === 2 ? 0 : 1) : 1;
+    const side = HOSTOPT.coop || HOSTOPT.camp != null ? 0 : HOSTOPT.team ? lobbyFree() : 1;   // 2 na 2: do menšího týmu
     const k = { c, slot, side, info: {}, lastRx: performance.now(), away: false, lost: 0, rm: false };
     conns.push(k); bindHost(k);
     c.on('open', () => {
@@ -115,16 +115,30 @@ function hostGame(opt = {}) {
     else if (!role) status('Chyba spojení: ' + e.type);
   });
 }
-// čekárna 2 na 2: hostitel vidí týmy a spouští hru
+// čekárna 2 na 2: hostitel vidí týmy, může hráče (i sebe) přesouvat a spouští hru; hosté si o přesun řeknou tlačítkem
+const lobbyCnt = s => (HOSTOPT.hside === s ? 1 : 0) + conns.filter(k => k.side === s).length;
+const lobbyFree = () => lobbyCnt(0) <= lobbyCnt(1) ? 0 : 1;
+function lobbyMove(id) {                                // id 0 = hostitel, jinak slot hosta
+  const k = id ? conns.find(x => x.slot === id) : null, cur = id ? k && k.side : HOSTOPT.hside;
+  if (cur == null || lobbyCnt(1 - cur) >= 2) return;
+  if (id) k.side = 1 - cur; else HOSTOPT.hside = 1 - cur;
+  sfx('click'); lobbyUpdate();
+}
 function lobbyUpdate() {
   if (!HOSTOPT.team || role) return;
-  const pl = [{ n: SET.name || 'Hráč', side: 0 }, ...conns.map(k => ({ n: k.info.n || '…', side: k.side }))];
-  const team = s => pl.filter(p => p.side === s).map(p => esc(p.n)).join(', ') || '<i>nikdo</i>';
+  const pl = [{ n: SET.name || 'Hráč', side: HOSTOPT.hside, id: 0 }, ...conns.map(k => ({ n: k.info.n || '…', side: k.side, id: k.slot }))];
+  const cnt = s => pl.filter(p => p.side === s).length, bot = HOSTOPT.bot && pl.length === 3;
+  const team = s => (pl.filter(p => p.side === s).map(p => `<span class="lp">${esc(p.n)}${cnt(1 - s) < 2 ? ` <button class="mini" data-mv="${p.id}" title="Přesunout do druhého týmu">⇄</button>` : ''}</span>`).join(' ') || '<i>nikdo</i>')
+    + (bot && cnt(s) === 1 ? ' <span class="lp">🤖 počítač</span>' : '');
+  const ok = cnt(0) >= 1 && cnt(1) >= 1;
   status(`2 na 2 · kód hry: <b>${hostGame.code}</b><br>
     <span class="lobby"><span>🔵 Tým A: ${team(0)}</span><span>🔴 Tým B: ${team(1)}</span></span>
-    ${conns.length ? `<button id="bLobbyGo">Spustit hru (${pl.length} hráči)</button>` : 'Pošli kód kámošům (až 3) a čekej…'}`);
+    ${pl.length === 3 ? `<button id="bLobbyBot" class="ghost">🤖 Počítač doplní menší tým: ${HOSTOPT.bot ? 'ZAP' : 'VYP'}</button><br>` : ''}
+    ${!conns.length ? 'Pošli kód kámošům (až 3) a čekej…' : ok ? `<button id="bLobbyGo">Spustit hru (${pl.length} hráči)</button>` : '<small>Každý tým potřebuje aspoň jednoho hráče.</small>'}`);
   const b = document.getElementById('bLobbyGo'); if (b) b.onclick = () => startGame('host');
-  send({ t: 'lobby', pl });
+  const bb = document.getElementById('bLobbyBot'); if (bb) bb.onclick = () => { HOSTOPT.bot = !HOSTOPT.bot; sfx('click'); lobbyUpdate(); };
+  document.querySelectorAll('#status [data-mv]').forEach(x => x.onclick = () => lobbyMove(+x.dataset.mv));
+  send({ t: 'lobby', pl: pl.map(({ n, side }) => ({ n, side })), bot });
 }
 
 function joinGame(code, spec) {
@@ -193,10 +207,15 @@ function onData(m, k) {
         lobbyUpdate();
       } else { OPP = infoOf(m); rememberFriend(OPP); }
       break;
-    case 'lobby':
+    case 'lobby': {
       if (role) break;
-      status(`Připojeno k 2 na 2. Čekáme, až hostitel spustí hru…<br><span class="lobby"><span>🔵 Tým A: ${m.pl.filter(p => p.side === 0).map(p => esc(p.n)).join(', ')}</span><span>🔴 Tým B: ${m.pl.filter(p => p.side === 1).map(p => esc(p.n)).join(', ')}</span></span>`);
+      const cnt = s => m.pl.filter(p => p.side === s).length, team = s => m.pl.filter(p => p.side === s).map(p => esc(p.n)).join(', ') + (m.bot && cnt(s) === 1 && m.pl.length === 3 ? ', 🤖 počítač' : '');
+      status(`Připojeno k 2 na 2. Čekáme, až hostitel spustí hru…<br><span class="lobby"><span>🔵 Tým A: ${team(0)}</span><span>🔴 Tým B: ${team(1)}</span></span>
+        <button id="bLobbySwap" class="ghost">⇄ Přejít do druhého týmu</button>`);
+      const b = document.getElementById('bLobbySwap'); if (b) b.onclick = () => { sfx('click'); send({ t: 'team' }); };
       break;
+    }
+    case 'team': if (k && !role && HOSTOPT.team) lobbyMove(k.slot); break;
     case 'party': partyMerge(m.r); if (role && !coop && !TEAM && OPP.pid) curTour = tourPending(SET.pid, OPP.pid); break;
     case 'away': if (k) k.away = !!m.v; else oppAway = !!m.v; break;
     case 'chat':
@@ -249,7 +268,7 @@ function netTick(now) {
     if (HOSTOPT.team && conns.some(k => now - k.lastRx > 8000)) {                                          // hostitel: zamrzlé odstraní
       for (const k of conns) if (now - k.lastRx > 8000) try { k.c && k.c.close(); } catch (e) {}
       conns = conns.filter(k => now - k.lastRx <= 8000);
-      conns.forEach((k, i) => { k.slot = i + 1; k.side = k.slot === 2 ? 0 : 1; });
+      conns.forEach((k, i) => { k.slot = i + 1; });                          // týmy zůstávají, jak si je hráči zvolili
       lobbyUpdate();
     }
     return;
@@ -287,7 +306,7 @@ function startGame(r, chal = null, camp = null, daily = false) {
   curTour = r !== 'solo' && OPP.pid ? tourPending(SET.pid, OPP.pid) : null;
   baseHp = null;
   if (r === 'solo') coop = TEAM = false; else if (r === 'host') { coop = HOSTOPT.coop || HOSTOPT.camp != null; TEAM = HOSTOPT.team; }
-  role = r; mySide = r === 'guest' ? GSIDE : 0; mirror = mySide === 1;
+  role = r; mySide = r === 'guest' ? GSIDE : r === 'host' && TEAM ? HOSTOPT.hside : 0; mirror = mySide === 1;
   document.querySelectorAll('.overlay:not(#rotate)').forEach(o => o.classList.add('hidden'));
   uiMode = 'units'; fx = []; netEv = []; phMap.clear();
   snapPrev = snapCur = null; V = null;
@@ -323,13 +342,21 @@ function startGame(r, chal = null, camp = null, daily = false) {
     setPrefs(S.pl[0], SET.af); S.pl[0].emb = SET.emb || 0;
     if (r === 'host' && !coop) { const e1 = conns.find(k => k.side === 1); if (e1 && e1.info.pid) { setPrefs(S.pl[1], e1.info.af); S.pl[1].emb = e1.info.emb || 0; } }
     else setPrefs(S.pl[1], Array.from({ length: 5 }, () => (Math.random() * 4) | 0));   // počítač má náhodné národy
+    S.bot = null;
     if (r === 'host') {                                 // dva hráči na jedné straně: každý má své zlato a svůj národ
       MYMEM = 0;
-      for (const k of conns) k.mem = k.side === 0 ? 1 : conns.filter(o => o.side === k.side && o.slot < k.slot).length;
+      const hs = TEAM ? HOSTOPT.hside : 0;
+      const memOf = s => (hs === s ? [{ af: SET.af, emb: SET.emb || 0 }] : []).concat(conns.filter(k => k.side === s).sort((a, b) => a.slot - b.slot).map(k => ({ af: k.info.af, emb: k.info.emb | 0, k })));
+      const L = [memOf(0), memOf(1)];
       for (const s of [0, 1]) {
-        const mem = (s === 0 ? [SET.af] : []).concat(conns.filter(k => k.side === s).sort((a, b) => a.slot - b.slot).map(k => k.info.af));
-        if (mem.length !== 2) continue;
-        const p = S.pl[s]; p.prefm = mem.map(cleanAf); p.afm = p.prefm.map(pr => pr.slice()); p.w = [p.gold, p.gold]; p.gold *= 2; p.pd = [0, 0];
+        L[s].forEach((x, i) => { if (x.k) x.k.mem = i; else MYMEM = i; });
+        if (TEAM && L[s].length) { setPrefs(S.pl[s], L[s][0].af); S.pl[s].emb = L[s][0].emb; }
+        // hra ve 3: menší tým doplní počítač jako druhý hráč (vlastní peněženka a náhodný národ)
+        const bot = TEAM && HOSTOPT.bot && L[s].length === 1 && L[1 - s].length === 2;
+        if (L[s].length !== 2 && !bot) continue;
+        const p = S.pl[s]; p.prefm = (bot ? [L[s][0].af, Array.from({ length: 5 }, () => (Math.random() * 4) | 0)] : L[s].map(x => x.af)).map(cleanAf);
+        p.afm = p.prefm.map(pr => pr.slice()); p.w = [p.gold, p.gold]; p.gold *= 2; p.pd = [0, 0];
+        if (bot) { S.bot = { s, m: 1 }; p.pd[1] = 1; }
       }
     }
   }

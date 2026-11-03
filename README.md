@@ -21,7 +21,7 @@ Aplikace se po instalaci aktualizuje sama – nové verze hry si stáhne při sp
 - **Generál** – strom dovedností se třemi větvemi (Armáda, Obrana, Hospodářství), bonusy z dobytých území a výbava hrdinů.
 - **✅ Úkoly** – denní a týdenní úkoly, za které získáš body generála a **skiny armády**.
 - **Bojiště s vlastnostmi** – louka, poušť s písečnými bouřemi, zima, sopka s lávou, bažina a les; delší bitvy přejdou do noci.
-- **Multiplayer** – souboj 1 na 1, co-op proti počítači, 2 na 2, turnaje, pozvánky nedávným soupeřům, **divácký režim** a emoty.
+- **Multiplayer** – souboj 1 na 1, co-op proti počítači, 2 na 2 (i ve třech s počítačem jako spoluhráčem, tým si volí každý sám; v týmu má každý své zlato a svůj národ), turnaje, pozvánky nedávným soupeřům, **divácký režim** a emoty.
 - **🌍 Online žebříček** – hodnocení (Elo) z online soubojů všech hráčů.
 - **Statistiky po bitvě** – graf síly armád a přehled, kdo kolik zabil a čím.
 - Obtížnosti od lehké po **🔥 Šílenou** (odemkne se po dohrání kampaně), denní výzva, úspěchy, profil s hodnostmi.

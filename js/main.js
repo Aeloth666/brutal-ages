@@ -100,6 +100,7 @@ function loop(now) {
         acc -= DT;
         step(DT);
         if (role === 'solo' || coop) ai(DT);
+        if (S.bot) aiBot(DT);
         for (const e of S.ev) { addFx(e); netEv.push(e); recEv.push(e); }
         S.ev = [];
       }

@@ -97,6 +97,17 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.10', d: '2026-11-03', cs: [
+    'Hra v týmu: kdo zabije, dostane celou odměnu a spoluhráč k tomu podíl podle obtížnosti (Lehká 35 %, Normální 25 %, Těžká 20 %, Nemožná 15 %, Šílená 10 %; 2 na 2 25 %).',
+    'Hra v týmu: fronta stavby má 9 míst (jinde zůstává 5).',
+    'Čekárna 2 na 2: každý si může vybrat tým (tlačítko ⇄) a hra jde spustit i ve třech – menší tým pak může doplnit počítač jako spoluhráč.',
+    'Opraveno: tlačítko „Spustit hru“ v čekárně se překrývalo se seznamem nedávných soupeřů.',
+    'Mamutí lovec (Lovci mamutů) oslaben: stojí 60 zlata, má 140 zdraví, nájezd je dvojnásobný místo trojnásobného a výcvik trvá déle.'], en: [
+    'Team play: whoever kills gets the full reward and the teammate also gets a share based on difficulty (Easy 35 %, Normal 25 %, Hard 20 %, Impossible 15 %, Insane 10 %; 2 vs 2 25 %).',
+    'Team play: the build queue has 9 slots (5 elsewhere).',
+    '2 vs 2 lobby: everyone can pick a team (⇄ button) and the game can start with three players – the smaller team can then get the computer as a teammate.',
+    'Fixed: the “Start game” button in the lobby overlapped the list of recent opponents.',
+    'Mammoth Hunter (Mammoth Hunters) nerfed: costs 60 gold, has 140 health, the charge deals double instead of triple damage and training takes longer.'] },
   { v: '2.9', d: '2026-11-02', cs: [
     'Co-op a 2 na 2: každý hráč v týmu má vlastní zlato – nákup platí ten, kdo kupuje, a odměnu za zabití dostane majitel jednotky (za věže a speciální útoky napůl).',
     'Každý hráč v týmu má svůj národ: jeho jednotky se kreslí podle jeho národa i u spoluhráče a soupeřů a na začátku věku si národ volí každý sám.',

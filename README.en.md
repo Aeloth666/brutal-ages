@@ -21,7 +21,7 @@ Once installed, the app updates itself – new game versions are downloaded at s
 - **General** – a skill tree with three branches (Army, Defence, Economy), bonuses from conquered territories and hero gear.
 - **✅ Quests** – daily and weekly quests that give general points and **army skins**.
 - **Battlefields with features** – meadow, desert with sandstorms, winter, volcano with lava, swamp and forest; long battles turn into night.
-- **Multiplayer** – 1 vs 1 duel, co-op against the computer, 2 vs 2, tournaments, invites for recent opponents, **spectator mode** and emotes.
+- **Multiplayer** – 1 vs 1 duel, co-op against the computer, 2 vs 2 (also with three players and the computer as a teammate, everyone picks their team; in a team everyone has their own gold and nation), tournaments, invites for recent opponents, **spectator mode** and emotes.
 - **🌍 Online leaderboard** – rating (Elo) from online duels of all players, clans.
 - **After-battle statistics** – army strength graph and who killed how many and with what.
 - Difficulties from easy to **🔥 Insane** (unlocked after finishing the campaign), daily challenge, achievements, profile with ranks.

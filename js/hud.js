@@ -19,11 +19,12 @@ function hud(V) {
   if (xf > 0) { rr(15, 58, 212 * xf, 7, 3.5); c.fillStyle = lg('xpb', 0, 0, 228, 0, [[0, '#7c3aed'], [1, '#c084fc']]); c.fill(); }
   c.fillStyle = '#e2e8f0'; c.font = '800 12px system-ui'; c.fillText(A.name.toUpperCase(), 14, 84);
   // fronta
-  for (let i = 0; i < 5; i++) {
-    const x = 124 + i * 21, y = 70;
-    rr(x, y, 19, 19, 4); c.fillStyle = '#0b1020'; c.fill(); c.strokeStyle = '#334155'; c.stroke();
+  const QN = qMax(p), QW = 105 / QN, QB = QW - 2;     // v týmu 9 menších políček, jinak 5
+  for (let i = 0; i < QN; i++) {
+    const x = 124 + i * QW, y = 70 + (19 - QB);
+    rr(x, y, QB, QB, 4); c.fillStyle = '#0b1020'; c.fill(); c.strokeStyle = '#334155'; c.stroke();
     const q = p.q[i];
-    if (q) { c.save(); c.beginPath(); c.rect(x, y, 19, 19); c.clip(); c.translate(x + 9.5, y + 18); const s = q.ty === 2 ? 0.2 : q.ty === 3 ? 0.18 : 0.34; c.scale(s, s); drawUnitLocal(teamCol(mySide), q.a, q.ty, 0, 0, 1); c.restore(); }
+    if (q) { c.save(); c.beginPath(); c.rect(x, y, QB, QB); c.clip(); c.translate(x + QB / 2, y + QB - 1); const s = (q.ty === 2 ? 0.2 : q.ty === 3 ? 0.18 : 0.34) * QB / 19; c.scale(s, s); drawUnitLocal(teamCol(mySide), q.a, q.ty, 0, 0, 1); c.restore(); }
   }
   rr(124, 93, 103, 6, 3); c.fillStyle = '#0b1020'; c.fill();
   if (p.qf > 0) { rr(124, 93, 103 * p.qf, 6, 3); c.fillStyle = '#22c55e'; c.fill(); }
@@ -35,10 +36,10 @@ function hud(V) {
   const okU = i => M.only == null || M.only === i;
   if (uiMode === 'units') {
     const FN = facAt(p, p.age);
-    A.units.forEach((u, i) => { const k = unitCost(p, i); add(FN.u[i] || u.n, okU(i) ? k.toLocaleString('cs') : 'ZAKÁZÁNO', { a: 'buy', ty: i }, okU(i) && p.gold >= k && p.q.length < 5, ['u', p.age, i]); });
+    A.units.forEach((u, i) => { const k = unitCost(p, i); add(FN.u[i] || u.n, okU(i) ? k.toLocaleString('cs') : 'ZAKÁZÁNO', { a: 'buy', ty: i }, okU(i) && p.gold >= k && p.q.length < qMax(p), ['u', p.age, i]); });
     { const sp = SPECS[p.age][(p.af && p.af[p.age]) | 0], k = unitCost(p, 6);   // speciální jednotka národa
-      add(sp.n, okU(6) ? k.toLocaleString('cs') : 'ZAKÁZÁNO', { a: 'buy', ty: 6 }, okU(6) && p.gold >= k && p.q.length < 5, ['u', p.age, 6]); }
-    if (p.age === 4) add(SUPER.n, SUPER.c.toLocaleString('cs'), { a: 'buy', ty: 3 }, okU(3) && p.gold >= SUPER.c && p.q.length < 5, ['u', 4, 3]);
+      add(sp.n, okU(6) ? k.toLocaleString('cs') : 'ZAKÁZÁNO', { a: 'buy', ty: 6 }, okU(6) && p.gold >= k && p.q.length < qMax(p), ['u', p.age, 6]); }
+    if (p.age === 4) add(SUPER.n, SUPER.c.toLocaleString('cs'), { a: 'buy', ty: 3 }, okU(3) && p.gold >= SUPER.c && p.q.length < qMax(p), ['u', 4, 3]);
     // hrdina: vyvolání, nebo když už bojuje, jeho ničivý úder
     const H = { ...HEROES[p.age], n: heroName(p) }, hero = V.units.some(u => u.side === mySide && u.ty === 4);
     if (hero) add('Ničivý úder', p.acd > 0 ? p.acd + ' s' : 'PŘIPRAVENO', { a: 'hero' }, p.acd <= 0, ['slam']);

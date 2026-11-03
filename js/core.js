@@ -145,7 +145,7 @@ const BOSSES = [
   { n: 'Titán', c: 55000, hp: 20000, d: 520, r: 210, s: 15, cd: 2.0, t: 0, p: 'ion', sp: 50, y: 110 },
 ];
 // speciální jednotka národa (ty 6): v každém věku jedna za každý národ (pořadí jako AGEFAC), ab = schopnost
-const SPEC_AB = { charge: 'Nájezd – první úder je trojnásobný', fast: 'Velmi rychlý', berserk: 'Čím méně zdraví, tím silněji útočí',
+const SPEC_AB = { charge: 'Nájezd – první úder je násobně silnější', fast: 'Velmi rychlý', berserk: 'Čím méně zdraví, tím silněji útočí',
   sniper: 'Obrovský dosah', tank: 'Velmi odolný', dodge: 'Uhne 40 % zásahů', bomb: 'Výbušné střely', healer: 'Léčí spojence kolem sebe',
   thief: 'Zásahy kradou zlato', drum: 'Spojenci kolem útočí o 40 % silněji', flame: 'Plamen zasáhne víc nepřátel naráz',
   boom: 'Při smrti vybuchne', leech: 'Zásahy ho léčí' };
@@ -155,7 +155,7 @@ const SPECS = AGES.map((A, a) => {
   const mk = (n, ab, o = {}) => ({ ...b, n, ab, ...o });
   const snip = p => ({ r: Math.round(r.r * 1.6), d: Math.round(r.d * 2.6), cd: 1.6, hp: Math.round(b.hp * 0.55), p });
   return [
-    [mk('Mamutí lovec', 'charge', { s: 54 }), mk('Vlčí běžec', 'fast', { s: 82, hp: Math.round(b.hp * 0.95) }), mk('Zuřivec', 'berserk'), mk('Orlí střelec', 'sniper', { ...snip('arrow'), d: Math.round(r.d * 1.7) })],
+    [mk('Mamutí lovec', 'charge', { s: 50, c: 60, hp: Math.round(b.hp * 0.93), chg: 2, t: 3 }), mk('Vlčí běžec', 'fast', { s: 82, hp: Math.round(b.hp * 0.95) }), mk('Zuřivec', 'berserk'), mk('Orlí střelec', 'sniper', { ...snip('arrow'), d: Math.round(r.d * 1.7) })],
     [mk('Templář', 'tank', { hp: Math.round(b.hp * 1.8), d: Math.round(b.d * 0.75), s: 38 }), mk('Berserkr', 'berserk'), mk('Ninja', 'dodge', { s: 70, hp: Math.round(b.hp * 0.7) }), mk('Chánova garda', 'charge', { s: 70 })],
     [mk('Granátník', 'bomb', { r: 170, p: 'shell', sp: 40, d: Math.round(r.d * 1.75), cd: 1.8, hp: Math.round(b.hp * 0.7) }), mk('Kněz', 'healer', { d: Math.round(b.d * 0.5), hp: Math.round(b.hp * 1.3) }), mk('Pirát s papouškem', 'thief', { d: Math.round(b.d * 1.2), hp: Math.round(b.hp * 1.15) }), mk('Mehter bubeník', 'drum', { d: Math.round(b.d * 0.6), c: Math.round(b.c * 0.6), hp: Math.round(b.hp * 1.4) })],
     [mk('Plamenometčík', 'flame', { r: 70, sw: 45, d: Math.round(b.d * 0.7) }), mk('Ženista', 'healer', { d: Math.round(b.d * 0.5), hp: Math.round(b.hp * 1.3) }), mk('Sabotér', 'boom', { s: 56 }), mk('Odstřelovač', 'sniper', snip('bullet'))],
@@ -165,6 +165,8 @@ const SPECS = AGES.map((A, a) => {
 const uDef = (a, ty, f) => ty === 6 ? SPECS[a][f | 0] : ty === 5 ? BOSSES[a] : ty === 3 ? SUPER : ty === 4 ? HEROES[a] : AGES[a].units[ty];
 const uDefU = u => uDef(u.a, u.ty, u.f);
 // šířka jednotky v boji (rozestupy, dosah); jízdní zvířata podle velikosti – mamut je mnohem delší než vlk
+// fronta stavby: v týmu (dva hráči na jedné straně) je delší
+const qMax = p => p && p.w ? 9 : 5;
 const unitW = (ty, s, a, m) => ty === 2 && a <= 1 && s != null ? mountW(s, a, m) : ty === 5 ? 96 : ty === 2 ? 64 : ty === 3 ? 34 : ty === 4 ? 32 : ty === 6 ? 30 : 26;
 const mountW = (s, a, m) => { const p = S.pl[s]; return (MOUNT[a === 1 ? 'horse' : mountKind({ af: p.afm ? p.afm[m | 0] : p.af })] || {}).gw || 64; };
 const unitY = u => u.ty === 5 ? BOSSES[u.a].y : u.ty >= 2 ? 34 : 28;          // kam míří střely
@@ -235,7 +237,7 @@ function applyCmd0(s, c) {
       if (s === 0 && M.only != null && c.ty !== M.only) return;
       if (![0, 1, 2, 3, 6].includes(c.ty)) return;
       const af = p.afm ? p.afm[p.cm | 0] : p.af, f = (af && af[p.age]) | 0, d = uDef(p.age, c.ty, f), k = d && unitCost(p, c.ty);
-      if (!d || p.gold < k || p.q.length >= 5) return;
+      if (!d || p.gold < k || p.q.length >= qMax(p)) return;
       p.gold -= k; p.q.push({ a: p.age, ty: c.ty, f, m: p.cm | 0 }); break;
     }
     case 'turret': {
@@ -304,7 +306,7 @@ function applyCmd0(s, c) {
       const nm = AGES[p.age].baseHp * (1 + UPS[2].k * p.up[2]);
       p.hp += nm - p.mhp; p.mhp = nm; p.bm = 1;
       setAgeFac(p, p.pref[p.age]); p.pick = FAC_PICK;     // nový věk = nový výběr národa
-      if (p.afm) { p.afm.forEach((af, i) => af[p.age] = p.prefm[i][p.age]); p.pd = [0, 0]; }
+      if (p.afm) { p.afm.forEach((af, i) => af[p.age] = p.prefm[i][p.age]); p.pd = [0, 0]; if (S.bot && S.bot.s === s) p.pd[S.bot.m] = 1; }
       S.ev.push([BX[s], GY - 90, 'evo']); break;
     }
   }
@@ -336,13 +338,18 @@ function spawn(s, q) {
 
 let dmgSrc = 'u';                                  // odkud škoda je (u jednotky, t věže, s speciál, h hrdina) – pro statistiky
 let dmgMem = null;                                 // který hráč týmu škodu způsobil (null = věž, speciál… → odměna napůl)
-// V týmu (co-op, 2 na 2) má každý hráč vlastní peněženku p.w[m]; p.gold je pak součet. Bez určeného hráče se dělí napůl.
+// V týmu (co-op, 2 na 2) má každý hráč vlastní peněženku p.w[m]; p.gold je pak součet.
+// Kdo zabil, dostane celou odměnu a spoluhráč k tomu podíl podle obtížnosti (ať má příjem, i když zrovna nebojuje).
+// Bez určeného hráče (věž, speciální útok, truhla) se odměna dělí napůl.
 // Během příkazu (p.inCmd) drží p.gold peněženku hráče, který příkaz dal (p.cm).
-function addGold(s, g, m) {
+const MATE_SHARE = [0.35, 0.25, 0.2, 0.15, 0.1];          // podíl spoluhráče podle obtížnosti (Lehká … Šílená); 2 na 2 = 25 %
+const mateShare = () => MATE_SHARE[S.diff ?? 1] ?? 0.25;
+function addGold(s, g, m, kill) {
   const p = S.pl[s]; if (!p) return;
   const W = p.w; if (!W) { p.gold += g; return; }
   const add = (i, v) => { if (p.inCmd && i === p.cm) p.gold += v; else W[i] += v; };
-  if (m == null) { add(0, g / 2); add(1, g / 2); } else add(m, g);
+  if (m == null) { add(0, g / 2); add(1, g / 2); }
+  else { add(m, g); if (kill) add(1 - m, g * mateShare()); }
   if (!p.inCmd) p.gold = W[0] + W[1];
 }
 function hurt(t, dmg, by, fromSpecial) {
@@ -356,7 +363,7 @@ function hurt(t, dmg, by, fromSpecial) {
     if (t.ty === 6 && d.ab === 'boom') { const src = dmgSrc; dmgSrc = 'u'; splash(t.x, 80, d.d * 4, t.side); dmgSrc = src; S.ev.push([t.x, GY - 20, 'boom']); }
     if (p) {
       const loot = g.loot && (t.ty === 2 || t.ty === 5) ? 2 : 1, gg = Math.round(d.c * KILL_GOLD * p.gm * (facOf(by).gold || 1) * g.gold * loot);
-      addGold(by, gg, dmgMem); if (S.st) S.st.gold[by] += gg;
+      addGold(by, gg, dmgMem, true); if (S.st) S.st.gold[by] += gg;
       p.xp += Math.round(d.c * KILL_XP * p.xm * g.xp);
       p.kills++;
       if (fromSpecial) { p.spk++; p.spBest = Math.max(p.spBest, p.spk); }
@@ -384,7 +391,7 @@ function attack(u, d0, tgt, dir) {
   const F = facOf(u.side), WP = u.ty === 1 && F.g && WEAP[F.g], pp = (WP && WP.proj) || d0.p, P = S.pl[u.side], g = GB(P);
   let k = (u.ty === 4 ? g.heroD * ((g.gear && g.gear[u.a][1]) || 1) : g.dmg) * (P.cryT > 0 ? 1.3 : 1);
   if (u.ty === 6) {                                    // schopnosti speciálních jednotek
-    if (d0.ab === 'charge' && !u.hit) k *= 3;
+    if (d0.ab === 'charge' && !u.hit) k *= d0.chg || 3;          // nájezd: první úder násobně silnější
     if (d0.ab === 'berserk') k *= 2 - u.hp / u.mx;
   }
   if (S.units.some(a => a.side === u.side && a !== u && a.ty === 6 && !a.dead && Math.abs(a.x - u.x) < 160 && uDefU(a).ab === 'drum')) k *= 1.4;
@@ -650,6 +657,22 @@ function ai(dt) {
   }
 }
 
+// ---------- počítač jako spoluhráč (hra ve 3) ----------
+// hraje za hráče m své strany: kupuje jednotky a hrdinu ze své peněženky, společné věci (věže, evoluce, speciál) nechává lidem
+function aiBot(dt) {
+  const B = S.bot; if (!B || S.over >= 0) return;
+  const p = S.pl[B.s], W = p.w; if (!W) return;
+  W[B.m] += AI_INCOME[p.age] * 0.5 * dt; p.gold = W[0] + W[1];   // malý příjem, ať nikdy nezůstane bez peněz
+  B.t = (B.t ?? 1) - dt; if (B.t > 0) return; B.t = rnd(1.2, 2.4);
+  const g = W[B.m], hero = S.units.some(u => u.side === B.s && u.ty === 4);
+  if (!hero && p.hcd <= 0 && g >= HEROES[p.age].c * 1.5 && Math.random() < 0.3) return applyCmd(B.s, { a: 'hero' }, B.m);
+  if (p.q.length >= qMax(p) - 3) return;                      // nechá ve frontě místo i lidem
+  if (B.want == null) { const r = Math.random(); B.want = p.age === 4 && r < 0.03 ? 3 : r < 0.08 ? 6 : r < 0.5 ? 0 : r < 0.82 ? 1 : 2; }
+  if (B.want === 3 && p.age < 4) B.want = 0;
+  if (g >= unitCost(p, B.want)) { applyCmd(B.s, { a: 'buy', ty: B.want }, B.m); B.want = null; }
+  else if (Math.random() < 0.15) B.want = null;
+}
+
 // ---------- Snapshoty ----------
 function snap(ev) {
   return {
@@ -669,7 +692,7 @@ function decode(sn) {
     // v týmu vidí každý své zlato a svůj národ (a[23] peněženky, a[24] národy hráčů týmu)
     pl: sn.P.map((a, i) => ({ gold: i === mySide && a[23] ? a[23][MYMEM] ?? a[0] : a[0], xp: a[1], age: a[2], hp: a[3], mhp: a[4], slots: a[5],
       tur: a[6].map(v => ({ a: (v / 3) | 0, i: v % 3 })), q: a[7].map(v => ({ a: v >> 3, ty: v & 7 })),
-      qf: a[8], spcd: a[9], kills: a[10] || 0, spBest: a[11] || 0, supers: a[12] || 0, built: a[13] || 0, up: a[14] || [0, 0, 0], hcd: a[15] || 0, acd: a[16] || 0, ord: a[17] || 0, af: i === mySide && a[24] ? a[24][MYMEM] || a[18] : Array.isArray(a[18]) ? a[18] : [0, 0, 0, 0, 0], emb: a[19] || 0, pick: a[20] || 0, rgcd: a[21] || 0, cry: a[22] || 0, afm: a[24] || null })),
+      qf: a[8], spcd: a[9], kills: a[10] || 0, spBest: a[11] || 0, supers: a[12] || 0, built: a[13] || 0, up: a[14] || [0, 0, 0], hcd: a[15] || 0, acd: a[16] || 0, ord: a[17] || 0, af: i === mySide && a[24] ? a[24][MYMEM] || a[18] : Array.isArray(a[18]) ? a[18] : [0, 0, 0, 0, 0], emb: a[19] || 0, pick: a[20] || 0, rgcd: a[21] || 0, cry: a[22] || 0, afm: a[24] || null, w: a[23] || null })),
     time: sn.Tm || 0, diff: sn.D, chal: sn.X, camp: sn.K, daily: sn.Dy, dark: sn.Dk || 0, chest: sn.Ch || 0, trex: sn.Tx || 0, rage: !!sn.Rg, speed: sn.Sp || 1, wait: !!sn.Wt, storm: !!sn.Sm, surv: sn.Sv ? sn.Sv[0] : 0, survT: sn.Sv ? sn.Sv[1] : 0,
     units: sn.U.map(a => ({ id: a[0], side: a[1], a: a[2], ty: a[3], x: a[4], hp: a[5], mx: a[6], st: a[7], at: a[8], back: a[9], rg: a[10], m: a[11] | 0 })),
     proj: sn.R.map(a => ({ id: a[0], x: a[1], y: a[2], p: a[3], dx: a[4], dy: a[5] })),
