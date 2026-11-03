@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.10.1', d: '2026-11-03', cs: ['Opraveno: ve Statistikách bitvy graf vyskočil přes celou obrazovku, zakryl tlačítko Zpět a z obrazovky nešlo odejít.'], en: ['Fixed: in Battle statistics the chart jumped over the whole screen, covered the Back button and the screen could not be closed.'] },
   { v: '2.10', d: '2026-11-03', cs: [
     'Hra v týmu: kdo zabije, dostane celou odměnu a spoluhráč k tomu podíl podle obtížnosti (Lehká 35 %, Normální 25 %, Těžká 20 %, Nemožná 15 %, Šílená 10 %; 2 na 2 25 %).',
     'Hra v týmu: fronta stavby má 9 míst (jinde zůstává 5).',
