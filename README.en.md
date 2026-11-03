@@ -8,6 +8,8 @@ A brutal war through the ages, from caves to space mechs. Build an army, defend 
 
 ### ▶ [Play in the browser](https://aeloth666.github.io/brutal-ages/) · 📲 [Download for Android (APK)](https://aeloth666.github.io/brutal-ages/BrutalAges.apk)
 
+📖 [Wiki – everything about the game](https://aeloth666.github.io/brutal-ages/wiki/) (Czech) · 📜 [Changelog](CHANGELOG.en.md)
+
 Once installed, the app updates itself – new game versions are downloaded at startup.
 
 ---

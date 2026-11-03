@@ -8,6 +8,8 @@ Brutální válka věků od jeskyní až po vesmírné mechy. Postav armádu, br
 
 ### ▶ [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · 📲 [Stáhnout pro Android (APK)](https://aeloth666.github.io/brutal-ages/BrutalAges.apk)
 
+📖 [Wiki – všechno o hře](https://aeloth666.github.io/brutal-ages/wiki/) · 📜 [Co je nového (changelog)](CHANGELOG.md)
+
 Aplikace se po instalaci aktualizuje sama – nové verze hry si stáhne při spuštění.
 
 ---
