@@ -10,11 +10,14 @@ function refreshSet() {
   $('gfxNote').textContent = GFX_D[GFXL];
   $('bEvt').textContent = '⚡ Události: ' + (SET.evt !== false ? 'ZAP' : 'VYP');
   $('bAutoGfx').textContent = '📉 Auto grafika: ' + (SET.gfxAuto !== false ? 'ZAP' : 'VYP');
+  $('bEco').textContent = '🔋 Úspora baterie: ' + (SET.eco ? 'ZAP' : 'VYP');
   $('bLang').textContent = LANG === 'en' ? '🌐 English' : '🌐 Čeština';
 }
 document.querySelectorAll('#gfxOpts button').forEach(b => b.onclick = () => { SET.gfx = GFXL = +b.dataset.g; saveSet(); resize(); refreshSet(); sfx('click'); });
 $('bLang').onclick = () => { SET.lang = LANG === 'en' ? 'cs' : 'en'; saveSet(); location.reload(); };   // jazyk se přepne po znovunačtení
 $('bAutoGfx').onclick = () => { SET.gfxAuto = SET.gfxAuto === false; saveSet(); refreshSet(); sfx('click'); };
+// úspora baterie: v bitvě 30 snímků/s a nižší rozlišení plátna
+$('bEco').onclick = () => { SET.eco = !SET.eco; saveSet(); resize(); refreshSet(); sfx('click'); };
 // automatická grafika: když telefon několik sekund nestíhá (< ~25 snímků/s), sníží kvalitu o stupeň
 const perf = { sum: 0, n: 0 };
 function perfTick(ms) {

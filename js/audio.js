@@ -29,7 +29,7 @@ function audioInit() {
   rs.connect(rf); rf.connect(AU.rain); AU.rain.connect(AU.sfx); rs.start();
   applyVolumes();
   MUS.next = a.currentTime + 0.1;
-  setInterval(musicTick, 25);
+  setInterval(musicTick, 60);                         // hudba se plánuje 0,3 s dopředu – stačí se budit 16× za sekundu (šetří baterii)
 }
 function applyVolumes() {
   if (!AU.ctx) return;
@@ -141,7 +141,7 @@ function musicTick() {
   const a = AU.ctx;
   if (!a || a.state !== 'running') return;
   if (MUS.next < a.currentTime - 0.2) MUS.next = a.currentTime + 0.05;
-  while (MUS.next < a.currentTime + 0.15) {
+  while (MUS.next < a.currentTime + 0.3) {
     const bpm = MUS.mode === 'menu' ? 84 : AGE_BPM[MUS.age];
     const spb = 60 / bpm / 4;
     if (SET.music) playStep(MUS.step, MUS.next, spb);

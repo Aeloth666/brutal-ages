@@ -97,6 +97,11 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.16', d: '2026-11-03', cs: [
+    'Méně vybíjí baterii: hra kreslí nejvýš 60 snímků za sekundu (dřív až 120–144 podle displeje), v menu 30 a s otevřenou nabídkou 15.',
+    'Nová volba Nastavení → Grafika → 🔋 Úspora baterie: v bitvě 30 snímků za sekundu a nižší rozlišení.'], en: [
+    'Uses less battery: the game draws at most 60 frames per second (up to 120–144 before, depending on the display), 30 in the menu and 15 with a panel open.',
+    'New option Settings → Graphics → 🔋 Battery saver: 30 frames per second in battle and a lower resolution.'] },
   { v: '2.15', d: '2026-11-03', cs: [
     'Tajemství se hledá jinak – zkus se pořádně dívat na zem, když teče hodně krve. 🩸',
     'Krev stříkající na displej zmizí rychleji (4 s místo 7 s) a už neproblikává, když tam není.'], en: [
