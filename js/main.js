@@ -83,6 +83,14 @@ document.querySelector('#menu h1').addEventListener('click', () => {
 //  HLAVNÍ SMYČKA
 // =====================================================================
 let last = performance.now(), lastDraw = 0;
+// ukazatel FPS v rohu (Nastavení → Grafika): počítá skutečně vykreslené snímky, obnovuje se dvakrát za sekundu
+const FPSM = { n: 0, t: 0 };
+function fpsTick(now) {
+  FPSM.n++;
+  if (now - FPSM.t < 500) return;
+  const f = Math.round(FPSM.n * 1000 / (now - FPSM.t)), el = $('fps'); FPSM.n = 0; FPSM.t = now;
+  el.textContent = f + ' FPS'; el.className = f >= fpsCap() * 0.85 ? 'ok' : f >= fpsCap() * 0.55 ? 'mid' : 'low';
+}
 // strop snímků: displeje 90–144 Hz by jinak kreslily zbytečně často a vybíjely baterii
 // bitva 60 (úspora baterie 30), menu 30, otevřená podnabídka 15
 const fpsCap = () => role ? (SET.eco ? 30 : 60) : document.querySelector('.overlay.panelOpen, .overlay:not(.hidden):not(#menu):not(#rotate)') ? 15 : 30;
@@ -90,6 +98,7 @@ function loop(now) {
   requestAnimationFrame(loop);
   if (now - lastDraw < 1000 / fpsCap() - 3) return;
   lastDraw = now;
+  if (SET.fps) fpsTick(now);
   perfTick(now - last);
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   netTick(now);

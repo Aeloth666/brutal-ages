@@ -11,12 +11,15 @@ function refreshSet() {
   $('bEvt').textContent = '⚡ Události: ' + (SET.evt !== false ? 'ZAP' : 'VYP');
   $('bAutoGfx').textContent = '📉 Auto grafika: ' + (SET.gfxAuto !== false ? 'ZAP' : 'VYP');
   $('bEco').textContent = '🔋 Úspora baterie: ' + (SET.eco ? 'ZAP' : 'VYP');
+  $('bFps').textContent = '📈 Ukazatel FPS: ' + (SET.fps ? 'ZAP' : 'VYP'); $('fps').classList.toggle('hidden', !SET.fps);
   $('bLang').textContent = LANG === 'en' ? '🌐 English' : '🌐 Čeština';
 }
 document.querySelectorAll('#gfxOpts button').forEach(b => b.onclick = () => { SET.gfx = GFXL = +b.dataset.g; saveSet(); resize(); refreshSet(); sfx('click'); });
 $('bLang').onclick = () => { SET.lang = LANG === 'en' ? 'cs' : 'en'; saveSet(); location.reload(); };   // jazyk se přepne po znovunačtení
 $('bAutoGfx').onclick = () => { SET.gfxAuto = SET.gfxAuto === false; saveSet(); refreshSet(); sfx('click'); };
 // úspora baterie: v bitvě 30 snímků/s a nižší rozlišení plátna
+$('bFps').onclick = () => { SET.fps = !SET.fps; saveSet(); refreshSet(); sfx('click'); };
+$('fps').classList.toggle('hidden', !SET.fps);                 // ukazatel zůstane zapnutý i po restartu
 $('bEco').onclick = () => { SET.eco = !SET.eco; saveSet(); resize(); refreshSet(); sfx('click'); };
 // automatická grafika: když telefon několik sekund nestíhá (< ~25 snímků/s), sníží kvalitu o stupeň
 const perf = { sum: 0, n: 0 };
