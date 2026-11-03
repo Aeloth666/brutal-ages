@@ -22,7 +22,7 @@ const ACH = [
   { id: 'daily7',  n: 'Vytrvalec',         d: 'Splň denní výzvu 7 dní v řadě.',              w: (m, V) => { let n = 0, d = new Date(); while (DRES[dayKey(d)]) { n++; d.setDate(d.getDate() - 1); } return n >= 7; } },
   { id: 'chicken', n: 'Slepice, nebo vejce?', d: 'Objev slepičí režim.', secret: 1 },
   { id: 'trex',    n: 'Jurský park',       d: 'Zažij v bitvě návrat T-Rexe.', secret: 1, t: (m, V) => !!V.trex },
-  { id: 'egg',     n: 'Zlaté vejce',       d: 'Najdi tajný kód.', secret: 1 },
+  { id: 'egg',     n: 'Zlaté vejce',       d: 'Najdi zlaté vejce.', secret: 1 },
   { id: 'extreme', n: 'Extrémista',        d: 'Odemkni EXTREME BRUTAL.', secret: 1 },
   { id: 'rage',    n: 'Vzteklina',         d: 'Rozzuř vojáka v kampani.', secret: 1, t: (m, V) => V.units.some(u => u.side === mySide && u.rg) },
   { id: 'coop',    n: 'Parťáci',           d: 'Vyhrajte spolu online hru proti počítači.',   w: () => coop },
@@ -219,6 +219,7 @@ function overlays(dt) {
     if (paused) drawPause();
   }
   if (splats.length && role) drawSplats(dt);
+  if (eggScene && role) drawEggScene();
   drawToasts(dt);
   c.restore();
 }

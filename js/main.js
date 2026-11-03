@@ -6,6 +6,8 @@ cv.addEventListener('pointerdown', e => {
   const dpr = cv.width / innerWidth;
   const x = (e.clientX * dpr - ox) / scl, y = (e.clientY * dpr - oy) / scl;
   const hit = b => b && x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+  if (eggScene) { eggClick(x, y); return; }                              // tajemství: scéna se zlatým vejcem
+  if (!replay && !paused && bloodCodeHit(x, y)) { eggStart(); return; }
   if (replay) { replayClick(hit); return; }
   if (tut && hit(tutBtn)) { tutNext(); return; }
   for (const b of facBtns) if (hit(b) && V.over < 0) { act({ a: 'fac', i: b.i }); facBtns = []; return; }
@@ -63,14 +65,7 @@ cv.addEventListener('pointerdown', e => {
 $('bSolo').onclick = () => { cleanupNet(); startGame('solo'); };
 $('bHost').onclick = () => hostGame({ coop: SET.net === 'coop', team: SET.net === '2v2' });
 // tajný kód místo kódu hry
-function joinOrSecret(v) {
-  if (v.trim().toUpperCase() === 'BRUTL' && SET.brutal) {
-    if (!SET.egg) { SET.egg = 1; saveSet(); }
-    unlock(ACH.find(a => a.id === 'egg')); sfx('ach'); $('code').value = '';
-    status('🥚 Našel jsi zlaté vejce! V profilu máš nový tajný znak.'); return;
-  }
-  joinGame(v);
-}
+function joinOrSecret(v) { joinGame(v); }
 $('bJoin').onclick = () => joinOrSecret($('code').value);
 $('bWatch').onclick = () => joinGame($('code').value, true);       // divák
 $('code').addEventListener('keydown', e => { if (e.key === 'Enter') joinOrSecret(e.target.value); });
@@ -95,7 +90,7 @@ function loop(now) {
   netTick(now);
   tutTick();
   if ((role === 'solo' || role === 'host') && S) {
-    if (S.over < 0 && !(paused && role === 'solo') && !netWait) {
+    if (S.over < 0 && !((paused || eggScene) && role === 'solo') && !netWait) {
       acc += dt * (role === 'solo' ? S.speed : 1);
       while (acc >= DT) {
         acc -= DT;
@@ -119,7 +114,7 @@ function loop(now) {
   if (replay && V) V = replayTick(dt);
   MUS.mode = V && role && V.over < 0 ? 'battle' : 'menu';
   if (V) MUS.age = V.pl[mySide].age;
-  render((paused && role === 'solo') || netWait ? 0 : dt);
+  render(((paused || eggScene) && role === 'solo') || netWait ? 0 : dt);
   overlays(dt);
 }
 requestAnimationFrame(loop);
@@ -137,6 +132,7 @@ if ('serviceWorker' in navigator && !nativeApp && (location.hostname !== 'localh
 addEventListener('keydown', e => {
   if (!V || !role || replay || e.target.tagName === 'INPUT') return;
   const k = e.key.toLowerCase();
+  if (eggScene && k === 'escape') { eggScene = null; e.preventDefault(); return; }
   if (k === 'escape' || k === 'p') { if (role === 'solo' && V.over < 0) { paused = !paused; sfx('click'); } e.preventDefault(); return; }
   if (paused || V.over >= 0 || netWait) return;
   const cmdBtns = btns.filter(b => b.cmd && typeof b.cmd === 'object');

@@ -810,7 +810,7 @@ function addFx(e) {
       if (BRUT() && !BF.includes(x)) bloodBurst(x, y, 9, 150, true);   // zásah bez zabití – skoro bez kaluží
       break;
     case 'die': {
-      if (BRUT() && !SET.egg && !bloodCode && !bloodCodeUsed && V && V.time > 90 && Math.random() < 0.05) bloodCode = { x: Math.max(160, Math.min(W - 160, MX(x))), l: 9, ml: 9 };
+      if (BRUT() && !SET.egg && !bloodCode && !bloodCodeUsed && V && V.time > 90 && Math.random() < 0.05) bloodCode = { x: Math.max(160, Math.min(W - 160, MX(x))), l: 14, ml: 14 };
       if (SET.chicken) { part(10, '#f8fafc', 110, 2.2, 1, 120); sfx('cluck', x); }
       seasonDie(x);
       const cp = { corpse: 1, x, side: e[3], a: e[4], ty: e[5], m: e[6] | 0, l: e[5] === 5 ? 3 : 1.3, ml: e[5] === 5 ? 3 : 1.3 };
@@ -981,10 +981,77 @@ function drawBloodCode(dt) {
   c.restore();
   if (B.l <= 0) { bloodCode = null; bloodCodeUsed = true; }
 }
+// ---------- tajemství: klepnutí na krvavý nápis odvede ke zlatému vejci ----------
+// vejce se jednou za 4 s zaleskne; klepnutím na něj se otevře a odemkne se tajný znak (proti počítači hra mezitím stojí)
+let eggScene = null;
+const bloodCodeHit = (x, y) => bloodCode && bloodCode.l > 0 && Math.abs(x - bloodCode.x) < 70 && Math.abs(y - (GY + 52)) < 34;
+function eggStart() { eggScene = { t0: performance.now(), x0: bloodCode.x, y0: GY + 52 }; bloodCode = null; bloodCodeUsed = true; sfx('evt'); vib(40); }
+const eggT = () => (performance.now() - eggScene.t0) / 1000;
+// cesta vejce: vynoří se z nápisu a přeletí doprostřed obrazovky
+function eggPos() { const k = Math.min(1, eggT() / 1.4), e = k * k * (3 - 2 * k); return [lerp(eggScene.x0, W / 2, e), lerp(eggScene.y0, H * 0.56, e), lerp(0.5, 2.8, e)]; }
+const eggClose = () => ({ x: W - 62, y: HUD + 14, w: 46, h: 40 });
+function eggPath(open) {
+  c.beginPath(); c.moveTo(0, -22); c.bezierCurveTo(13, -22, 17, -2, 16, 7); c.bezierCurveTo(15, 19, -15, 19, -16, 7); c.bezierCurveTo(-17, -2, -13, -22, 0, -22); c.closePath();
+}
+function drawEggScene() {
+  const E = eggScene, t = eggT(), [x, y, s] = eggPos(), done = E.done ? t - E.done : -1;
+  c.save();
+  c.globalAlpha = Math.min(0.9, t * 1.3); c.fillStyle = '#05030a'; c.fillRect(0, 0, W, H);
+  c.globalAlpha = Math.min(1, t * 1.6);
+  const R = 60 + 50 * s, g = c.createRadialGradient(x, y, 6, x, y, R);
+  g.addColorStop(0, `rgba(255,214,110,${done >= 0 ? 0.75 : 0.32})`); g.addColorStop(1, 'rgba(255,214,110,0)'); c.fillStyle = g; circ(x, y, R);
+  c.translate(x, y); c.scale(s, s);
+  // hnízdo z hlíny a kostí
+  c.fillStyle = '#3b2412'; c.beginPath(); c.ellipse(0, 16, 26, 7, 0, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = '#e7dcc4'; c.lineWidth = 1.6; c.lineCap = 'round'; for (const [a, b] of [[-22, -6], [10, 22], [-12, 6]]) ln(a, 15 + (a % 3), b, 12 + (b % 4));
+  if (done < 0) {
+    // celé vejce: zlatý přechod, obrys, stálý odlesk
+    eggPath(); c.fillStyle = lg('goldEgg', 0, -22, 0, 19, [[0, '#fff7c2'], [0.45, '#facc15'], [1, '#a16207']]); c.fill(); c.strokeStyle = '#5c3a06'; c.lineWidth = 1.4; c.stroke();
+    c.fillStyle = 'rgba(255,255,255,.55)'; c.beginPath(); c.ellipse(-6, -11, 3.2, 6, -0.4, 0, Math.PI * 2); c.fill();
+    // jednou za 4 s přeběhne po vejci záblesk a nahoře zajiskří hvězdička
+    const gl = (t - 1.4) % 4;
+    if (t > 1.4 && gl < 0.7) {
+      const k = gl / 0.7;
+      c.save(); eggPath(); c.clip(); c.globalAlpha = Math.sin(k * Math.PI) * 0.9; c.fillStyle = '#fff';
+      c.beginPath(); c.moveTo(-30 + k * 50, -26); c.lineTo(-22 + k * 50, -26); c.lineTo(-38 + k * 50, 22); c.lineTo(-46 + k * 50, 22); c.closePath(); c.fill(); c.restore();
+      const st = Math.sin(k * Math.PI) * 5; c.fillStyle = '#fff'; c.globalAlpha = Math.sin(k * Math.PI);
+      c.beginPath(); c.moveTo(8, -24 - st); c.lineTo(9, -21); c.lineTo(8 + st, -20); c.lineTo(9, -19); c.lineTo(8, -16 + st); c.lineTo(7, -19); c.lineTo(8 - st, -20); c.lineTo(7, -21); c.closePath(); c.fill();
+    }
+  } else {
+    // otevřené vejce: skořápka se rozlomí, vyletí zlaté světlo a objeví se tajný znak
+    const k = Math.min(1, done / 0.6);
+    for (const side of [-1, 1]) {
+      c.save(); c.translate(side * k * 10, -k * 8 * (side < 0 ? 1 : 0.6)); c.rotate(side * k * 0.6);
+      c.beginPath(); c.moveTo(0, -22); c.bezierCurveTo(side * 13, -22, side * 17, -2, side * 16, 7); c.bezierCurveTo(side * 15, 19, 0, 19, 0, 19);
+      for (let i = 0; i < 4; i++) c.lineTo(side * (i % 2 ? 4 : 0), 13 - i * 9); c.lineTo(0, -22); c.closePath();
+      c.fillStyle = lg('goldEgg', 0, -22, 0, 19, [[0, '#fff7c2'], [0.45, '#facc15'], [1, '#a16207']]); c.fill(); c.strokeStyle = '#5c3a06'; c.lineWidth = 1.2; c.stroke(); c.restore();
+    }
+    c.globalAlpha = Math.min(1, done * 2); c.font = '22px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('🥚', 0, -18 - Math.min(1, done) * 14);
+  }
+  c.restore();
+  if (done >= 0) {
+    c.save(); c.globalAlpha = Math.min(1, done * 1.5); c.textAlign = 'center'; c.fillStyle = '#fde68a'; c.font = '900 34px system-ui'; c.fillText('ZLATÉ VEJCE', W / 2, H * 0.8);
+    c.fillStyle = '#e2e8f0'; c.font = '700 17px system-ui'; c.fillText('V profilu máš nový tajný znak 🥚', W / 2, H * 0.8 + 30); c.restore();
+    if (done > 3.2) eggScene = null;
+  } else {
+    const b = eggClose(); c.save(); c.globalAlpha = Math.min(0.8, t);                  // zavřít bez vejce
+    rr(b.x, b.y, b.w, b.h, 9); c.fillStyle = '#1e293b'; c.fill(); c.strokeStyle = '#cbd5e1'; c.lineWidth = 3; c.lineCap = 'round';
+    ln(b.x + 15, b.y + 12, b.x + 31, b.y + 28); ln(b.x + 31, b.y + 12, b.x + 15, b.y + 28); c.restore();
+  }
+}
+function eggClick(x, y) {
+  const E = eggScene; if (E.done) return;
+  const b = eggClose(); if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) { eggScene = null; return; }
+  const [ex, ey, s] = eggPos();
+  if (eggT() > 1.2 && Math.hypot(x - ex, (y - ey) * 0.85) < 22 * s) {
+    E.done = eggT(); if (!SET.egg) { SET.egg = 1; saveSet(); }
+    achId('egg'); sfx('evo'); vib([60, 40, 120]);
+  }
+}
 // cákanec „na skle“: nepravidelná skvrna s kapičkami, z níž stékají pramínky dolů (zpomalují a mají kapku na konci)
 function screenSplat(x, y, big) {
   const r = rnd(20, 36) * (big ? 1.4 : 1);
-  const s = { x: Math.max(50, Math.min(W - 50, x + rnd(-160, 160))), y: Math.max(HUD + 20, Math.min(H - 140, y + rnd(-150, 20))), r, l: 7, ml: 7,
+  const s = { x: Math.max(50, Math.min(W - 50, x + rnd(-160, 160))), y: Math.max(HUD + 20, Math.min(H - 140, y + rnd(-150, 20))), r, l: 4, ml: 4,
     blobs: Array.from({ length: 9 }, () => [rnd(-1, 1), rnd(-0.8, 0.8), rnd(0.22, 0.55)]),
     dots: Array.from({ length: 10 }, () => [rnd(-2.2, 2.2), rnd(-1.8, 1.4), rnd(1.2, 3.4)]),
     drips: Array.from({ length: 3 + ((Math.random() * 4) | 0) }, () => ({ dx: rnd(-0.75, 0.75), v: rnd(26, 70), len: 0, w: rnd(2.6, 5) })) };
@@ -993,7 +1060,8 @@ function screenSplat(x, y, big) {
 function drawSplats(dt) {
   for (const s of splats) {
     s.l -= dt;
-    const a = Math.min(1, s.l / 2);
+    if (s.l <= 0) continue;
+    const a = Math.max(0, Math.min(1, s.l / 1.5));
     // pramínky stékají dolů a postupně zpomalují (krev zasychá)
     for (const d of s.drips) { d.len += d.v * dt; d.v = Math.max(4, d.v - dt * 9); }
     c.globalAlpha = a * 0.8; c.fillStyle = '#7f0a0a';

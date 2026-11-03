@@ -97,6 +97,11 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.15', d: '2026-11-03', cs: [
+    'Tajemství se hledá jinak – zkus se pořádně dívat na zem, když teče hodně krve. 🩸',
+    'Krev stříkající na displej zmizí rychleji (4 s místo 7 s) a už neproblikává, když tam není.'], en: [
+    'The secret is found differently now – look closely at the ground when a lot of blood is spilled. 🩸',
+    'Blood splattering on the screen disappears faster (4 s instead of 7 s) and no longer flickers when it is not there.'] },
   { v: '2.14', d: '2026-11-03', cs: [
     'Nové tlačítko ℹ ve hře: karty všech jednotek tvého národa a věku – cena, výcvik, útok, rychlost útoku, zdraví, rychlost, dosah a schopnost (včetně bonusů národa a vylepšení).',
     'Zprávy mezi přáteli: u přítele tlačítko 💬 s konverzací. Nová zpráva přijde jako oznámení a odznak ve Velitelství; konverzace se ukládá v telefonu.'], en: [
