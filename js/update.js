@@ -97,7 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
-  { v: '2.17', d: '2026-11-03', cs: ['Nastavení → Grafika → 📈 Ukazatel FPS: malé počítadlo snímků za sekundu v levém horním rohu (v menu i ve hře). Zelená = plynulé, žlutá = občas trhá, červená = nestíhá.'], en: ['Settings → Graphics → 📈 FPS counter: a small frames-per-second counter in the top left corner (in the menu and in the game). Green = smooth, yellow = occasional stutter, red = struggling.'] },
+  { v: '2.17', d: '2026-11-03', cs: ['Nastavení → Grafika → 📈 Ukazatel FPS: malé počítadlo snímků za sekundu v levém dolním rohu (v menu i ve hře). Zelená = plynulé, žlutá = občas trhá, červená = nestíhá.'], en: ['Settings → Graphics → 📈 FPS counter: a small frames-per-second counter in the bottom left corner (in the menu and in the game). Green = smooth, yellow = occasional stutter, red = struggling.'] },
   { v: '2.16.1', d: '2026-11-03', cs: ['Opravena chyba při spuštění z verze 2.16 (chyběl ukazatel zdraví bosse).'], en: ['Fixed a startup error from version 2.16 (the boss health bar was missing).'] },
   { v: '2.16', d: '2026-11-03', cs: [
     'Méně vybíjí baterii: hra kreslí nejvýš 60 snímků za sekundu (dřív až 120–144 podle displeje), v menu 30 a s otevřenou nabídkou 15.',

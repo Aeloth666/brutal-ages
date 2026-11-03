@@ -322,6 +322,6 @@ table.cmp td.win { color: #4ade80; font-weight: 800; } table.cmp { margin-top: 8
 .badge-in { font-style: normal; background: #dc2626; color: #fff; border-radius: 9px; padding: 0 6px; font-size: 11px; margin-left: 3px; }
 
 /* ukazatel FPS v rohu (nad vším, neblokuje klepnutí) */
-#fps { position: fixed; top: max(4px, env(safe-area-inset-top)); left: max(6px, env(safe-area-inset-left)); z-index: 999; pointer-events: none;
+#fps { position: fixed; bottom: max(4px, env(safe-area-inset-bottom)); left: max(6px, env(safe-area-inset-left)); z-index: 999; pointer-events: none;
   font: 800 11px/1 ui-monospace, Consolas, monospace; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.55); color: #4ade80; }
 #fps.mid { color: #facc15; } #fps.low { color: #f87171; } #fps.hidden { display: none; }
