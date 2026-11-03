@@ -97,6 +97,13 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.12', d: '2026-11-03', cs: [
+    'Přezdívky jsou jedinečné: v Profilu se jméno ukládá tlačítkem a obsazené jméno (bez ohledu na velká písmena a diakritiku) hra odmítne. Výchozí „Hráč“ je volné pro všechny.',
+    'Kdo už jméno používá, zabere si ho po spuštění nové verze; kdo ho mezitím ztratil, dostane upozornění.',
+    'Nedávní soupeři v „Hrát s kámoši“ mají tlačítko ➕ Přítel pro žádost o přátelství.'], en: [
+    'Nicknames are unique: the name is saved with a button in the Profile and a taken name (regardless of case and accents) is refused. The default “Hráč” is free for everyone.',
+    'Players keep the name they already use once they start the new version; whoever lost it gets a notice.',
+    'Recent opponents in “Play with friends” have a ➕ Friend button to send a friend request.'] },
   { v: '2.11', d: '2026-11-03', cs: [
     'Přátelé (Velitelství → 👥 Přátelé): každý hráč má své ID (BA-…), kámoše najdeš podle jména nebo ID a pošleš mu žádost o přátelství.',
     'Porovnání statistik s přítelem: úroveň, hry, zabití, výhry proti počítači, online bilance, nejrychlejší výhra, hvězdy v kampani, úspěchy, přežití a vzájemné souboje – lepší hodnota svítí zeleně.',

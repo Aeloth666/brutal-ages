@@ -82,13 +82,22 @@ function renderProf() {
       <div class="prof-info"><b>${rankOf(L)}</b><small>${PROF.xp.toLocaleString('cs')} XP · do další úrovně ${(b - PROF.xp).toLocaleString('cs')} XP</small>
         <div class="prof-bar"><i style="width:${pct}%"></i></div></div>
     </div>
-    <label class="nick">Tvoje přezdívka (uvidí ji kámoši):
-      <input id="nick" maxlength="14" placeholder="Hráč" autocomplete="off" value="${esc(SET.name || '')}"></label>
+    <label class="nick">Tvoje přezdívka (uvidí ji kámoši, každé jméno může mít jen jeden hráč):</label>
+    <div class="row"><input id="nick" maxlength="14" placeholder="Hráč" autocomplete="off" value="${esc(SET.name || '')}"><button id="bNick">💾 Uložit</button></div>
+    <p id="nickMsg" class="muted">${ME.nbad ? '⚠️ Tohle jméno už používá jiný hráč – vyber si jiné.' : ''}</p>
     <div class="colors-head">Znak na praporu základny</div>
     <div id="embList">${EMBS.map((e, i) => `<button class="emb ${(SET.emb || 0) === i ? 'on' : ''} ${embLocked(e, L) ? 'locked' : ''}" data-e="${i}" title="${e.n}">${embLocked(e, L) ? (e.egg ? '🔒<small>???</small>' : '🔒<small>úr. ' + e.lv + '</small>') : e.ic || '—'}</button>`).join('')}</div>
     ${EXTREME() ? '<p class="extreme">💀 EXTREME BRUTAL je zapnutý – víc krve a v kampani tlačítko 😡 Vztek.</p>' : ''}
     <p class="muted">XP získáváš za každou hru: za zabité nepřátele, výhry, online zápasy a hvězdy z kampaně a denní výzvy.</p>`;
-  $('nick').addEventListener('input', e => { SET.name = e.target.value.trim().slice(0, 14); saveSet(); });
+  // přezdívka se uloží až po kontrole, že ji nemá jiný hráč
+  const saveNick = async () => {
+    const n = $('nick').value.trim().slice(0, 14), msg = t => { $('nickMsg').textContent = t; };
+    if (n === (SET.name || '')) { msg(''); return; }
+    sfx('click'); msg('Kontroluji jméno…');
+    try { await claimName(n); SET.name = n; saveSet(); msg('✔ Uloženo.'); pubSync(true); }
+    catch (e) { msg('❌ ' + e.message); }
+  };
+  $('bNick').onclick = saveNick; $('nick').onkeydown = e => { if (e.key === 'Enter') saveNick(); };
   document.querySelectorAll('#embList .emb').forEach(b => b.onclick = () => {
     const i = +b.dataset.e; if (embLocked(EMBS[i], profLevel())) return;
     SET.emb = i; saveSet();
@@ -385,10 +394,16 @@ function renderFriends() {
   const st = { on: ['🟢', 'online'], busy: ['🟠', 'právě hraje'], off: ['⚫', 'offline'] };
   const row = (f, i) => {
     const [dot, txt] = st[friendOn[f.pid]] || ['⚪', 'zjišťuji…'];
-    return `<div class="friend"><span>${dot} <b>${esc(f.n)}</b> <small>${txt}</small></span><button data-i="${i}" ${friendOn[f.pid] === 'off' ? 'class="ghost"' : ''}>📨 Pozvat</button></div>`;
+    return `<div class="friend"><span>${dot} <b>${esc(f.n)}</b> <small>${txt}</small></span><span>${f.fr ? '' : `<button class="ghost" data-add="${i}" title="Poslat žádost o přátelství">➕ Přítel</button> `}<button data-i="${i}" ${friendOn[f.pid] === 'off' ? 'class="ghost"' : ''}>📨 Pozvat</button></span></div>`;
   };
   const fr = L.filter(f => f.fr), rec = L.filter(f => !f.fr);
   box.innerHTML = (fr.length ? '<h3>👥 Přátelé</h3>' + fr.map(f => row(f, L.indexOf(f))).join('') : '') + (rec.length ? '<h3>Nedávní soupeři</h3>' + rec.map(f => row(f, L.indexOf(f))).join('') : '');
-  box.querySelectorAll('button').forEach(b => b.onclick = () => { sfx('click'); inviteFriend(L[+b.dataset.i]); });
+  box.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { sfx('click'); inviteFriend(L[+b.dataset.i]); });
+  // nedávný soupeř → žádost o přátelství
+  box.querySelectorAll('[data-add]').forEach(b => b.onclick = async () => {
+    sfx('click'); b.disabled = true; b.textContent = '…';
+    try { b.textContent = (await frRequestPid(L[+b.dataset.add].pid)) === 'friend' ? '✔ Přítel' : '📨 Žádost odeslána'; }
+    catch (e) { b.textContent = '❌'; status(esc(e.message)); }
+  });
 }
 $('bMP').addEventListener('click', () => { friendOn = {}; renderFriends(); pingFriends(); });

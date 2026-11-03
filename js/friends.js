@@ -12,6 +12,31 @@ const saveFr = () => store('aow-fr', MYFR);
 // čtení s přihlášením (žádosti smí číst jen adresát)
 const fbGetA = async path => { const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit'); const r = await fbFetch(`${FB.db}/${path}.json?auth=${a.t}`); if (!r.ok) throw new Error('Čtení selhalo (' + r.status + ')'); return r.json(); };
 
+// ---------- jedinečná přezdívka ----------
+// klíč jména: malá písmena bez diakritiky, jen písmena a číslice („Pépa“ = „pepa“); /names/{klíč} → uid toho, kdo ho má
+const nameKey = n => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const NAME_FREE = ['hrac', ''];                          // výchozí „Hráč“ je volné pro všechny
+// zabere jméno (a uvolní předchozí); vrací true, nebo vyhodí chybu s důvodem
+async function claimName(n) {
+  const k = nameKey(n);
+  if (NAME_FREE.includes(k)) { if (ME.nk && ME.nk !== k) { const a = await fbAuth(); if (a) await fbPut('names/' + ME.nk, null).catch(() => {}); } ME.nk = k; store('aow-me', ME); return true; }
+  if (k.length < 2) throw new Error('Jméno musí mít aspoň 2 písmena nebo číslice');
+  const a = await fbAuth(); if (!a) throw new Error('Jméno jde změnit jen online');
+  const owner = await fbGet('names/' + k);
+  if (owner && owner !== a.uid) throw new Error('Tohle jméno už má jiný hráč');
+  if (!owner) await fbPut('names/' + k, a.uid);
+  if (ME.nk && ME.nk !== k && !NAME_FREE.includes(ME.nk)) await fbPut('names/' + ME.nk, null).catch(() => {});
+  ME.nk = k; ME.nbad = 0; store('aow-me', ME);
+  return true;
+}
+// stávající hráči: jméno, které už používají, si zaberou; když ho mezitím má někdo jiný, hra je upozorní
+async function nameCheck() {
+  const k = nameKey(SET.name);
+  if (!FB.key || NAME_FREE.includes(k) || ME.nk === k) return;
+  try { await claimName(SET.name); }
+  catch (e) { if (/jiný hráč/.test(e.message) && !ME.nbad) { ME.nbad = 1; store('aow-me', ME); toasts.push({ a: { n: 'Jméno ' + SET.name + ' už používá jiný hráč – změň si ho v Profilu' }, h: '👤 PŘEZDÍVKA', l: 6 }); } }
+}
+
 // souhrn statistik pro porovnání s přáteli
 function myStats() {
   const sw = ST.solo.reduce((a, r) => a + r[0], 0), sl = ST.solo.reduce((a, r) => a + r[1], 0);
@@ -54,6 +79,14 @@ async function frSearch(q) {
 async function frRequest(p, acc) {
   const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit');
   await fbPut(`freq/${p.uid}/${a.uid}`, { n: (SET.name || 'Hráč').slice(0, 14), id: await ensureId(), pid: SET.pid, t: Date.now(), ...(acc ? { acc: 1 } : {}) });
+}
+// žádost nedávnému soupeři: najde jeho profil podle herního identifikátoru (pid)
+async function frRequestPid(pid) {
+  const res = await fbFetch(`${FB.db}/pub.json?orderBy=${encodeURIComponent('"pid"')}&equalTo=${encodeURIComponent(JSON.stringify(pid))}&limitToFirst=1`);
+  const r = res.ok ? await res.json() : null, e = r && Object.entries(r)[0];
+  if (!e) throw new Error('Hráč ještě nemá Přátele (potřebuje novou verzi a jednou je otevřít)');
+  if (MYFR.some(f => f.uid === e[0])) return 'friend';
+  await frRequest({ uid: e[0], ...e[1] }); return 'sent';
 }
 function frAdd(p) {
   if (!p || !p.uid || MYFR.some(f => f.uid === p.uid)) return;
@@ -152,5 +185,5 @@ async function renderCompare(uid) {
 }
 function openFriends() { frView = null; openPanel('friendsPanel'); renderFr(); pubSync(true).then(() => { if (!frView) renderFr(); }); frPoll().then(() => { if (!frView) renderFr(); }); }
 $('bFriends').onclick = () => { sfx('click'); openFriends(); };
-setTimeout(() => { pubSync(); frPoll(); }, 4000);
+setTimeout(() => { nameCheck().finally(() => pubSync()); frPoll(); }, 4000);
 setInterval(() => { if (!role) frPoll(); }, 90000);
