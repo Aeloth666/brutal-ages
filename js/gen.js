@@ -80,7 +80,7 @@ function hqNews() {
   questRoll();
   const got = ACH.filter(a => ACHS[a.id]).length;
   if (HQS.ach < 0) { HQS.ach = got; HQS.done = QST.done; store('aow-hqseen', HQS); }   // první spuštění: staré věci nejsou novinky
-  return { gen: Math.max(0, genFree()), quest: (HQS.day !== QST.day ? 1 : 0) + (HQS.week !== QST.week ? 1 : 0) + Math.max(0, QST.done - HQS.done), ach: Math.max(0, got - HQS.ach), got };
+  return { fr: typeof FRQN !== 'undefined' ? FRQN : 0, gen: Math.max(0, genFree()), quest: (HQS.day !== QST.day ? 1 : 0) + (HQS.week !== QST.week ? 1 : 0) + Math.max(0, QST.done - HQS.done), ach: Math.max(0, got - HQS.ach), got };
 }
 function tileBadge(id, n) {
   const el = $(id); let s = el.querySelector('.badge');
@@ -93,8 +93,9 @@ function refreshHQ() {
   $('hqGen').textContent = N.gen > 0 ? N.gen + ' volných bodů' : 'strom dovedností';
   $('hqQuest').textContent = (HQS.day !== QST.day ? 'nové úkoly! · ' : '') + (qOpen ? qOpen + ' nesplněných úkolů' : 'vše splněno ✔');
   $('hqAch').textContent = N.got + ' / ' + ACH.length + (N.ach ? ' · ' + N.ach + ' nových' : '');
-  tileBadge('bGen', N.gen); tileBadge('bQuest', N.quest); tileBadge('bAch', N.ach);
-  const sum = N.gen + N.quest + N.ach, b = $('hqBadge');
+  tileBadge('bGen', N.gen); tileBadge('bQuest', N.quest); tileBadge('bAch', N.ach); tileBadge('bFriends', N.fr);
+  if ($('hqFr')) $('hqFr').textContent = N.fr ? N.fr + ' nových žádostí' : MYFR.length ? MYFR.length + ' přátel' : 'hledání, žádosti a porovnání';
+  const sum = N.gen + N.quest + N.ach + N.fr, b = $('hqBadge');
   b.textContent = sum; b.classList.toggle('hidden', !sum);
 }
 $('bHQ').onclick = () => { refreshHQ(); openPanel('hqPanel'); };

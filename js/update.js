@@ -97,6 +97,15 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.11', d: '2026-11-03', cs: [
+    'Přátelé (Velitelství → 👥 Přátelé): každý hráč má své ID (BA-…), kámoše najdeš podle jména nebo ID a pošleš mu žádost o přátelství.',
+    'Porovnání statistik s přítelem: úroveň, hry, zabití, výhry proti počítači, online bilance, nejrychlejší výhra, hvězdy v kampani, úspěchy, přežití a vzájemné souboje – lepší hodnota svítí zeleně.',
+    'Přátelé jsou i v „Hrát s kámoši“ nad nedávnými soupeři, vidíš, kdo je online, a můžeš ho rovnou pozvat. Nové žádosti ukáže odznak ve Velitelství.',
+    'Nový úspěch: Nejsi sám.'], en: [
+    'Friends (Headquarters → 👥 Friends): every player has an ID (BA-…), find friends by name or ID and send them a friend request.',
+    'Compare stats with a friend: level, games, kills, wins vs computer, online record, fastest win, campaign stars, achievements, survival and head-to-head – the better value glows green.',
+    'Friends also appear in “Play with friends” above recent opponents, you see who is online and can invite them right away. New requests show a badge in Headquarters.',
+    'New achievement: Not alone.'] },
   { v: '2.10.1', d: '2026-11-03', cs: ['Opraveno: ve Statistikách bitvy graf vyskočil přes celou obrazovku, zakryl tlačítko Zpět a z obrazovky nešlo odejít.'], en: ['Fixed: in Battle statistics the chart jumped over the whole screen, covered the Back button and the screen could not be closed.'] },
   { v: '2.10', d: '2026-11-03', cs: [
     'Hra v týmu: kdo zabije, dostane celou odměnu a spoluhráč k tomu podíl podle obtížnosti (Lehká 35 %, Normální 25 %, Těžká 20 %, Nemožná 15 %, Šílená 10 %; 2 na 2 25 %).',

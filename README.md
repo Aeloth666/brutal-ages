@@ -17,7 +17,7 @@ Aplikace se po instalaci aktualizuje sama – nové verze hry si stáhne při sp
 - **5 věků** – doba kamenná, středověk, renesance, moderní doba a budoucnost, každý s vlastními jednotkami, věžemi, speciálním útokem a hrdinou.
 - **20 národů** – v každém věku 4 (např. Kmen Vlka, Vikingové, Samurajové, Piráti, Mimozemšťané, Roboti…), každý s vlastním bonusem, vzhledem, základnou, pokřikem a **speciální jednotkou** (ninja, berserkr, kněz, sabotér, parazit…); v době kamenné jezdí každý kmen na svém zvířeti (mamut, vlk, medvěd, pratur).
 - **Kampaň** – 15 území napříč dějinami, **bossové** na konci každého věku (šavlozubý tygr, drak, Leonardův obrněný vůz, obří tank, titán) a Rudá horda, která ti dobytá území občas napadne.
-- **🎖 Velitelství** – profil, generál, úkoly, úspěchy, národy a statistiky přehledně na jednom místě; odznak ukáže, co je nového.
+- **🎖 Velitelství** – profil, generál, úkoly, úspěchy, národy, statistiky a **👥 přátelé** (ID hráče, hledání podle jména, žádosti o přátelství a porovnání statistik) přehledně na jednom místě; odznak ukáže, co je nového.
 - **Generál** – strom dovedností se třemi větvemi (Armáda, Obrana, Hospodářství), bonusy z dobytých území a výbava hrdinů.
 - **✅ Úkoly** – denní a týdenní úkoly, za které získáš body generála a **skiny armády**.
 - **Bojiště s vlastnostmi** – louka, poušť s písečnými bouřemi, zima, sopka s lávou, bažina a les; delší bitvy přejdou do noci.

@@ -42,6 +42,7 @@ const ACH = [
   { id: 'candy',   n: 'Koledník',          d: 'O Halloweenu seber dýni s bonbony. Koleda, koleda!', secret: 1 },
   { id: 'gift',    n: 'Dárek pod stromeček', d: 'O Vánocích seber dárek na bojišti.', secret: 1 },
   { id: 'cloud',   n: 'Pojištěný',         d: 'Zálohuj svůj postup do cloudu.' },
+  { id: 'friend',  n: 'Nejsi sám',         d: 'Přidej si prvního přítele. Teď už víš, komu to dát sežrat.' },
   { id: 'clanNew', n: 'Náčelník party',    d: 'Založ vlastní klan.' },
   { id: 'clanJoin', n: 'Nováček v partě',  d: 'Přidej se ke klanu.' },
   { id: 'clanGoal', n: 'Jeden za všechny', d: 'Splňte s klanem týdenní klanovou výzvu.' },

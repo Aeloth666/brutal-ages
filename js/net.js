@@ -374,6 +374,7 @@ function toMenu(msg) {
   role = null; S = null; V = null; snapCur = snapPrev = null; paused = false; replay = null;
   cleanupNet(); wxApply(); setField(FIELDS[SET.field] ? SET.field : 'meadow');
   refreshMenu(); try { refreshHQ(); } catch (e) {}
+  try { pubSync(); } catch (e) {}                       // po hře zveřejní aktuální statistiky pro přátele
   document.getElementById('menu').classList.remove('hidden');
   status(msg || ''); document.getElementById('mstatus').innerHTML = msg ? esc(msg) : '';
 }

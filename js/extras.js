@@ -309,7 +309,7 @@ function inboxStart() {
   inbox.on('error', e => {
     if (e.type === 'unavailable-id') { try { inbox.destroy(); } catch (x) {} inbox = null; return; }   // schránku drží jiná karta
     if (e.type === 'peer-unavailable') {                       // kamarád není online
-      const f = FRIENDS.find(f => String(e.message).includes(inboxId(f.pid)));
+      const f = invList().find(f => String(e.message).includes(inboxId(f.pid)));
       if (f) { friendOn[f.pid] = 'off'; if (f.pid === inviteFriend.to) status(`${esc(f.n)} teď není ve hře. Pošli mu kód: <b>${hostGame.code}</b>`); renderFriends(); }
     }
   });
@@ -369,9 +369,10 @@ function inviteFriend(f) {
 }
 
 // kdo z nedávných soupeřů je právě ve hře (krátký dotaz na jeho schránku)
+const invList = () => [...MYFR.filter(f => f.pid).map(f => ({ pid: f.pid, n: f.n, fr: 1 })), ...FRIENDS.filter(f => !MYFR.some(x => x.pid === f.pid))];
 function pingFriends() {
   if (!inbox || !inbox.open) return;
-  for (const f of FRIENDS) {
+  for (const f of invList()) {
     const c = inbox.connect(inboxId(f.pid), { reliable: true, serialization: 'json' });
     c.on('open', () => c.send({ t: 'ping' }));
     c.on('data', r => { if (r.t === 'pong') { friendOn[f.pid] = r.busy ? 'busy' : 'on'; renderFriends(); } try { c.close(); } catch (e) {} });
@@ -379,13 +380,15 @@ function pingFriends() {
   }
 }
 function renderFriends() {
-  const box = $('friends');
-  if (!FRIENDS.length) { box.innerHTML = ''; return; }
+  const box = $('friends'), L = invList();
+  if (!L.length) { box.innerHTML = ''; return; }
   const st = { on: ['🟢', 'online'], busy: ['🟠', 'právě hraje'], off: ['⚫', 'offline'] };
-  box.innerHTML = '<h3>Nedávní soupeři</h3>' + FRIENDS.map((f, i) => {
+  const row = (f, i) => {
     const [dot, txt] = st[friendOn[f.pid]] || ['⚪', 'zjišťuji…'];
     return `<div class="friend"><span>${dot} <b>${esc(f.n)}</b> <small>${txt}</small></span><button data-i="${i}" ${friendOn[f.pid] === 'off' ? 'class="ghost"' : ''}>📨 Pozvat</button></div>`;
-  }).join('');
-  box.querySelectorAll('button').forEach(b => b.onclick = () => { sfx('click'); inviteFriend(FRIENDS[+b.dataset.i]); });
+  };
+  const fr = L.filter(f => f.fr), rec = L.filter(f => !f.fr);
+  box.innerHTML = (fr.length ? '<h3>👥 Přátelé</h3>' + fr.map(f => row(f, L.indexOf(f))).join('') : '') + (rec.length ? '<h3>Nedávní soupeři</h3>' + rec.map(f => row(f, L.indexOf(f))).join('') : '');
+  box.querySelectorAll('button').forEach(b => b.onclick = () => { sfx('click'); inviteFriend(L[+b.dataset.i]); });
 }
 $('bMP').addEventListener('click', () => { friendOn = {}; renderFriends(); pingFriends(); });
