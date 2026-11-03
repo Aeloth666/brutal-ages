@@ -80,7 +80,7 @@ function hqNews() {
   questRoll();
   const got = ACH.filter(a => ACHS[a.id]).length;
   if (HQS.ach < 0) { HQS.ach = got; HQS.done = QST.done; store('aow-hqseen', HQS); }   // první spuštění: staré věci nejsou novinky
-  return { fr: typeof FRQN !== 'undefined' ? FRQN + CINVN : 0, gen: Math.max(0, genFree()), quest: (HQS.day !== QST.day ? 1 : 0) + (HQS.week !== QST.week ? 1 : 0) + Math.max(0, QST.done - HQS.done), ach: Math.max(0, got - HQS.ach), got };
+  return { fr: typeof FRQN !== 'undefined' ? FRQN + CINVN + msgN() : 0, gen: Math.max(0, genFree()), quest: (HQS.day !== QST.day ? 1 : 0) + (HQS.week !== QST.week ? 1 : 0) + Math.max(0, QST.done - HQS.done), ach: Math.max(0, got - HQS.ach), got };
 }
 function tileBadge(id, n) {
   const el = $(id); let s = el.querySelector('.badge');
@@ -308,3 +308,41 @@ function drawEmotes(dt) {
   }
   emotes = emotes.filter(m => m.l > 0);
 }
+
+// ---------- informace o jednotkách (tlačítko ℹ ve hře) ----------
+// karty jednotek aktuálního věku a národa hráče; hodnoty včetně vylepšení a bonusů národa
+let infoPaused = false;
+function renderUnitInfo() {
+  const p = V && V.pl[mySide]; if (!p) return;
+  const a = p.age, F = facAt(p, p.age), f = (p.af && p.af[a]) | 0, team = teamCol(mySide);
+  const list = [0, 1, 2].map(ty => ({ ty, n: F.u[ty] || AGES[a].units[ty].n }))
+    .concat([{ ty: 6, n: SPECS[a][f].n }, { ty: 4, n: heroName(p) }]).concat(a === 4 ? [{ ty: 3, n: SUPER.n }] : []);
+  const card = ({ ty, n }) => {
+    const d = uDef(a, ty, f), up = p.up || [0, 0, 0];
+    const hp = d.hp * (1 + UPS[1].k * up[1]) * (F.hp || 1) * (ty === 2 ? F.heavy || 1 : 1);
+    const dmg = d.d * (1 + UPS[0].k * up[0]) * ((d.p ? F.ranged : F.melee) || 1);
+    const cost = ty === 4 ? HEROES[a].c : unitCost(p, ty);
+    const abil = ty === 6 ? (SPEC_IC[d.ab] || '') + ' ' + SPEC_AB[d.ab] : ty === 4 ? '💥 Ničivý úder – zraní všechny nepřátele kolem' : ty === 3 ? '⚡ Laser zasáhne vše v cestě' : d.sp ? '💣 Plošné poškození' : d.p ? '🏹 Útočí na dálku' : '⚔️ Bojuje zblízka';
+    return `<div class="ucard${ty === 6 ? ' spec' : ty === 4 ? ' hero' : ''}"><div class="uc-head"><canvas width="96" height="80" data-ty="${ty}"></canvas><b>${esc(n)}</b></div>
+      <div class="uc-grid">
+        <span title="Cena">💰 ${cost.toLocaleString('cs')}</span><span title="Doba výcviku">🔨 ${ty === 4 ? '—' : (d.t * (F.build || 1)).toFixed(1) + ' s'}</span>
+        <span title="Útok za ránu">⚔️ ${Math.round(dmg)}</span><span title="Útoků za sekundu">⏱ ${(1 / d.cd).toFixed(2)}/s</span>
+        <span title="Zdraví">❤️ ${Math.round(hp)}</span><span title="Rychlost">🏃 ${Math.round(d.s * (F.spd || 1))}</span>
+        <span title="Dosah" class="wide">🎯 ${d.r < 40 ? 'na blízko' : 'dosah ' + d.r}</span></div>
+      <small>${esc(abil)}</small></div>`;
+  };
+  $('uiBody').innerHTML = `<p class="muted">${F.ic || ''} <b>${esc(F.n)}</b> – ${esc(F.d || '')} · ${esc(AGES[a].name)}${(p.up || []).some(x => x) ? ' · hodnoty včetně vylepšení' : ''}</p>
+    <div class="ucards">${list.map(card).join('')}</div>`;
+  // obrázky jednotek (kreslí se do malých pláten stejně jako ve hře)
+  document.querySelectorAll('#uiBody canvas').forEach(cv2 => {
+    const ty = +cv2.dataset.ty, save = c; c = cv2.getContext('2d'); GC.clear();
+    const s = ty === 2 ? 0.62 : ty === 3 ? 0.5 : ty === 4 ? 0.8 : 1.05;
+    c.save(); c.translate(48, 76); c.scale(s, s); try { drawUnitLocal(team, a, ty, 0, 0, 1); } catch (e) {} c.restore();
+    c = save; GC.clear();
+  });
+}
+function openUnitInfo() {
+  if (role === 'solo' && !paused && V && V.over < 0) { paused = true; infoPaused = true; }
+  renderUnitInfo(); openPanel('unitPanel');
+}
+$('unitPanel').querySelector('.panel-close').addEventListener('click', () => { if (infoPaused) { paused = false; infoPaused = false; } });

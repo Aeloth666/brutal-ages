@@ -42,6 +42,7 @@ cv.addEventListener('pointerdown', e => {
     chatOpen = false; return;
   }
   if (hit(menuBtn)) { sfx('click'); paused = true; return; }
+  if (hit(infoBtn)) { sfx('click'); openUnitInfo(); return; }
   if (hit(extraBtn)) {
     sfx('click');
     if (extraBtn.k === 'speed') { if (S) S.speed = S.speed > 1 ? 1 : 2; }

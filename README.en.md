@@ -17,7 +17,7 @@ Once installed, the app updates itself – new game versions are downloaded at s
 - **5 ages** – stone age, middle ages, renaissance, modern age and the future, each with its own units, towers, special attack and hero.
 - **20 nations** – 4 in every age (e.g. Wolf Tribe, Vikings, Samurai, Pirates, Aliens, Robots…), each with its own bonus, look, base, war cry and **special unit** (ninja, berserker, priest, saboteur, parasite…); in the stone age every tribe rides its own animal (mammoth, wolf, bear, aurochs).
 - **Campaign** – 15 territories across history, **bosses** at the end of every age (sabre-toothed tiger, dragon, Leonardo's armoured car, giant tank, titan) and the Red Horde that sometimes attacks territories you have conquered.
-- **🎖 Headquarters** – profile, general, quests, achievements, nations, statistics and **👥 friends** (player ID, search by name, friend requests and stats comparison) in one place; a badge shows what is new.
+- **🎖 Headquarters** – profile, general, quests, achievements, nations, statistics and **👥 friends** (player ID, search by name, friend requests, messages and stats comparison) in one place; a badge shows what is new.
 - **General** – a skill tree with three branches (Army, Defence, Economy), bonuses from conquered territories and hero gear.
 - **✅ Quests** – daily and weekly quests that give general points and **army skins**.
 - **Battlefields with features** – meadow, desert with sandstorms, winter, volcano with lava, swamp and forest; long battles turn into night.

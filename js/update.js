@@ -97,6 +97,11 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.14', d: '2026-11-03', cs: [
+    'Nové tlačítko ℹ ve hře: karty všech jednotek tvého národa a věku – cena, výcvik, útok, rychlost útoku, zdraví, rychlost, dosah a schopnost (včetně bonusů národa a vylepšení).',
+    'Zprávy mezi přáteli: u přítele tlačítko 💬 s konverzací. Nová zpráva přijde jako oznámení a odznak ve Velitelství; konverzace se ukládá v telefonu.'], en: [
+    'New ℹ button in the game: cards of all units of your nation and age – cost, training, attack, attack speed, health, speed, range and ability (including nation bonuses and upgrades).',
+    'Messages between friends: a 💬 button with the conversation next to each friend. A new message arrives as a notification and a badge in Headquarters; the conversation is stored on the phone.'] },
   { v: '2.13', d: '2026-11-03', cs: [
     'Pozvánky do klanu: v klanu je tlačítko 📨 Pozvat do klanu s výběrem z přátel a nedávných soupeřů. Pozvánka dorazí i hráči, který zrovna nehraje – uvidí ji v Klanu a v Přátelích.',
     'Žádosti o přátelství a pozvánky do klanu pro hráče, kteří ještě nemají novou verzi, se zapamatují a odešlou samy, jakmile si ji spustí (do 30 dní).'], en: [

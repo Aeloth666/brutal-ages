@@ -6,6 +6,31 @@ const ME = load('aow-me', { id: '' });                   // moje ID hráče (6 z
 let MYFR = load('aow-fr', []);                           // přátelé: [{ uid, id, n, pid }]
 let FRQ = {}, FRQN = 0, pubLast = 0;                     // příchozí žádosti (z /freq), jejich počet a čas posledního zápisu profilu
 let CINV = {}, CINVN = 0;                                // pozvánky do klanu (z /cinv) a jejich počet
+// zprávy mezi přáteli: server je jen schránka (/msg/{komu}/{id}), doručené se smažou a konverzace zůstává v telefonu
+const MSG = load('aow-msg', {}), UNR = load('aow-unr', {}); // uid přítele → [{ o: 1 moje / 0 jeho, x, t }], nepřečtené
+const msgN = () => Object.values(UNR).reduce((a, b) => a + b, 0);
+async function msgSend(uid, x) {
+  x = String(x || '').trim().slice(0, 200); if (!x) return;
+  const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit');
+  const r = await fbFetch(`${FB.db}/msg/${uid}.json?auth=${a.t}`, { method: 'POST', body: JSON.stringify({ f: a.uid, n: (SET.name || 'Hráč').slice(0, 14), x, t: Date.now() }) });
+  if (!r.ok) throw new Error('Zprávu se nepodařilo odeslat (' + r.status + ')');
+  (MSG[uid] = MSG[uid] || []).push({ o: 1, x, t: Date.now() }); MSG[uid] = MSG[uid].slice(-50); store('aow-msg', MSG);
+}
+// vyzvedne doručené zprávy (jen od přátel), uloží je k sobě a ze serveru smaže
+async function msgPoll() {
+  const a = await fbAuth(); if (!a) return 0;
+  const r = await fbGetA('msg/' + a.uid).catch(() => null) || {};
+  let n = 0;
+  for (const [id, q] of Object.entries(r)) {
+    await fbPut(`msg/${a.uid}/${id}`, null).catch(() => {});
+    if (!q || !MYFR.some(f => f.uid === q.f)) continue;
+    (MSG[q.f] = MSG[q.f] || []).push({ o: 0, x: String(q.x).slice(0, 200), t: q.t || Date.now() }); MSG[q.f] = MSG[q.f].slice(-50);
+    if (frView !== 'chat:' + q.f) { UNR[q.f] = (UNR[q.f] || 0) + 1; toasts.push({ a: { n: q.n + ': ' + String(q.x).slice(0, 60) }, h: '💬 ZPRÁVA', l: 4 }); }
+    n++;
+  }
+  if (n) { store('aow-msg', MSG); store('aow-unr', UNR); }
+  return n;
+}
 const ID_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const fmtId = id => id ? 'BA-' + id : '…';
 const normId = s => String(s || '').toUpperCase().replace(/^BA-?/, '').replace(/[^A-Z0-9]/g, '');
@@ -142,7 +167,7 @@ async function frPoll() {
   if (!FB.key) return;
   try {
     const a = await fbAuth(); if (!a) return;
-    await pendFlush();
+    await pendFlush(); await msgPoll();
     const r = await fbGetA('freq/' + a.uid) || {};
     FRQ = {};
     for (const [uid, q] of Object.entries(r)) {
@@ -171,6 +196,7 @@ function frRemove(uid) { MYFR = MYFR.filter(f => f.uid !== uid); saveFr(); }
 let frView = null;                                        // null = seznam, jinak uid přítele v porovnání
 async function renderFr(msg) {
   const b = $('frBody'); if (!b) return;
+  if (frView && frView.startsWith('chat:')) return renderChat(frView.slice(5));
   if (frView) return renderCompare(frView);
   const reqs = Object.entries(FRQ);
   b.innerHTML = `
@@ -181,7 +207,7 @@ async function renderFr(msg) {
     ${CINVN ? `<div class="msec">🛡 Pozvánky do klanu</div>` + Object.entries(CINV).map(([uid, q]) => `<div class="friend"><span><b>${esc(q.n)}</b> zve do <span class="ctag">[${esc(q.tag)}]</span> ${esc(q.cn)}</span><span><button data-cyes="${uid}">🛡 Přidat se</button> <button class="ghost" data-cno="${uid}">✕</button></span></div>`).join('') : ''}
     ${reqs.length ? `<div class="msec">📨 Žádosti o přátelství</div>` + reqs.map(([uid, q]) => `<div class="friend"><span><b>${esc(q.n)}</b> <small>${fmtId(q.id)}</small></span><span><button data-yes="${uid}">✔ Přijmout</button> <button class="ghost" data-no="${uid}">✕</button></span></div>`).join('') : ''}
     <div class="msec">👥 Přátelé</div>
-    ${MYFR.length ? MYFR.map(f => `<div class="friend"><span><b>${esc(f.n)}</b> <small>${fmtId(f.id)}</small></span><span><button data-cmp="${f.uid}">📊 Porovnat</button> <button class="ghost" data-inv="${f.uid}">📨 Pozvat</button> <button class="ghost mini" data-del="${f.uid}" title="Odebrat z přátel">✕</button></span></div>`).join('')
+    ${MYFR.length ? MYFR.map(f => `<div class="friend"><span><b>${esc(f.n)}</b> <small>${fmtId(f.id)}</small></span><span><button data-chat="${f.uid}">💬${UNR[f.uid] ? ' <i class="badge-in">' + UNR[f.uid] + '</i>' : ''}</button> <button data-cmp="${f.uid}">📊 Porovnat</button> <button class="ghost" data-inv="${f.uid}">📨 Pozvat</button> <button class="ghost mini" data-del="${f.uid}" title="Odebrat z přátel">✕</button></span></div>`).join('')
       : '<p class="muted">Zatím nikoho nemáš. Najdi kámoše podle jména nebo ID a pošli mu žádost.</p>'}`;
   const m = t => { $('frMsg').textContent = t; };
   $('bFrCopy').onclick = () => { sfx('click'); try { navigator.clipboard.writeText(fmtId(ME.id)); m('ID zkopírováno.'); } catch (e) { m(fmtId(ME.id)); } };
@@ -204,6 +230,7 @@ async function renderFr(msg) {
   b.querySelectorAll('[data-no]').forEach(x => x.onclick = async () => { sfx('click'); await frAnswer(x.dataset.no, false); renderFr(); });
   b.querySelectorAll('[data-cyes]').forEach(x => x.onclick = async () => { sfx('click'); try { await clanInvAnswer(x.dataset.cyes, true); renderFr('Jsi v klanu [' + CLAN.tag + '].'); } catch (e) { renderFr('❌ ' + e.message); } });
   b.querySelectorAll('[data-cno]').forEach(x => x.onclick = async () => { sfx('click'); await clanInvAnswer(x.dataset.cno, false); renderFr(); });
+  b.querySelectorAll('[data-chat]').forEach(x => x.onclick = () => { sfx('click'); frView = 'chat:' + x.dataset.chat; renderFr(); });
   b.querySelectorAll('[data-cmp]').forEach(x => x.onclick = () => { sfx('click'); frView = x.dataset.cmp; renderFr(); });
   b.querySelectorAll('[data-inv]').forEach(x => x.onclick = () => { const f = MYFR.find(f => f.uid === x.dataset.inv); if (!f || !f.pid) return; sfx('click');
     $('friendsPanel').classList.add('hidden'); $('hqPanel').classList.add('hidden'); openPanel('mpPanel'); inviteFriend({ pid: f.pid, n: f.n }); });
@@ -235,6 +262,31 @@ async function renderCompare(uid) {
     <p class="muted">${o ? 'Statistiky přítele z ' + new Date(p.t).toLocaleString('cs') + '.' : 'Přítel zatím nemá zveřejněné statistiky – stačí, když si otevře Přátele.'}
     Vzájemné online souboje: <b>${h2h[0]} : ${h2h[1]}</b> (tvoje výhry : prohry).</p>`;
   $('bFrBack').onclick = () => { sfx('click'); frView = null; renderFr(); };
+}
+// konverzace s přítelem; při otevřeném okně se nové zprávy vyzvedávají každých 5 s
+let chatTimer = 0;
+function renderChat(uid) {
+  const b = $('frBody'), f = MYFR.find(x => x.uid === uid) || { n: 'Přítel' };
+  delete UNR[uid]; store('aow-unr', UNR); if (typeof refreshHQ === 'function') refreshHQ();
+  const L = MSG[uid] || [], tm = t => new Date(t).toLocaleString('cs', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+  b.innerHTML = `<button id="bFrBack" class="ghost mini">← Zpět na přátele</button> <b>💬 ${esc(f.n)}</b>
+    <div class="chat" id="chatLog">${L.length ? L.map(m => `<div class="cm ${m.o ? 'me' : ''}"><span>${esc(m.x)}</span><small>${tm(m.t)}</small></div>`).join('') : '<p class="muted">Zatím žádné zprávy. Napiš první!</p>'}</div>
+    <div class="row"><input id="chatIn" maxlength="200" placeholder="Zpráva…" autocomplete="off"><button id="bChatSend">Poslat</button></div><p id="chatMsg" class="muted"></p>`;
+  const log = $('chatLog'); log.scrollTop = log.scrollHeight;
+  const send = async () => {
+    const x = $('chatIn').value; if (!x.trim()) return;
+    if (Date.now() - (send.t || 0) < 1500) return; send.t = Date.now();                    // ochrana proti zahlcení
+    sfx('click'); $('bChatSend').disabled = true;
+    try { await msgSend(uid, x); renderChat(uid); setTimeout(() => $('chatIn') && $('chatIn').focus(), 50); }
+    catch (e) { $('chatMsg').textContent = '❌ ' + e.message; $('bChatSend').disabled = false; }
+  };
+  $('bChatSend').onclick = send; $('chatIn').onkeydown = e => { if (e.key === 'Enter') send(); };
+  $('bFrBack').onclick = () => { sfx('click'); frView = null; renderFr(); };
+  clearInterval(chatTimer);
+  chatTimer = setInterval(async () => {
+    if (frView !== 'chat:' + uid || $('friendsPanel').classList.contains('hidden')) { clearInterval(chatTimer); return; }
+    if (await msgPoll().catch(() => 0)) { const v = $('chatIn') && $('chatIn').value; renderChat(uid); if (v) $('chatIn').value = v; }
+  }, 5000);
 }
 function openFriends() { frView = null; openPanel('friendsPanel'); renderFr(); pubSync(true).then(() => { if (!frView) renderFr(); }); frPoll().then(() => { if (!frView) renderFr(); }); }
 $('bFriends').onclick = () => { sfx('click'); openFriends(); };

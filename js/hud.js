@@ -94,6 +94,10 @@ function hud(V) {
   rr(menuBtn.x, menuBtn.y, menuBtn.w, menuBtn.h, 9); c.fillStyle = '#1e293b'; c.fill(); c.strokeStyle = '#334155'; c.lineWidth = 1.5; c.stroke();
   c.strokeStyle = '#cbd5e1'; c.lineWidth = 3; c.lineCap = 'round';
   for (let i = 0; i < 3; i++) ln(W - 43, 21 + i * 9, W - 23, 21 + i * 9);
+  // informace o jednotkách aktuálního národa
+  infoBtn = { x: W - 160, y: 10, w: 46, h: 40 };
+  rr(infoBtn.x, infoBtn.y, infoBtn.w, infoBtn.h, 9); c.fillStyle = '#1e293b'; c.fill(); c.strokeStyle = '#334155'; c.lineWidth = 1.5; c.stroke();
+  c.fillStyle = '#e2e8f0'; circ(infoBtn.x + 23, infoBtn.y + 20, 11); c.fillStyle = '#1e293b'; c.font = '900 16px Georgia, serif'; c.textAlign = 'center'; c.fillText('i', infoBtn.x + 23, infoBtn.y + 26);
   // vedle menu: zrychlení (proti počítači) nebo rychlé zprávy (online)
   const b = extraBtn = { x: W - 108, y: 10, w: 46, h: 40, k: role === 'solo' ? 'speed' : 'chat' };
   const on = b.k === 'speed' ? V.speed > 1 : chatOpen;
@@ -130,7 +134,7 @@ function drawFacPick(p) {
     c.fillText(line, b.x + 44, ly);
   });
 }
-let extraBtn = null, orderBtns = [], evtBanner = null, shake = 0;
+let extraBtn = null, infoBtn = null, orderBtns = [], evtBanner = null, shake = 0;
 const TREX_TEAM = ['#6b4423', '#4a2c14', '#a07040'];
 function drawTrex(x, dir) {
   c.save(); c.translate(x, GY); c.scale(dir * 4, 4);                  // kyčel ~4,8 m – T-Rex má budit respekt
