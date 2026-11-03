@@ -619,6 +619,7 @@ MOUNT.horse = { body: [-1, -43, 30, 12], legs: [[-22, 0, 0, -40], [17, 1, 0, -38
   lw: [[15, 6.4, 4.4], [12, 6, 4.4]], foot: 'hoof', col: ['#8b5a33', '#5e3a1f', '#b07a4a'], head: [42, -64], neck: [26, -56, 8], seat: [-3, -56], stride: 12, lift: 6, bob: 1.4, hp: 104 };
 MOUNT.trex = { body: [0, -42, 26, 12], legs: [[-3, 0, 0, -40], [3, 0, 1, -40]], hs: [17, 16, 11], fs: [17, 16, 11],
   lw: [[24, 10, 7], [24, 10, 7]], foot: 'claw', col: ['#7b6a3a', '#55471f', '#a8975c'], head: [44, -48], neck: [30, -46, 10], seat: [0, -52], stride: 14, lift: 6, bob: 2, hp: 0 };
+MOUNT.mammoth.mod = { hp: 1.3, d: 1.15 };            // mamut: o 30 % víc zdraví a o 15 % silnější úder (pomalý, ale nezastavitelný)
 for (const [k, w] of Object.entries({ mammoth: 100, wolf: 72, bear: 80, aurochs: 84, horse: 78 })) MOUNT[k].gw = w;   // šířka v boji (core.js unitW)
 const MOUNT_OF = ['mammoth', 'wolf', 'bear', 'aurochs'];                  // pořadí národů doby kamenné (AGEFAC[0])
 const mountKind = team => MOUNT_OF[(team && team.af && team.af[0]) | 0] || 'mammoth';

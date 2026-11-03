@@ -12,8 +12,12 @@ const msgN = () => Object.values(UNR).reduce((a, b) => a + b, 0);
 async function msgSend(uid, x) {
   x = String(x || '').trim().slice(0, 200); if (!x) return;
   const a = await fbAuth(); if (!a) throw new Error('Nepodařilo se přihlásit');
-  const r = await fbFetch(`${FB.db}/msg/${uid}.json?auth=${a.t}`, { method: 'POST', body: JSON.stringify({ f: a.uid, n: (SET.name || 'Hráč').slice(0, 14), x, t: Date.now() }) });
-  if (!r.ok) throw new Error('Zprávu se nepodařilo odeslat (' + r.status + ')');
+  // jedním zápisem zpráva i čas mého posledního odeslání (/msgt) – pravidla pustí další zprávu až po 2 s (ochrana proti zahlcení)
+  const ts = { '.sv': 'timestamp' }, id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  let r = await fbFetch(`${FB.db}/.json?auth=${a.t}`, { method: 'PATCH', body: JSON.stringify({ [`msg/${uid}/${id}`]: { f: a.uid, n: (SET.name || 'Hráč').slice(0, 14), x, t: ts }, [`msgt/${a.uid}`]: ts }) });
+  // starší pravidla bez /msgt: obyčejný zápis zprávy (s novými pravidly projde jen cesta výš)
+  if (r.status === 401) r = await fbFetch(`${FB.db}/msg/${uid}.json?auth=${a.t}`, { method: 'POST', body: JSON.stringify({ f: a.uid, n: (SET.name || 'Hráč').slice(0, 14), x, t: Date.now() }) });
+  if (!r.ok) throw new Error(r.status === 401 ? 'Píšeš moc rychle, chvilku počkej' : 'Zprávu se nepodařilo odeslat (' + r.status + ')');
   (MSG[uid] = MSG[uid] || []).push({ o: 1, x, t: Date.now() }); MSG[uid] = MSG[uid].slice(-50); store('aow-msg', MSG);
 }
 // vyzvedne doručené zprávy (jen od přátel), uloží je k sobě a ze serveru smaže

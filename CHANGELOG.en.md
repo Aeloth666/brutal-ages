@@ -4,6 +4,14 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Version 2.18 – 3. 11. 2026
+
+- The Mammoth rider is stronger: 30 % more health and a 15 % stronger hit (slow but unstoppable).
+- The pause menu has a ↻ Restart button – a round (e.g. a campaign mission) can be played again from the start.
+- When evolution is available, the Evolve button pulses with a golden glow. A pressed button (buying a unit etc.) briefly flashes.
+- Web version: a new game version no longer kicks you out of a running battle – it loads after returning to the menu.
+- Messages between friends are protected against flooding (at most one message every 2 seconds).
+
 ## Version 2.17.2 – 3. 11. 2026
 
 - Unit pictures in the buttons and in the queue always fit completely (even a mammoth or a horse with a rider).

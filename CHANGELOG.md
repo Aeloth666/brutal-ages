@@ -4,6 +4,14 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.18 – 3. 11. 2026
+
+- Mamutí jezdec je silnější: o 30 % víc zdraví a o 15 % silnější úder (pomalý, ale nezastavitelný).
+- V menu pauzy je tlačítko ↻ Začít znovu – kolo (třeba misi v kampani) jde rozehrát od začátku.
+- Když je dostupná evoluce, tlačítko Evoluce pulzuje zlatou září. Stisknuté tlačítko (nákup jednotky apod.) krátce blikne.
+- Webová verze: nová verze hry už nevyhodí z rozehrané bitvy – načte se až po návratu do menu.
+- Zprávy mezi přáteli mají ochranu proti zahlcení (nejvýš jedna zpráva za 2 sekundy).
+
 ## Verze 2.17.2 – 3. 11. 2026
 
 - Obrázky jednotek v tlačítkách a ve frontě se vždy vejdou celé (i mamut nebo kůň s jezdcem).

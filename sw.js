@@ -1,6 +1,6 @@
 // Service worker: hra jde hrát offline v prohlížeči (online hra a počasí potřebují síť).
 // VERSION přepisuje build-web.ps1 při každém sestavení webové verze.
-const VERSION = 'brutal-ages-web-202611030954';
+const VERSION = 'brutal-ages-web-202611031304';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'lib/peerjs.min.js',
   'js/i18n.js', 'js/build.js', 'js/core.js', 'js/net.js', 'js/render.js', 'js/units.js', 'js/world.js', 'js/hud.js',
@@ -11,13 +11,13 @@ const FILES = [
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
-// nová verze smaže staré mezipaměti a otevřenou hru jednou obnoví, ať hned běží nový kód
+// nová verze smaže staré mezipaměti a dá vědět otevřené hře – ta se obnoví hned v menu, nebo až po dohrání bitvy
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(async ks => {
     const old = ks.filter(k => k !== VERSION);
     await Promise.all(old.map(k => caches.delete(k)));
     await self.clients.claim();
-    if (old.length) for (const c of await self.clients.matchAll({ type: 'window' })) c.navigate(c.url);
+    if (old.length) for (const c of await self.clients.matchAll({ type: 'window' })) c.postMessage({ t: 'sw-new' });
   }));
 });
 // vlastní soubory: nejdřív ze sítě (vždy nejnovější), z mezipaměti jen bez připojení;

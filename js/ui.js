@@ -185,7 +185,7 @@ function renderAchList() {
 let paused = false, pauseBtns = [];
 function drawPause() {
   c.fillStyle = 'rgba(8,10,16,.75)'; c.fillRect(0, 0, W, H);
-  const w = 360, h = 384, x = W / 2 - w / 2, y = 116;
+  const w = 360, h = role === 'solo' && !tut ? 442 : 384, x = W / 2 - w / 2, y = 116;
   rr(x, y, w, h, 18); c.fillStyle = '#151c2b'; c.fill(); c.strokeStyle = '#e5c04a'; c.lineWidth = 2; c.stroke();
   c.textAlign = 'center'; c.fillStyle = '#fde68a'; c.font = '900 30px system-ui'; c.fillText(role === 'solo' ? 'PAUZA' : 'MENU', W / 2, y + 46);
   if (role !== 'solo') { c.fillStyle = '#94a3b8'; c.font = '600 13px system-ui'; c.fillText('Online hra mezitím běží dál', W / 2, y + 68); }
@@ -194,6 +194,7 @@ function drawPause() {
     ['Hudba: ' + (SET.music ? 'ZAP' : 'VYP'), 'music', '#334155'],
     ['Zvuky: ' + (SET.sfx ? 'ZAP' : 'VYP'), 'sfx', '#334155'],
     ['Vibrace: ' + (SET.vib ? 'ZAP' : 'VYP'), 'vib', '#334155'],
+    ...(role === 'solo' && !tut ? [['↻ Začít znovu', 'restart', '#b45309']] : []),
     ['Ukončit hru', 'quit', '#b91c1c'],
   ];
   pauseBtns = items.map(([t, k, col], i) => {

@@ -19,6 +19,7 @@ cv.addEventListener('pointerdown', e => {
       else if (b.k === 'sfx') { SET.sfx = !SET.sfx; saveSet(); }
       else if (b.k === 'vib') { SET.vib = !SET.vib; saveSet(); vib(60); }
       else if (b.k === 'quit') toMenu();
+      else if (b.k === 'restart' && confirm('Začít tohle kolo znovu? Rozehraná bitva se ztratí.')) { defNext = curDef; survNext = curSurv; startGame('solo', curChal, curCamp, curDaily); }
     }
     return;
   }
@@ -57,7 +58,7 @@ cv.addEventListener('pointerdown', e => {
     else if (b.cmd === 'gmode') { uiMode = 'upgrades'; sfx('click'); }
     else if (b.cmd === 'smode') { if (b.ok) { uiMode = 'sell'; sfx('click'); } }
     else if (b.cmd === 'umode') { uiMode = 'units'; sfx('click'); }
-    else if (b.ok) act(b.cmd);
+    else if (b.ok) { act(b.cmd); BTN_FLASH.set(btnKey(b), T); }
     return;
   }
 });
@@ -137,6 +138,9 @@ requestAnimationFrame(loop);
 const nativeApp = !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
 if ('serviceWorker' in navigator && !nativeApp && (location.hostname !== 'localhost' || /[?&]pwa\b/.test(location.search)))
   navigator.serviceWorker.register('sw.js').catch(() => {});
+// nová webová verze: v menu se načte hned, v bitvě až po návratu do menu (nevyhodí hráče z rozehrané hry)
+let swNew = false;
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.t === 'sw-new') { if (!role) location.reload(); else swNew = true; } });
 
 // =====================================================================
 //  WEB: ovládání klávesnicí a celá obrazovka na mobilu (v aplikaci se nepoužije)
@@ -151,7 +155,7 @@ addEventListener('keydown', e => {
   if (paused || V.over >= 0 || netWait) return;
   const cmdBtns = btns.filter(b => b.cmd && typeof b.cmd === 'object');
   const press = pred => { const b = btns.find(b => b.cmd && typeof b.cmd === 'object' && pred(b.cmd)); if (b && b.ok) act(b.cmd); };
-  if (/^[1-9]$/.test(k)) { const b = cmdBtns[+k - 1]; if (b && b.ok) act(b.cmd); }
+  if (/^[1-9]$/.test(k)) { const b = cmdBtns[+k - 1]; if (b && b.ok) { act(b.cmd); BTN_FLASH.set(btnKey(b), T); } }
   else if (k === 'h') press(c => c.a === 'hero');
   else if (k === ' ') press(c => c.a === 'special');
   else if (k === 'v') press(c => c.a === 'evolve');

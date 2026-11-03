@@ -97,6 +97,17 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.18', d: '2026-11-03', cs: [
+    'Mamutí jezdec je silnější: o 30 % víc zdraví a o 15 % silnější úder (pomalý, ale nezastavitelný).',
+    'V menu pauzy je tlačítko ↻ Začít znovu – kolo (třeba misi v kampani) jde rozehrát od začátku.',
+    'Když je dostupná evoluce, tlačítko Evoluce pulzuje zlatou září. Stisknuté tlačítko (nákup jednotky apod.) krátce blikne.',
+    'Webová verze: nová verze hry už nevyhodí z rozehrané bitvy – načte se až po návratu do menu.',
+    'Zprávy mezi přáteli mají ochranu proti zahlcení (nejvýš jedna zpráva za 2 sekundy).'], en: [
+    'The Mammoth rider is stronger: 30 % more health and a 15 % stronger hit (slow but unstoppable).',
+    'The pause menu has a ↻ Restart button – a round (e.g. a campaign mission) can be played again from the start.',
+    'When evolution is available, the Evolve button pulses with a golden glow. A pressed button (buying a unit etc.) briefly flashes.',
+    'Web version: a new game version no longer kicks you out of a running battle – it loads after returning to the menu.',
+    'Messages between friends are protected against flooding (at most one message every 2 seconds).'] },
   { v: '2.17.2', d: '2026-11-03', cs: ['Obrázky jednotek v tlačítkách a ve frontě se vždy vejdou celé (i mamut nebo kůň s jezdcem).', 'Stromy v pozadí stojí na kopcích, už nevisí ve vzduchu.'], en: ['Unit pictures in the buttons and in the queue always fit completely (even a mammoth or a horse with a rider).', 'Trees in the background stand on the hills instead of floating in the air.'] },
   { v: '2.17', d: '2026-11-03', cs: ['Nastavení → Grafika → 📈 Ukazatel FPS: malé počítadlo snímků za sekundu v levém dolním rohu (v menu i ve hře). Zelená = plynulé, žlutá = občas trhá, červená = nestíhá.'], en: ['Settings → Graphics → 📈 FPS counter: a small frames-per-second counter in the bottom left corner (in the menu and in the game). Green = smooth, yellow = occasional stutter, red = struggling.'] },
   { v: '2.16.1', d: '2026-11-03', cs: ['Opravena chyba při spuštění z verze 2.16 (chyběl ukazatel zdraví bosse).'], en: ['Fixed a startup error from version 2.16 (the boss health bar was missing).'] },

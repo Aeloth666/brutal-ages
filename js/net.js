@@ -370,6 +370,7 @@ function startGame(r, chal = null, camp = null, daily = false) {
 
 let curTour = null;
 function toMenu(msg) {
+  if (typeof swNew !== 'undefined' && swNew) { location.reload(); return; }   // mezitím vyšla nová webová verze
   tut = null; specMode = false;
   role = null; S = null; V = null; snapCur = snapPrev = null; paused = false; replay = null;
   cleanupNet(); wxApply(); setField(FIELDS[SET.field] ? SET.field : 'meadow');

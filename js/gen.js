@@ -319,8 +319,9 @@ function renderUnitInfo() {
     .concat([{ ty: 6, n: SPECS[a][f].n }, { ty: 4, n: heroName(p) }]).concat(a === 4 ? [{ ty: 3, n: SUPER.n }] : []);
   const card = ({ ty, n }) => {
     const d = uDef(a, ty, f), up = p.up || [0, 0, 0];
-    const hp = d.hp * (1 + UPS[1].k * up[1]) * (F.hp || 1) * (ty === 2 ? F.heavy || 1 : 1);
-    const dmg = d.d * (1 + UPS[0].k * up[0]) * ((d.p ? F.ranged : F.melee) || 1);
+    const mm = a === 0 && ty === 2 ? MOUNT[mountKind(team)].mod || {} : {};          // mamut je silnější
+    const hp = d.hp * (1 + UPS[1].k * up[1]) * (F.hp || 1) * (ty === 2 ? F.heavy || 1 : 1) * (mm.hp || 1);
+    const dmg = d.d * (1 + UPS[0].k * up[0]) * ((d.p ? F.ranged : F.melee) || 1) * (mm.d || 1);
     const cost = ty === 4 ? HEROES[a].c : unitCost(p, ty);
     const abil = ty === 6 ? (SPEC_IC[d.ab] || '') + ' ' + SPEC_AB[d.ab] : ty === 4 ? '💥 Ničivý úder – zraní všechny nepřátele kolem' : ty === 3 ? '⚡ Laser zasáhne vše v cestě' : d.sp ? '💣 Plošné poškození' : d.p ? '🏹 Útočí na dálku' : '⚔️ Bojuje zblízka';
     return `<div class="ucard${ty === 6 ? ' spec' : ty === 4 ? ' hero' : ''}"><div class="uc-head"><canvas width="96" height="80" data-ty="${ty}"></canvas><b>${esc(n)}</b></div>

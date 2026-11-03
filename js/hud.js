@@ -216,6 +216,8 @@ function drawIcon(ic, cx, bottom, maxW, maxH) {
   const k = Math.min(maxW / ic.w, maxH / ic.h, 0.55);
   c.drawImage(ic.cv, cx - ic.w * k / 2, bottom - ic.h * k, ic.w * k, ic.h * k);
 }
+// bliknutí tlačítka po stisku (nákup jednotky apod.) – klíč podle příkazu, protože tlačítka se staví každý snímek znovu
+const BTN_FLASH = new Map(), btnKey = b => JSON.stringify(b.cmd) + '|' + b.label;
 function drawBtn(b) {
   c.save();
   c.globalAlpha = b.ok ? 1 : 0.42;
@@ -224,6 +226,16 @@ function drawBtn(b) {
   c.fillStyle = b.ok ? lg('btnOn', 0, 7, 0, 103, [[0, '#33507a'], [1, '#1c2b44']]) : '#1a2130'; c.fill();
   c.strokeStyle = b.ok ? '#5b7fb3' : '#2a3344'; c.lineWidth = 1.5; c.stroke();
   c.fillStyle = 'rgba(255,255,255,.08)'; rr(b.x + 3, b.y + 3, b.w - 6, 26, 8); c.fill();
+  // evoluce je dostupná → tlačítko pulzuje zlatou září
+  if (b.ok && b.icon && b.icon[0] === 'e') {
+    const p = 0.5 + 0.5 * Math.sin(T * 5);
+    c.save(); c.shadowColor = '#fde047'; c.shadowBlur = 10 + p * 16; rr(b.x, b.y, b.w, b.h, 11);
+    c.strokeStyle = `rgba(253,224,71,${0.55 + 0.45 * p})`; c.lineWidth = 3; c.stroke();
+    c.fillStyle = `rgba(253,224,71,${0.06 + 0.1 * p})`; c.fill(); c.restore();
+  }
+  // právě stisknuté tlačítko krátce blikne
+  const fl = BTN_FLASH.get(btnKey(b));
+  if (fl != null && T - fl < 0.35 && T >= fl) { c.save(); rr(b.x, b.y, b.w, b.h, 11); c.fillStyle = `rgba(255,255,255,${0.55 * (1 - (T - fl) / 0.35)})`; c.fill(); c.restore(); }
   c.save(); rr(b.x + 2, b.y + 2, b.w - 4, b.h - 32, 9); c.clip();
   const [k, a, i] = b.icon, cx0 = b.x + b.w / 2;
   if (k === 'u') drawIcon(unitIcon(teamCol(mySide), a, i), cx0, b.y + 63, b.w - 12, 58);
