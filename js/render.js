@@ -16,7 +16,7 @@ safeProbe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;
 document.body.appendChild(safeProbe);
 function safeInsets() { const s = getComputedStyle(safeProbe); return [s.paddingTop, s.paddingRight, s.paddingBottom, s.paddingLeft].map(v => parseFloat(v) || 0); }
 function resize() {
-  const dpr = Math.min(GFX_DPR[GFXL], window.devicePixelRatio || 1, SET.eco ? 1.5 : 9), [it, ir, ib, il] = safeInsets();   // úspora baterie: nižší rozlišení
+  const dpr = Math.min(GFX_DPR[GFXL], window.devicePixelRatio || 1, typeof SET !== 'undefined' && SET.eco ? 1.5 : 9), [it, ir, ib, il] = safeInsets();   // úspora baterie: nižší rozlišení
   cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
   cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
   const aw = (innerWidth - il - ir) * dpr, ah = (innerHeight - it - ib) * dpr;

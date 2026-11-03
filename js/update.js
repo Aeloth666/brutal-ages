@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.16.1', d: '2026-11-03', cs: ['Opravena chyba při spuštění z verze 2.16 (chyběl ukazatel zdraví bosse).'], en: ['Fixed a startup error from version 2.16 (the boss health bar was missing).'] },
   { v: '2.16', d: '2026-11-03', cs: [
     'Méně vybíjí baterii: hra kreslí nejvýš 60 snímků za sekundu (dřív až 120–144 podle displeje), v menu 30 a s otevřenou nabídkou 15.',
     'Nová volba Nastavení → Grafika → 🔋 Úspora baterie: v bitvě 30 snímků za sekundu a nižší rozlišení.'], en: [
