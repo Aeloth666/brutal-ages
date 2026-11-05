@@ -114,11 +114,12 @@ function hud(V) {
   }
 }
 let facBtns = [], sbonBtns = [];
+const TOUCH = matchMedia('(pointer: coarse)').matches;              // dotykový displej: bez nápověd kláves
 // nekonečné přežití: výběr bonusu po bossovi (3 karty)
 function drawSbonPick() {
   sbonBtns = [];
   const P = V.survPick; if (!P || V.over >= 0 || replay) return;
-  const w = 250, gap = 12, n = P.length - 1, tw = n * w + (n - 1) * gap, x0 = W / 2 - tw / 2, y = HUD + 100;
+  const w = 250, gap = 12, n = P.length - 1, tw = n * w + (n - 1) * gap, x0 = W / 2 - tw / 2, y = HUD + 150;
   rr(x0 - 14, y - 40, tw + 28, 136, 14); c.fillStyle = 'rgba(15,21,34,.95)'; c.fill(); c.strokeStyle = '#e5c04a'; c.lineWidth = 2; c.stroke();
   c.textAlign = 'center'; c.fillStyle = '#fde68a'; c.font = '800 16px system-ui';
   c.fillText(`Vyber si bonus (${P[n]} s)`, W / 2, y - 14);
@@ -231,7 +232,7 @@ function drawAbils(p) {
     c.font = '800 14px system-ui'; c.fillStyle = '#f5e6c4'; c.fillText(A.n, b.x + 42, b.y + 25);
     c.font = '700 12px system-ui'; c.fillStyle = act ? '#fff' : ok ? '#fde68a' : '#cbd5e1';
     c.fillText(act ? Math.ceil(p.ab[k]) + ' s' : ok ? 'PŘIPRAVENO' : Math.ceil(cd) + ' s', b.x + 42, b.y + 44);
-    c.font = '700 10px system-ui'; c.fillStyle = 'rgba(245,230,196,.5)'; c.textAlign = 'right'; c.fillText('ASDF'[k], b.x + w - 7, b.y + 15);
+    if (!TOUCH) { c.font = '700 10px system-ui'; c.fillStyle = 'rgba(245,230,196,.5)'; c.textAlign = 'right'; c.fillText('ASDF'[k], b.x + w - 7, b.y + 15); }
     c.globalAlpha = 1;
     abilBtns.push(b);
   });

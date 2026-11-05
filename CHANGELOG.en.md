@@ -4,6 +4,11 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.23 – 5. 11. 2026
+
+- When something crashes, the game reports the error automatically (what happened, version, what you were playing) – so fixes come faster. Nothing personal is sent.
+- On phones: ability buttons without keyboard hints, the survival bonus choice no longer overlaps achievement pop-ups, the replay bar is opaque.
+
 ## Version 2.22 – 5. 11. 2026
 
 - Battle recording: after a game the whole battle is saved – Play solo → 🎬 Last battle. You can switch between highlights / full battle, speed up to 4× and tap the timeline to jump.

@@ -97,6 +97,11 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.23', d: '2026-11-05', cs: [
+    'Když hře něco spadne, automaticky se nahlásí chyba (co se stalo, verze, co jsi zrovna hrál) – opravy pak přijdou rychleji. Neposílá se nic osobního.',
+    'Na telefonu: tlačítka schopností bez nápovědy kláves, výběr bonusu v přežití se nepřekrývá s oznámením úspěchu, lišta záznamu je neprůhledná.'], en: [
+    'When something crashes, the game reports the error automatically (what happened, version, what you were playing) – so fixes come faster. Nothing personal is sent.',
+    'On phones: ability buttons without keyboard hints, the survival bonus choice no longer overlaps achievement pop-ups, the replay bar is opaque.'] },
   { v: '2.22', d: '2026-11-05', cs: [
     'Záznam bitvy: po hře se uloží celá bitva – Hrát sám → 🎬 Poslední bitva. V záznamu jde přepínat sestřih / celá bitva, rychlost až 4× a klepnutím na časovou osu přeskakovat.',
     'Sestřih poslední bitvy pošleš příteli ve zprávách (🎬 Poslat záznam), on si ho přehraje tlačítkem ▶ Přehrát.',

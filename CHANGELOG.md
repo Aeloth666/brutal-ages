@@ -4,6 +4,11 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.23 – 5. 11. 2026
+
+- Když hře něco spadne, automaticky se nahlásí chyba (co se stalo, verze, co jsi zrovna hrál) – opravy pak přijdou rychleji. Neposílá se nic osobního.
+- Na telefonu: tlačítka schopností bez nápovědy kláves, výběr bonusu v přežití se nepřekrývá s oznámením úspěchu, lišta záznamu je neprůhledná.
+
 ## Verze 2.22 – 5. 11. 2026
 
 - Záznam bitvy: po hře se uloží celá bitva – Hrát sám → 🎬 Poslední bitva. V záznamu jde přepínat sestřih / celá bitva, rychlost až 4× a klepnutím na časovou osu přeskakovat.
