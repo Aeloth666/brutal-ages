@@ -120,7 +120,7 @@ const QDEF = {
   online: { n: k => `Odehraj ${k} ${k < 2 ? 'hru' : 'hry'} s kámoši`, f: r => r.online ? 1 : 0, k: [1, 2], wk: 8 },
   stars: { n: k => `Získej ${k} ${k < 5 ? 'hvězdy' : 'hvězd'} v kampani`, f: r => r.stars, k: [2, 3], wk: 12 },
 };
-const weekKey = () => { const d = new Date(), j = new Date(d.getFullYear(), 0, 1); return d.getFullYear() + '-' + Math.ceil(((d - j) / 864e5 + j.getDay() + 1) / 7); };
+const weekKey = (d = new Date()) => { const j = new Date(d.getFullYear(), 0, 1); return d.getFullYear() + '-' + Math.ceil(((d - j) / 864e5 + j.getDay() + 1) / 7); };
 function questRoll() {
   const dk = dayKey(), wk = weekKey();
   if (QST.day !== dk) {

@@ -4,6 +4,14 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.22 – 5. 11. 2026
+
+- Záznam bitvy: po hře se uloží celá bitva – Hrát sám → 🎬 Poslední bitva. V záznamu jde přepínat sestřih / celá bitva, rychlost až 4× a klepnutím na časovou osu přeskakovat.
+- Sestřih poslední bitvy pošleš příteli ve zprávách (🎬 Poslat záznam), on si ho přehraje tlačítkem ▶ Přehrát.
+- Ligy v online soubojích: Dřevěná, Bronzová, Stříbrná, Zlatá, Diamantová a Mistrovská – podle hodnocení, s postupem a sestupem.
+- Klanová válka: členové klanu sbírají každý týden body za bitvy, klany se řadí v žebříčku. Nové úspěchy Zlatá liga a Válečník klanu.
+- U přátel, kteří právě hrají online, je tlačítko 👁 Sledovat – připojíš se jako divák bez kódu.
+
 ## Verze 2.21 – 5. 11. 2026
 
 - Schopnosti armády: dole v zemi jsou 4 tlačítka (A S D F) – ⚔️ Do útoku!, 🛡️ Štíty!, 💨 Vpřed! a ❤️ Lazaret. Na pár sekund posílí celou armádu, pak se minutu nabíjí. Počítač je používá taky.

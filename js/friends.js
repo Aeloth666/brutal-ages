@@ -84,12 +84,17 @@ async function ensureId() {
   throw new Error('Nepodařilo se vytvořit ID');
 }
 // veřejný profil – zapisuje se po hře a při otevření přátel (nejvýš jednou za minutu)
+// kód hry, kterou teď hraju online (hostitel = můj kód, připojený = kód hostitele) – divák se připojí k hostiteli
+let pubLive = false;
+const liveGame = () => role && role !== 'solo' && !specMode && typeof HOST_ID !== 'undefined' ? (role === 'host' ? hostGame.code : String(HOST_ID || '').replace(PREFIX, '')) || null : null;
 async function pubSync(force) {
   if (!FB.key || (!force && Date.now() - pubLast < 60000)) return;
   pubLast = Date.now();
   try {
     const id = await ensureId(), n = (SET.name || 'Hráč').slice(0, 14);
-    await fbPut('pub/' + (await fbAuth()).uid, { id, n, nl: n.toLowerCase(), pid: SET.pid, e: SET.emb || 0, s: myStats(), t: Date.now() });
+    const g = liveGame();
+    await fbPut('pub/' + (await fbAuth()).uid, { id, n, nl: n.toLowerCase(), pid: SET.pid, e: SET.emb || 0, s: myStats(), t: Date.now(), ...(g ? { g, gt: Date.now() } : {}) });
+    pubLive = !!g;
   } catch (e) {}
 }
 // hledání: ID (BA-XXXXXX) nebo začátek jména
@@ -194,6 +199,19 @@ async function frAnswer(uid, yes) {
   if (yes && q) { frAdd({ uid, ...q }); await frRequest({ uid }, true).catch(() => {}); }
   if (typeof refreshHQ === 'function') refreshHQ();
 }
+// u přátel, kteří právě hrají online, ukáže tlačítko 👁 Sledovat (připojí se jako divák, bez opisování kódu)
+async function frLive() {
+  const L = MYFR.slice(0, 30); if (!L.length) return;
+  const res = await Promise.all(L.map(f => fbGet('pub/' + f.uid).then(p => [f, p]).catch(() => [f, null])));
+  for (const [f, p] of res) {
+    const row = document.querySelector(`[data-chat="${f.uid}"]`); if (!row || !p) continue;
+    if (p.s && p.s.r != null) { const nm = row.closest('.friend').querySelector('b'); if (nm && !nm.dataset.lg) { nm.dataset.lg = 1; nm.insertAdjacentHTML('afterbegin', leagueTag(p.s.r) + ' '); } }
+    if (!p.g || !(Date.now() - (p.gt || 0) < 30 * 60000)) continue;
+    const bt = document.createElement('button'); bt.className = 'live'; bt.textContent = '👁 Sledovat'; bt.title = 'Právě hraje online';
+    bt.onclick = () => { sfx('click'); $('friendsPanel').classList.add('hidden'); $('hqPanel').classList.add('hidden'); joinGame(p.g, true); };
+    row.parentNode.insertBefore(bt, row);
+  }
+}
 function frRemove(uid) { MYFR = MYFR.filter(f => f.uid !== uid); saveFr(); }
 
 // ---------- okno Přátelé ----------
@@ -235,6 +253,7 @@ async function renderFr(msg) {
   b.querySelectorAll('[data-cyes]').forEach(x => x.onclick = async () => { sfx('click'); try { await clanInvAnswer(x.dataset.cyes, true); renderFr('Jsi v klanu [' + CLAN.tag + '].'); } catch (e) { renderFr('❌ ' + e.message); } });
   b.querySelectorAll('[data-cno]').forEach(x => x.onclick = async () => { sfx('click'); await clanInvAnswer(x.dataset.cno, false); renderFr(); });
   b.querySelectorAll('[data-chat]').forEach(x => x.onclick = () => { sfx('click'); frView = 'chat:' + x.dataset.chat; renderFr(); });
+  frLive();
   b.querySelectorAll('[data-cmp]').forEach(x => x.onclick = () => { sfx('click'); frView = x.dataset.cmp; renderFr(); });
   b.querySelectorAll('[data-inv]').forEach(x => x.onclick = () => { const f = MYFR.find(f => f.uid === x.dataset.inv); if (!f || !f.pid) return; sfx('click');
     $('friendsPanel').classList.add('hidden'); $('hqPanel').classList.add('hidden'); openPanel('mpPanel'); inviteFriend({ pid: f.pid, n: f.n }); });
@@ -253,7 +272,7 @@ async function renderCompare(uid) {
   const rows = [
     ['Úroveň', 'lv'], ['Odehrané hry', 'g'], ['Zabité jednotky', 'k'], ['Výhry proti počítači', 'sw'],
     ['Úspěšnost proti počítači', s => pct(s.sw, s.sl), s => s.sw / Math.max(1, s.sw + s.sl)],
-    ['Online výhry : prohry', s => s.ow + ' : ' + s.ol, s => s.ow - s.ol], ['Online hodnocení', 'r'],
+    ['Online výhry : prohry', s => s.ow + ' : ' + s.ol, s => s.ow - s.ol], ['Online hodnocení', 'r'], ['Liga', s => leagueOf(s.r).ic + ' ' + leagueOf(s.r).n, s => s.r],
     ['Nejrychlejší výhra', s => s.b ? fmtTime(s.b) : '—', s => s.b ? -s.b : -1e9], ['Hvězdy v kampani', 'cs'],
     ['Úspěchy', 'ac'], ['Nejvíc vln v přežití', 'sv'], ['Splněné úkoly', 'q']];
   const cell = (s, show) => s ? (typeof show === 'function' ? show(s) : (s[show] ?? 0).toLocaleString('cs')) : '—';
@@ -274,8 +293,22 @@ function renderChat(uid) {
   delete UNR[uid]; store('aow-unr', UNR); if (typeof refreshHQ === 'function') refreshHQ();
   const L = MSG[uid] || [], tm = t => new Date(t).toLocaleString('cs', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
   b.innerHTML = `<button id="bFrBack" class="ghost mini">← Zpět na přátele</button> <b>💬 ${esc(f.n)}</b>
-    <div class="chat" id="chatLog">${L.length ? L.map(m => `<div class="cm ${m.o ? 'me' : ''}"><span>${esc(m.x)}</span><small>${tm(m.t)}</small></div>`).join('') : '<p class="muted">Zatím žádné zprávy. Napiš první!</p>'}</div>
-    <div class="row"><input id="chatIn" maxlength="200" placeholder="Zpráva…" autocomplete="off"><button id="bChatSend">Poslat</button></div><p id="chatMsg" class="muted"></p>`;
+    <div class="chat" id="chatLog">${L.length ? L.map((m, k) => { const rp = /#rep$/.test(m.x), x = rp ? m.x.replace(/s*#rep$/, '') : m.x;
+      // u záznamu jde přehrát jen ten nejnovější (na serveru je jeden na hráče)
+      const newest = rp && !L.slice(k + 1).some(n => n.o === m.o && /#rep$/.test(n.x));
+      return `<div class="cm ${m.o ? 'me' : ''}"><span>${esc(x)}</span>${rp && newest ? `<button class="rep mini" ${m.o ? 'data-me="1"' : ''}>▶ Přehrát</button>` : ''}<small>${tm(m.t)}</small></div>`; }).join('') : '<p class="muted">Zatím žádné zprávy. Napiš první!</p>'}</div>
+    <div class="row"><input id="chatIn" maxlength="200" placeholder="Zpráva…" autocomplete="off"><button id="bChatSend">Poslat</button></div>
+    <div class="row"><button id="bChatRep" class="ghost mini">🎬 Poslat záznam poslední bitvy</button></div><p id="chatMsg" class="muted"></p>`;
+  b.querySelectorAll('.cm .rep').forEach(x => x.onclick = async () => {
+    sfx('click'); x.disabled = true; x.textContent = '⏳ Načítám…';
+    try { if (x.dataset.me) await recOpenLast(); else recPlay(await recFetch(uid)); }
+    catch (e) { x.textContent = '❌ ' + e.message; }
+  });
+  $('bChatRep').onclick = async () => {
+    sfx('click'); $('bChatRep').disabled = true; $('chatMsg').textContent = '⏳ Nahrávám záznam…';
+    try { const l = await recShare(); await msgSend(uid, '🎬 Záznam bitvy: ' + l + ' #rep'); renderChat(uid); }
+    catch (e) { $('chatMsg').textContent = '❌ ' + e.message; $('bChatRep').disabled = false; }
+  };
   const log = $('chatLog'); log.scrollTop = log.scrollHeight;
   const send = async () => {
     const x = $('chatIn').value; if (!x.trim()) return;

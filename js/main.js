@@ -8,7 +8,7 @@ cv.addEventListener('pointerdown', e => {
   const hit = b => b && x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
   if (eggScene) { eggClick(x, y); return; }                              // tajemství: scéna se zlatým vejcem
   if (!replay && !paused && bloodCodeHit(x, y)) { eggStart(); return; }
-  if (replay) { replayClick(hit); return; }
+  if (replay) { replayClick(hit, x); return; }
   if (tut && hit(tutBtn)) { tutNext(); return; }
   for (const b of sbonBtns) if (hit(b) && V.over < 0) { act({ a: 'sbon', i: b.i }); sbonBtns = []; return; }
   for (const b of facBtns) if (hit(b) && V.over < 0) { act({ a: 'fac', i: b.i }); facBtns = []; return; }

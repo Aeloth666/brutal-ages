@@ -37,6 +37,8 @@ const ACH = [
   { id: 'camp2',   n: 'Pán času',          d: 'Dokonči druhou kapitolu kampaně.',            w: () => chapDone(1) },
   { id: 'hero1',   n: 'Hrdina kampaně',    d: 'Vyhraj první misi na hrdinskou obtížnost.',   w: () => Object.keys(CAMPH).length >= 1 },
   { id: 'heroAll', n: 'Legenda',           d: 'Vyhraj všechny mise kampaně na hrdinskou obtížnost.', w: () => Object.keys(CAMPH).length >= CAMP.length },
+  { id: 'gold',    n: 'Zlatá liga',        d: 'Postup v online soubojích do Zlaté ligy (1300 bodů).', w: () => typeof LB !== 'undefined' && LB.r >= 1300 },
+  { id: 'clanWar', n: 'Válečník klanu',    d: 'Tvůj klan vyhrál týdenní klanovou válku.',     w: () => false },
   { id: 'camp75',  n: 'Mistr času',        d: 'Získej v kampani všech 75 hvězd.',            w: () => chapStars(0) + chapStars(1) >= 75 },
   { id: 'rematch', n: 'Ještě jednou!',     d: 'Vyhraj odvetu proti kámošovi.',               w: () => role !== 'solo' && !coop && rematchN > 0 },
   // ---- bossové ----

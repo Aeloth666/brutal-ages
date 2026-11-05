@@ -4,6 +4,14 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.22 – 5. 11. 2026
+
+- Battle recording: after a game the whole battle is saved – Play solo → 🎬 Last battle. You can switch between highlights / full battle, speed up to 4× and tap the timeline to jump.
+- Send the highlights of your last battle to a friend in messages (🎬 Send recording); they watch it with ▶ Play.
+- Leagues in online duels: Wooden, Bronze, Silver, Gold, Diamond and Master – based on rating, with promotion and relegation.
+- Clan war: clan members collect points for battles every week and clans are ranked on the leaderboard. New achievements Gold league and Clan warrior.
+- Friends who are playing online have a 👁 Watch button – you join as a spectator without a code.
+
 ## Version 2.21 – 5. 11. 2026
 
 - Army abilities: 4 buttons set into the ground (A S D F) – ⚔️ Charge!, 🛡️ Shields!, 💨 Forward! and ❤️ Field hospital. They boost your whole army for a few seconds, then recharge for about a minute. The computer uses them too.

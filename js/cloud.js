@@ -45,7 +45,37 @@ $('bGS').addEventListener('click', renderCloud);
 const CLAN = load('aow-clan', { tag: '' });
 const weekKey2 = () => typeof weekKey === 'function' ? weekKey() : '';
 const CLAN_GOAL = 20;                                    // týdenní klanová výzva: společně vyhrát 20 online soubojů
-function clanMe() { return { n: (SET.name || 'Hráč').slice(0, 14), r: Math.round(LB.r), w: LB.w, l: LB.l, sv: SURVB.best, wk: weekKey2(), ww: CLAN.ww && CLAN.wk === weekKey2() ? CLAN.ww : 0, t: Date.now() }; }
+function clanMe() { clanRoll(); return { n: (SET.name || 'Hráč').slice(0, 14), r: Math.round(LB.r), w: LB.w, l: LB.l, sv: SURVB.best, wk: weekKey2(), ww: CLAN.ww && CLAN.wk === weekKey2() ? CLAN.ww : 0,
+  pk: CLAN.pk || '', pp: CLAN.pp || 0, ppk: CLAN.ppk || '', ppp: CLAN.ppp || 0, t: Date.now() }; }
+// KLANOVÁ VÁLKA: každý člen sbírá za týden body (online souboje, kampaň, přežití…), klany se řadí podle součtu
+const prevWeek = () => typeof weekKey === 'function' ? weekKey(new Date(Date.now() - 7 * 864e5)) : '';
+function clanRoll() { const wk = weekKey2(); if (CLAN.pk !== wk) { if (CLAN.pk === prevWeek()) { CLAN.ppk = CLAN.pk; CLAN.ppp = CLAN.pp || 0; } CLAN.pk = wk; CLAN.pp = 0; } }
+function clanPts(n) {
+  if (!CLAN.tag || !(n > 0)) return;
+  clanRoll(); CLAN.pp = (CLAN.pp || 0) + n; store('aow-clan', CLAN);
+  toasts.push({ a: { n: '+' + n + ' bodů pro [' + CLAN.tag + ']' }, h: '⚔ KLANOVÁ VÁLKA', l: 2.5 });
+  clanSync();
+}
+// body za odehranou bitvu (volá record v meta.js)
+function clanBattlePts(won, V) {
+  if (specMode || tut) return 0;
+  if (role !== 'solo' && !coop) return TEAM ? (won ? 6 : 2) : (won ? 10 : 2);
+  if (curSurv) return Math.floor(Math.max(0, (V.surv || 1) - 1) / 10) * 2;
+  if (!won) return 0;
+  if (coop) return 4;
+  if (V.camp != null) return curDef != null ? 2 : curHero != null ? 6 : 3;
+  if (V.daily || V.chal != null) return 2;
+  return [0, 1, 2, 3, 4][V.diff || 0];
+}
+// výsledky týdne pro všechny klany: tento a minulý týden
+function clanWarScores(all) {
+  const wk = weekKey2(), pw = prevWeek();
+  return Object.entries(all || {}).filter(([, c]) => c && c.n && c.o).map(([tag, c]) => {
+    const m = Object.values(c.m || {});
+    const pts = k => m.reduce((s, x) => s + (x.pk === k ? x.pp || 0 : x.ppk === k ? x.ppp || 0 : 0), 0);
+    return { tag, n: c.n, k: m.length, now: pts(wk), last: pts(pw) };
+  });
+}
 async function clanSync() {
   if (!CLAN.tag || !FB.key) return;
   const a = await fbAuth(); if (!a) return;
@@ -102,8 +132,9 @@ async function renderClan() {
       <p class="muted">Kámoše pozveš tlačítkem níž, nebo ať v Hrát s kámoši → 🛡 Klan zadá zkratku <b>${esc(CLAN.tag)}</b>.</p>
       <button id="bClanInv">📨 Pozvat do klanu</button><div id="clanInvList"></div>
       <h3>🎯 Týdenní klanová výzva</h3><div class="q-row ${ww >= CLAN_GOAL ? 'ok' : ''}"><span>Vyhrajte společně ${CLAN_GOAL} online soubojů</span><small>${Math.min(ww, CLAN_GOAL)} / ${CLAN_GOAL}</small><i style="width:${pct}%"></i></div>
-      <table class="bst lb"><tr><th>Člen</th><th>Hodnocení</th><th>V : P</th><th>Výher tento týden</th><th>♾ vln</th></tr>
-      ${mem.map(m => `<tr class="${m.uid === me ? 'me' : ''}"><td>${m.uid === c.o ? '👑 ' : ''}${esc(m.n)}</td><td><b>${m.r}</b></td><td>${m.w} : ${m.l}</td><td>${m.wk === wk ? m.ww || 0 : 0}</td><td>${m.sv || 0}</td></tr>`).join('')}</table>
+      ${(() => { const all = clanWarScores({ [CLAN.tag]: c })[0]; return `<h3>⚔ Klanová válka</h3><p class="muted">Tento týden má klan <b>${all.now}</b> bodů${all.last ? `, minulý týden ${all.last}` : ''}. Pořadí klanů je v Žebříčku → 🛡 Klany.</p>`; })()}
+      <table class="bst lb"><tr><th>Člen</th><th>Hodnocení</th><th>V : P</th><th>Výher tento týden</th><th>⚔ Body týdne</th><th>♾ vln</th></tr>
+      ${mem.map(m => `<tr class="${m.uid === me ? 'me' : ''}"><td>${m.uid === c.o ? '👑 ' : ''}${esc(m.n)}</td><td>${typeof leagueTag === 'function' ? leagueTag(m.r) : ''} <b>${m.r}</b></td><td>${m.w} : ${m.l}</td><td>${m.wk === wk ? m.ww || 0 : 0}</td><td>${m.pk === wk ? m.pp || 0 : 0}</td><td>${m.sv || 0}</td></tr>`).join('')}</table>
       <button id="bClanLeave" class="ghost">${c.o === me && mem.length <= 1 ? 'Zrušit klan' : 'Opustit klan'}</button><p id="clanMsg" class="muted"></p>`;
     // výběr, koho pozvat: přátelé a nedávní soupeři, kteří ještě nejsou v klanu
     $('bClanInv').onclick = () => {
@@ -128,7 +159,14 @@ async function renderClanLb(box) {
     const all = await fbGet('clans') || {}, wk = weekKey2();
     const list = Object.entries(all).filter(([, c]) => c && c.n && c.o).map(([tag, c]) => { const m = Object.values(c.m || {}); return { tag, n: c.n, k: m.length, w: m.reduce((s, x) => s + (x.w || 0), 0),
       r: m.length ? Math.round(m.reduce((s, x) => s + (x.r || 1000), 0) / m.length) : 0, ww: m.reduce((s, x) => s + (x.wk === wk ? x.ww || 0 : 0), 0) }; }).sort((a, b) => b.w - a.w || b.r - a.r);
-    box.innerHTML = tabs + `<p class="muted">Klany podle celkového počtu online výher svých členů.</p>
+    const war = clanWarScores(all).sort((a, b) => b.now - a.now), lastW = clanWarScores(all).filter(c => c.last > 0).sort((a, b) => b.last - a.last)[0];
+    if (lastW && lastW.tag === CLAN.tag) achId('clanWar');
+    const warHtml = `<h3>⚔ Klanová válka – tento týden</h3>
+      <p class="muted">Body za týden sbírají všichni členové: online souboj výhra 10 / prohra 2, 2 na 2 výhra 6, kampaň 3 (hrdinská 6), proti počítači 1–4 podle obtížnosti, přežití 2 za každých 10 vln, výzvy 2.${lastW ? ` Vítěz minulého týdne: 🏆 <span class="ctag">[${esc(lastW.tag)}]</span> ${esc(lastW.n)} (${lastW.last} b.)` : ''}</p>
+      <table class="bst lb"><tr><th>#</th><th>Klan</th><th>Členů</th><th>Body týdne</th></tr>
+      ${war.filter(c => c.now > 0 || c.tag === CLAN.tag).map((c, i) => `<tr class="${c.tag === CLAN.tag ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td><span class="ctag">[${esc(c.tag)}]</span> ${esc(c.n)}</td><td>${c.k}</td><td><b>${c.now}</b></td></tr>`).join('') || '<tr><td colspan="4">Tento týden zatím nikdo nebojoval.</td></tr>'}</table>
+      <h3>🏆 Celkově</h3>`;
+    box.innerHTML = tabs + warHtml + `<p class="muted">Klany podle celkového počtu online výher svých členů.</p>
       <table class="bst lb"><tr><th>#</th><th>Klan</th><th>Členů</th><th>Výher</th><th>Ø hodnocení</th><th>Tento týden</th></tr>
       ${list.map((c, i) => `<tr class="${c.tag === CLAN.tag ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td><span class="ctag">[${esc(c.tag)}]</span> ${esc(c.n)}</td><td>${c.k}</td><td><b>${c.w}</b></td><td>${c.r}</td><td>${c.ww}</td></tr>`).join('') || '<tr><td colspan="6">Zatím žádný klan – založ první!</td></tr>'}</table>`;
   } catch (e) { box.innerHTML = tabs + '<p class="muted">Klany se nepodařilo načíst.</p>'; }

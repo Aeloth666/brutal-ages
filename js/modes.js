@@ -436,69 +436,6 @@ function renderDaily() {
 $('bDaily').onclick = () => { renderDaily(); openPanel('dailyPanel'); };
 
 // =====================================================================
-//  ZÁZNAM ZÁPASU – posledních 90 s, po hře se dá přehrát (i zpomaleně)
-// =====================================================================
-const REC_HZ = 15, REC_MAX = 90 * REC_HZ;
-let rec = [], recEv = [], recAcc = 0, recTail = 0;
-let replay = null;                       // { pos (snímek, desetinně), speed, cache }
-function recPush(sn) { rec.push(sn); if (rec.length > REC_MAX) rec.shift(); }
-// host a hra proti počítači nahrávají vlastní simulaci, připojený hráč přijaté snímky
-function recTick(dt) {
-  if (!S || replay || netWait || (paused && role === 'solo')) return;
-  if (S.over >= 0) { if (recTail > 2.5) return; recTail += dt; } else recTail = 0;
-  recAcc += dt;
-  if (recAcc >= 1 / REC_HZ) { recAcc = 0; recPush(snap(recEv)); recEv = []; }
-}
-function startReplay(from) {
-  if (rec.length < 10) return;
-  // výchozí sestřih: posledních 20 s zpomaleně
-  const start = from === 0 ? 0 : Math.max(0, rec.length - 20 * REC_HZ);
-  replay = { pos: start, speed: from === 0 ? 1 : 0.5, cache: new Map(), last: Math.floor(start) - 1 };
-  fx = []; pools = []; phMap.clear(); sfx('click');
-}
-const recFrame = i => { let v = replay.cache.get(i); if (!v) { v = decode(rec[i]); replay.cache.set(i, v); if (replay.cache.size > 60) replay.cache.delete(replay.cache.keys().next().value); } return v; };
-function replayTick(dt) {
-  const R = replay, end = rec.length - 1;
-  R.pos = Math.min(end, R.pos + dt * REC_HZ * R.speed);
-  const i = Math.floor(R.pos);
-  for (let k = R.last + 1; k <= i; k++) (rec[k].E || []).forEach(addFx);   // efekty snímků, přes které se přešlo
-  R.last = i;
-  const a = R.pos - i, cur = recFrame(Math.min(end, i + 1)), prev = recFrame(i);
-  const v = lerpSnap(prev, cur, a);
-  return { ...v, over: -1 };                          // během záznamu bez obrazovky konce
-}
-let replayBtns = [];
-function drawReplay() {
-  const R = replay, end = rec.length - 1, y = 26;
-  c.fillStyle = 'rgba(14,18,28,.97)'; c.fillRect(0, 0, W, HUD);
-  c.fillStyle = '#e5c04a'; c.fillRect(0, HUD - 3, W, 2);
-  c.textAlign = 'left'; c.fillStyle = '#fde68a'; c.font = '900 20px system-ui'; c.fillText('🎬 ZÁZNAM', 20, y + 30);
-  // časová osa
-  const tx = 170, tw = 420;
-  rr(tx, y + 20, tw, 8, 4); c.fillStyle = '#334155'; c.fill();
-  rr(tx, y + 20, tw * (R.pos / end), 8, 4); c.fillStyle = '#f59e0b'; c.fill();
-  c.fillStyle = '#cbd5e1'; c.font = '700 13px system-ui';
-  c.fillText(`-${fmtTime((end - R.pos) / REC_HZ)}`, tx + tw + 10, y + 29);
-  const items = [['0,5×', 0.5], ['1×', 1], ['2×', 2], ['⟲ Celý', 'all'], ['✕ Konec', 'quit']];
-  replayBtns = items.map(([t, k], i) => {
-    const b = { x: 690 + i * 120, y: y + 4, w: 110, h: 42, k };
-    const on = k === R.speed;
-    rr(b.x, b.y, b.w, b.h, 9); c.fillStyle = k === 'quit' ? '#b91c1c' : on ? '#a16207' : '#334155'; c.fill();
-    c.fillStyle = '#fff'; c.font = '800 16px system-ui'; c.textAlign = 'center'; c.fillText(t, b.x + b.w / 2, b.y + 27);
-    return b;
-  });
-  if (R.pos >= end) { c.textAlign = 'center'; c.fillStyle = '#fde68a'; c.font = '900 26px system-ui'; c.fillText('KONEC ZÁZNAMU', W / 2, HUD + 60); }
-}
-function replayClick(hit) {
-  for (const b of replayBtns) if (hit(b)) {
-    sfx('click');
-    if (b.k === 'quit') { replay = null; fx = []; }
-    else if (b.k === 'all') startReplay(0);
-    else { replay.speed = b.k; if (replay.pos >= rec.length - 1) startReplay(); }
-  }
-}
-
-// =====================================================================
 //  ŽEBŘÍČEK PARTY – bez serveru: výsledky zápasů a denních výzev si
 //  telefony předávají při každém online spojení, takže se šíří mezi všemi
 // =====================================================================

@@ -311,7 +311,7 @@ function startGame(r, chal = null, camp = null, daily = false) {
   uiMode = 'units'; fx = []; netEv = []; phMap.clear();
   snapPrev = snapCur = null; V = null;
   paused = false; endDone = false; chatOpen = false; bubbles = []; pools = [];
-  rec = []; recEv = []; recAcc = 0; recTail = 0; replay = null; evtBanner = null; shake = 0; bloodCode = null; bloodCodeUsed = false; splats = [];
+  recReset(); recView = null; replay = null; evtBanner = null; shake = 0; bloodCode = null; bloodCodeUsed = false; splats = [];
   rmMe = rmOpp = false; rmInfo = null; lastRx = performance.now(); netLostAt = 0; oppAway = false;
   for (const k of conns) { k.rm = false; k.lastRx = lastRx; }
   if (r !== 'guest') { S = newState(); acc = 0; aiWant = null; aiT = 1; aiEvoT = 0; aiBroke = 0; }
@@ -368,16 +368,18 @@ function startGame(r, chal = null, camp = null, daily = false) {
   if (r !== 'guest') S.events = SET.evt !== false && S.camp == null && S.chal == null && !S.daily;
   if (r !== 'guest') { setField((S.camp != null && CAMP[S.camp].field) || (S.daily && DAILY.field) || pickField()); S.field = FIELD; }
   if (r === 'host') { for (const k of conns) sendTo(k, { t: 'start', sess: SESS, ...hello(), coop, camp, field: FIELD, side: k.side, team: TEAM, mem: k.mem | 0 }); for (const s of specs) if (s.open) try { s.send(specStart()); } catch (e) {} partySend(); }
+  if (r !== 'solo') setTimeout(() => { try { pubSync(true); } catch (e) {} }, 1500);   // přátelé uvidí 👁 Sledovat
 }
 
 let curTour = null;
 function toMenu(msg) {
   if (typeof swNew !== 'undefined' && swNew) { location.reload(); return; }   // mezitím vyšla nová webová verze
-  tut = null; specMode = false;
+  try { recSave(); } catch (e) {}                        // odehraná bitva → „Poslední bitva“ v menu
+  tut = null; specMode = false; recView = null;
   role = null; S = null; V = null; snapCur = snapPrev = null; paused = false; replay = null;
   cleanupNet(); wxApply(); setField(FIELDS[SET.field] ? SET.field : 'meadow');
-  refreshMenu(); try { refreshHQ(); } catch (e) {}
-  try { pubSync(); } catch (e) {}                       // po hře zveřejní aktuální statistiky pro přátele
+  refreshMenu(); try { refreshHQ(); refreshLastRep(); } catch (e) {}
+  try { pubSync(pubLive); } catch (e) {}                 // po hře zveřejní aktuální statistiky (a zruší „hraje online“)
   document.getElementById('menu').classList.remove('hidden');
   status(msg || ''); document.getElementById('mstatus').innerHTML = msg ? esc(msg) : '';
 }

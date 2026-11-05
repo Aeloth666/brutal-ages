@@ -97,6 +97,17 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.22', d: '2026-11-05', cs: [
+    'Záznam bitvy: po hře se uloží celá bitva – Hrát sám → 🎬 Poslední bitva. V záznamu jde přepínat sestřih / celá bitva, rychlost až 4× a klepnutím na časovou osu přeskakovat.',
+    'Sestřih poslední bitvy pošleš příteli ve zprávách (🎬 Poslat záznam), on si ho přehraje tlačítkem ▶ Přehrát.',
+    'Ligy v online soubojích: Dřevěná, Bronzová, Stříbrná, Zlatá, Diamantová a Mistrovská – podle hodnocení, s postupem a sestupem.',
+    'Klanová válka: členové klanu sbírají každý týden body za bitvy, klany se řadí v žebříčku. Nové úspěchy Zlatá liga a Válečník klanu.',
+    'U přátel, kteří právě hrají online, je tlačítko 👁 Sledovat – připojíš se jako divák bez kódu.'], en: [
+    'Battle recording: after a game the whole battle is saved – Play solo → 🎬 Last battle. You can switch between highlights / full battle, speed up to 4× and tap the timeline to jump.',
+    'Send the highlights of your last battle to a friend in messages (🎬 Send recording); they watch it with ▶ Play.',
+    'Leagues in online duels: Wooden, Bronze, Silver, Gold, Diamond and Master – based on rating, with promotion and relegation.',
+    'Clan war: clan members collect points for battles every week and clans are ranked on the leaderboard. New achievements Gold league and Clan warrior.',
+    'Friends who are playing online have a 👁 Watch button – you join as a spectator without a code.'] },
   { v: '2.21', d: '2026-11-05', cs: [
     'Schopnosti armády: dole v zemi jsou 4 tlačítka (A S D F) – ⚔️ Do útoku!, 🛡️ Štíty!, 💨 Vpřed! a ❤️ Lazaret. Na pár sekund posílí celou armádu, pak se minutu nabíjí. Počítač je používá taky.',
     'Hrdinská obtížnost: každou dobytou misi kampaně můžeš zahrát znovu těžší – za výhru dostaneš 👑 korunu. Nové úspěchy Hrdina kampaně a Legenda.',

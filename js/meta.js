@@ -81,6 +81,7 @@ function record(won, V) {
     lbResult(won);                                     // online žebříček (Elo)
   }
   store('aow-stats', ST);
+  try { clanPts(clanBattlePts(won, V)); } catch (e) {}
   profGain(won, V);
   genRecord(won, V);
 }

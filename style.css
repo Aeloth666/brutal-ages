@@ -332,3 +332,7 @@ table.cmp td.win { color: #4ade80; font-weight: 800; } table.cmp { margin-top: 8
 #campMap text.lockmsg { font-size: 26px; }
 #campMap text.crown { font-size: 24px; text-anchor: middle; pointer-events: none; }
 .cb-btns button.hero { background: linear-gradient(#b45309, #7c2d12); }
+.friend button.live { background: linear-gradient(#16a34a, #166534); animation: pulse 1.6s ease-in-out infinite; }
+.q-row.league i { opacity: .45; }
+.lg { font-size: 1.05em; }
+.cm .rep { margin: 4px 0 0; display: block; }
