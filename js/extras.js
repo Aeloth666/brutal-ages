@@ -179,9 +179,10 @@ const TUT = [
   { t: 'Pod horním panelem jsou rozkazy armádě. Zkus „Drž“ – vojáci zastaví u věží a budou bránit.', order: 1, done: c => c.a === 'ord' && c.o === 1, pre: () => { uiMode = 'units'; } },
   { t: 'Výborně! Teď dej rozkaz „Útok“, ať armáda zase táhne vpřed.', order: 0, done: c => c.a === 'ord' && c.o === 0 },
   { t: 'Blíží se nepřátelé! Použij speciální útok – Meteority zasáhnou celé bojiště.', btn: isBtn('special'), done: c => c.a === 'special', enemies: true },
+  { t: 'Dole v zemi jsou schopnosti armády. Na pár sekund posílí celou tvou armádu a pak se nabíjí. Zkus „Do útoku!“ – vojáci budou chvíli útočit silněji.', abil: 0, done: c => c.a === 'abil', pre: () => { S.pl[0].abc = ABIL.map(() => 0); } },
   { t: 'Za zabité nepřátele dostáváš zlato a zkušenosti. S plnými zkušenostmi můžeš evolvovat do dalšího věku – zkus to!', btn: isBtn('evolve'), done: c => c.a === 'evolve', xp: true },
   { t: 'Ve středověku máš nové jednotky i věže. Vyvolej hrdinu – je silný a jeho tlačítko pak spustí Ničivý úder.', btn: isBtn('hero'), done: c => c.a === 'hero', gold: () => HEROES[S.pl[0].age].c },
-  { t: 'Vylepšení zvyšují útok, zdraví jednotek a hradby. To je pro začátek vše – teď znič soupeřovu základnu!', next: 'end' },
+  { t: 'Vylepšení zvyšují útok, zdraví jednotek a hradby. To je pro začátek vše – teď znič soupeřovu základnu! Kampaň pak najdeš v Hrát sám.', next: 'end' },
 ];
 let tut = null, tutBtn = null;
 function startTutorial() {
@@ -210,7 +211,7 @@ function drawTut() {
   if (!tut || !V) return;
   const st = TUT[tut.i];
   // zvýraznění cílového tlačítka
-  const tgt = st.btn ? btns.find(st.btn) : st.order != null ? orderBtns[st.order] : null;
+  const tgt = st.btn ? btns.find(st.btn) : st.order != null ? orderBtns[st.order] : st.abil != null ? abilBtns[st.abil] : null;
   if (tgt) {
     const p = 4 + Math.sin(T * 6) * 3;
     c.strokeStyle = '#fde047'; c.lineWidth = 4; rr(tgt.x - p, tgt.y - p, tgt.w + p * 2, tgt.h + p * 2, 12); c.stroke();

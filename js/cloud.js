@@ -67,6 +67,18 @@ function clanBattlePts(won, V) {
   if (V.daily || V.chal != null) return 2;
   return [0, 1, 2, 3, 4][V.diff || 0];
 }
+// vítěz minulého týdne: 🏆 u zkratky klanu v žebříčcích (zjišťuje se jednou za spuštění)
+let CLANWIN = load('aow-clanwin', { wk: '', tag: '' });
+async function clanWinCheck() {
+  if (CLANWIN.wk === prevWeek() || !FB.key) return;
+  try {
+    const all = await fbGet('clans') || {}, w = clanWarScores(all).filter(c => c.last > 0).sort((a, b) => b.last - a.last)[0];
+    CLANWIN = { wk: prevWeek(), tag: w ? w.tag : '' }; store('aow-clanwin', CLANWIN);
+    if (w && w.tag === CLAN.tag) { achId('clanWar'); toasts.push({ a: { n: '[' + w.tag + '] vyhrál minulý týden klanovou válku!' }, h: '🏆 KLANOVÁ VÁLKA', l: 5 }); }
+  } catch (e) {}
+}
+setTimeout(clanWinCheck, 7000);
+const clanBadge = tag => tag && CLANWIN.tag === tag && CLANWIN.wk === prevWeek() ? '🏆' : '';
 // výsledky týdne pro všechny klany: tento a minulý týden
 function clanWarScores(all) {
   const wk = weekKey2(), pw = prevWeek();
@@ -128,7 +140,7 @@ async function renderClan() {
     const mem = Object.entries(c.m || {}).map(([uid, v]) => ({ uid, ...v })).sort((x, y) => y.r - x.r);
     const ww = mem.reduce((n, m) => n + (m.wk === wk ? m.ww || 0 : 0), 0), pct = Math.min(100, Math.round(ww / CLAN_GOAL * 100));
     if (ww >= CLAN_GOAL) achId('clanGoal');
-    b.innerHTML = `<div class="clan-head"><span class="ctag big">[${esc(CLAN.tag)}]</span> <b>${esc(c.n)}</b> <small class="muted">${mem.length} ${mem.length === 1 ? 'člen' : mem.length < 5 ? 'členové' : 'členů'}</small></div>
+    b.innerHTML = `<div class="clan-head"><span class="ctag big">${clanBadge(CLAN.tag)}[${esc(CLAN.tag)}]</span> <b>${esc(c.n)}</b> <small class="muted">${mem.length} ${mem.length === 1 ? 'člen' : mem.length < 5 ? 'členové' : 'členů'}</small></div>
       <p class="muted">Kámoše pozveš tlačítkem níž, nebo ať v Hrát s kámoši → 🛡 Klan zadá zkratku <b>${esc(CLAN.tag)}</b>.</p>
       <button id="bClanInv">📨 Pozvat do klanu</button><div id="clanInvList"></div>
       <h3>🎯 Týdenní klanová výzva</h3><div class="q-row ${ww >= CLAN_GOAL ? 'ok' : ''}"><span>Vyhrajte společně ${CLAN_GOAL} online soubojů</span><small>${Math.min(ww, CLAN_GOAL)} / ${CLAN_GOAL}</small><i style="width:${pct}%"></i></div>
@@ -164,11 +176,11 @@ async function renderClanLb(box) {
     const warHtml = `<h3>⚔ Klanová válka – tento týden</h3>
       <p class="muted">Body za týden sbírají všichni členové: online souboj výhra 10 / prohra 2, 2 na 2 výhra 6, kampaň 3 (hrdinská 6), proti počítači 1–4 podle obtížnosti, přežití 2 za každých 10 vln, výzvy 2.${lastW ? ` Vítěz minulého týdne: 🏆 <span class="ctag">[${esc(lastW.tag)}]</span> ${esc(lastW.n)} (${lastW.last} b.)` : ''}</p>
       <table class="bst lb"><tr><th>#</th><th>Klan</th><th>Členů</th><th>Body týdne</th></tr>
-      ${war.filter(c => c.now > 0 || c.tag === CLAN.tag).map((c, i) => `<tr class="${c.tag === CLAN.tag ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td><span class="ctag">[${esc(c.tag)}]</span> ${esc(c.n)}</td><td>${c.k}</td><td><b>${c.now}</b></td></tr>`).join('') || '<tr><td colspan="4">Tento týden zatím nikdo nebojoval.</td></tr>'}</table>
+      ${war.filter(c => c.now > 0 || c.tag === CLAN.tag).map((c, i) => `<tr class="${c.tag === CLAN.tag ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td><span class="ctag">${clanBadge(c.tag)}[${esc(c.tag)}]</span> ${esc(c.n)}</td><td>${c.k}</td><td><b>${c.now}</b></td></tr>`).join('') || '<tr><td colspan="4">Tento týden zatím nikdo nebojoval.</td></tr>'}</table>
       <h3>🏆 Celkově</h3>`;
     box.innerHTML = tabs + warHtml + `<p class="muted">Klany podle celkového počtu online výher svých členů.</p>
       <table class="bst lb"><tr><th>#</th><th>Klan</th><th>Členů</th><th>Výher</th><th>Ø hodnocení</th><th>Tento týden</th></tr>
-      ${list.map((c, i) => `<tr class="${c.tag === CLAN.tag ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td><span class="ctag">[${esc(c.tag)}]</span> ${esc(c.n)}</td><td>${c.k}</td><td><b>${c.w}</b></td><td>${c.r}</td><td>${c.ww}</td></tr>`).join('') || '<tr><td colspan="6">Zatím žádný klan – založ první!</td></tr>'}</table>`;
+      ${list.map((c, i) => `<tr class="${c.tag === CLAN.tag ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td><span class="ctag">${clanBadge(c.tag)}[${esc(c.tag)}]</span> ${esc(c.n)}</td><td>${c.k}</td><td><b>${c.w}</b></td><td>${c.r}</td><td>${c.ww}</td></tr>`).join('') || '<tr><td colspan="6">Zatím žádný klan – založ první!</td></tr>'}</table>`;
   } catch (e) { box.innerHTML = tabs + '<p class="muted">Klany se nepodařilo načíst.</p>'; }
   box.querySelectorAll('.lb-tabs button').forEach(b => b.onclick = () => { lbTab = b.dataset.t; sfx('click'); renderLb(); });
 }

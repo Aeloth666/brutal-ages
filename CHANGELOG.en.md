@@ -4,6 +4,12 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.24 – 5. 11. 2026
+
+- The tutorial now also shows army abilities. The first time you meet something new (abilities, survival bonuses, 3× speed, leagues, battle recording) a short tip pops up.
+- New daily and weekly quests: use army abilities, defeat bosses, win a mission on heroic difficulty, pick bonuses in survival.
+- Last week's clan war winner has a 🏆 next to its tag on the leaderboards and its members get the Clan warrior achievement.
+
 ## Version 2.23 – 5. 11. 2026
 
 - When something crashes, the game reports the error automatically (what happened, version, what you were playing) – so fixes come faster. Nothing personal is sent.

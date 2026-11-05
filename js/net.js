@@ -311,7 +311,7 @@ function startGame(r, chal = null, camp = null, daily = false) {
   uiMode = 'units'; fx = []; netEv = []; phMap.clear();
   snapPrev = snapCur = null; V = null;
   paused = false; endDone = false; chatOpen = false; bubbles = []; pools = [];
-  recReset(); recView = null; replay = null; evtBanner = null; shake = 0; bloodCode = null; bloodCodeUsed = false; splats = [];
+  recReset(); recView = null; replay = null; BSTAT.abil = BSTAT.sbon = 0; evtBanner = null; shake = 0; bloodCode = null; bloodCodeUsed = false; splats = [];
   rmMe = rmOpp = false; rmInfo = null; lastRx = performance.now(); netLostAt = 0; oppAway = false;
   for (const k of conns) { k.rm = false; k.lastRx = lastRx; }
   if (r !== 'guest') { S = newState(); acc = 0; aiWant = null; aiT = 1; aiEvoT = 0; aiBroke = 0; }
@@ -384,8 +384,10 @@ function toMenu(msg) {
   status(msg || ''); document.getElementById('mstatus').innerHTML = msg ? esc(msg) : '';
 }
 
+const BSTAT = { abil: 0, sbon: 0 };                 // počítadla bitvy pro úkoly
 function act(cmd) {
   if (specMode) return;                               // divák nic neovládá
+  if (cmd.a === 'abil') BSTAT.abil++; else if (cmd.a === 'sbon') BSTAT.sbon++;
   sfx('buy');
   tutCmd(cmd);
   if (role === 'guest') send({ t: 'c', c: cmd });

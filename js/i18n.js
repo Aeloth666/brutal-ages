@@ -110,6 +110,18 @@ const EN = {
   'Body za týden sbírají všichni členové': 'All members collect points during the week', 'online souboj výhra': 'online duel win', 'podle obtížnosti': 'by difficulty', 'za každých': 'for every',
   'Vítěz minulého týdne': "Last week's winner", 'Body týdne': 'Points this week', 'Tento týden zatím nikdo nebojoval.': 'Nobody has fought this week yet.', 'Celkově': 'Overall',
   'Tento týden má klan': 'This week the clan has', 'minulý týden': 'last week', 'Pořadí klanů je v Žebříčku →': 'The clan ranking is in Leaderboard →', 'Sledovat': 'Watch', 'Právě hraje online': 'Playing online right now',
+  // výuka a tipy k novinkám, nové úkoly
+  'Dole v zemi jsou schopnosti armády': 'Down in the ground are your army abilities', 'Na pár sekund posílí celou tvou armádu a pak se nabíjí': 'They boost your whole army for a few seconds and then recharge',
+  'vojáci budou chvíli útočit silněji': 'your soldiers will attack harder for a while', 'Kampaň pak najdeš v Hrát sám': 'You will find the campaign in Play solo',
+  'Schopnosti armády jsou nabité': 'Army abilities are charged', 'tlačítka dole v zemi': 'buttons down in the ground', 'klávesy A S D F': 'keys A S D F',
+  'Na pár sekund posílí celou armádu': 'They boost your whole army for a few seconds', 'pak se zase nabíjí': 'then they recharge',
+  'Po každém bossovi si v přežití vybereš bonus': 'After every boss in survival you pick a bonus', 'Bonusy se sčítají': 'Bonuses stack', 'rozmysli si': 'think about', 'co tvé armádě chybí': 'what your army is missing',
+  'Zrychlení přepíná': 'Speed-up cycles', 'na počítači klávesa Tab': 'Tab key on a computer',
+  'podle hodnocení z online soubojů postupuješ z Dřevěné až do Mistrovské ligy': 'based on your online duel rating you climb from the Wooden up to the Master league', 'Klany spolu bojují v týdenní klanové válce': 'Clans fight each other in a weekly clan war',
+  'přehraje celou bitvu': 'plays the whole battle', 'klepnutím na časovou osu přeskočíš': 'tap the timeline to jump', 'Sestřih pošleš příteli v chatu': 'Send the highlights to a friend in chat',
+  'Použij': 'Use', 'schopnost armády': 'army abilities', 'Poraz': 'Defeat', 'bosse': 'boss', 'bossy': 'bosses',
+  'misi na hrdinskou obtížnost': 'mission on heroic difficulty', 'mise na hrdinskou obtížnost': 'missions on heroic difficulty',
+  'bonusy v nekonečném přežití': 'bonuses in endless survival', 'bonusů v nekonečném přežití': 'bonuses in endless survival', 'vyhrál minulý týden klanovou válku': 'won the clan war last week',
   // kampaň – 2. kapitola
   'Trhlina v čase': 'Rift in time', 'Myslel sis': 'Did you think', 'že je konec': 'it was over', 'Šaman Rudé hordy otevřel trhlinu v čase a jeho válečníci se vrací na úsvit dějin': "The Red Horde's shaman opened a rift in time and his warriors are returning to the dawn of history",
   'silnější a zuřivější než kdy dřív': 'stronger and fiercer than ever', 'Zavři trhlinu': 'Close the rift', 'dokud je malá': "while it's still small",

@@ -213,7 +213,7 @@ function drawOrders(p) {
 // schopnosti armády: kamenné desky zapuštěné do hlíny pod bojištěm (klávesy A S D F)
 function drawAbils(p) {
   abilBtns = [];
-  if (!p.abc || tut) return;
+  if (!p.abc || (tut && !TUT.slice(0, tut.i + 1).some(s => s.abil != null))) return;
   const w = 128, h = 60, gap = 12, x0 = W / 2 - (ABIL.length * w + (ABIL.length - 1) * gap) / 2, y = GY + 22;
   ABIL.forEach((A, k) => {
     const b = { x: x0 + k * (w + gap), y, w, h, k }, act = p.ab[k] > 0, cd = p.abc[k], ok = cd <= 0;

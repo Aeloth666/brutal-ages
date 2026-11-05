@@ -97,6 +97,13 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.24', d: '2026-11-05', cs: [
+    'Výuka nově ukáže i schopnosti armády. Při prvním setkání s novinkami (schopnosti, bonusy v přežití, zrychlení 3×, ligy, záznam bitvy) se ukáže krátký tip.',
+    'Nové denní a týdenní úkoly: použij schopnosti armády, poraz bosse, vyhraj misi na hrdinskou obtížnost, vyber bonusy v přežití.',
+    'Klan, který vyhrál minulý týden klanovou válku, má v žebříčcích u zkratky 🏆 a jeho členové dostanou úspěch Válečník klanu.'], en: [
+    'The tutorial now also shows army abilities. The first time you meet something new (abilities, survival bonuses, 3× speed, leagues, battle recording) a short tip pops up.',
+    'New daily and weekly quests: use army abilities, defeat bosses, win a mission on heroic difficulty, pick bonuses in survival.',
+    "Last week's clan war winner has a 🏆 next to its tag on the leaderboards and its members get the Clan warrior achievement."] },
   { v: '2.23', d: '2026-11-05', cs: [
     'Když hře něco spadne, automaticky se nahlásí chyba (co se stalo, verze, co jsi zrovna hrál) – opravy pak přijdou rychleji. Neposílá se nic osobního.',
     'Na telefonu: tlačítka schopností bez nápovědy kláves, výběr bonusu v přežití se nepřekrývá s oznámením úspěchu, lišta záznamu je neprůhledná.'], en: [

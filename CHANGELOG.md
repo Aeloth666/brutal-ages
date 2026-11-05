@@ -4,6 +4,12 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.24 – 5. 11. 2026
+
+- Výuka nově ukáže i schopnosti armády. Při prvním setkání s novinkami (schopnosti, bonusy v přežití, zrychlení 3×, ligy, záznam bitvy) se ukáže krátký tip.
+- Nové denní a týdenní úkoly: použij schopnosti armády, poraz bosse, vyhraj misi na hrdinskou obtížnost, vyber bonusy v přežití.
+- Klan, který vyhrál minulý týden klanovou válku, má v žebříčcích u zkratky 🏆 a jeho členové dostanou úspěch Válečník klanu.
+
 ## Verze 2.23 – 5. 11. 2026
 
 - Když hře něco spadne, automaticky se nahlásí chyba (co se stalo, verze, co jsi zrovna hrál) – opravy pak přijdou rychleji. Neposílá se nic osobního.

@@ -379,6 +379,7 @@ function hurt(t, dmg, by, fromSpecial) {
   t.hp -= dmg;
   if (t.hp <= 0) {
     t.dead = 1;
+    if (t.ty === 5 && by >= 0) { S.bossK = S.bossK || [0, 0]; S.bossK[by]++; }
     const d = uDefU(t), p = S.pl[by], g = p && GB(p);
     if (t.ty === 6 && d.ab === 'boom') { const src = dmgSrc; dmgSrc = 'u'; splash(t.x, 80, d.d * 4, t.side); dmgSrc = src; S.ev.push([t.x, GY - 20, 'boom']); }
     if (p) {

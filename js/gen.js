@@ -119,18 +119,22 @@ const QDEF = {
   fac: { n: k => `Vyhraj za národ ${AGEFAC[(k / 4) | 0][k % 4].ic} ${AGEFAC[(k / 4) | 0][k % 4].n}`, f: (r, k) => r.won && r.fac === k ? k + 1 : 0, set: 1, eq: 1 },
   online: { n: k => `Odehraj ${k} ${k < 2 ? 'hru' : 'hry'} s kámoši`, f: r => r.online ? 1 : 0, k: [1, 2], wk: 8 },
   stars: { n: k => `Získej ${k} ${k < 5 ? 'hvězdy' : 'hvězd'} v kampani`, f: r => r.stars, k: [2, 3], wk: 12 },
+  abil: { n: k => `Použij ${k}× schopnost armády`, f: r => r.abil, k: [4, 6], wk: 40 },
+  boss: { n: k => `Poraz ${k} ${k < 2 ? 'bosse' : 'bossy'}`, f: r => r.boss, k: [1, 2], wk: 8, need: () => Object.keys(CAMPS).length >= 3 || SURVB.best >= 10 },
+  hero: { n: k => `Vyhraj ${k} ${k < 2 ? 'misi' : k < 5 ? 'mise' : 'misí'} na hrdinskou obtížnost`, f: r => r.hero ? 1 : 0, k: [1], wk: 3, need: () => Object.keys(CAMPS).length >= 3 },
+  sbon: { n: k => `Vyber ${k} ${k < 5 ? 'bonusy' : 'bonusů'} v nekonečném přežití`, f: r => r.sbon, k: [2, 3], wk: 12, need: () => SURVB.best >= 12 },
 };
 const weekKey = (d = new Date()) => { const j = new Date(d.getFullYear(), 0, 1); return d.getFullYear() + '-' + Math.ceil(((d - j) / 864e5 + j.getDay() + 1) / 7); };
 function questRoll() {
   const dk = dayKey(), wk = weekKey();
   if (QST.day !== dk) {
-    const r = seeded(dk + SET.pid), ids = Object.keys(QDEF).filter(i => i !== 'online' || ST.vs && Object.keys(ST.vs).length), pick = [];
+    const r = seeded(dk + SET.pid), ids = Object.keys(QDEF).filter(i => (i !== 'online' || ST.vs && Object.keys(ST.vs).length) && (!QDEF[i].need || QDEF[i].need())), pick = [];
     while (pick.length < 3) { const id = ids[(r() * ids.length) | 0]; if (!pick.includes(id)) pick.push(id); }
     QST.d = pick.map(id => { const D = QDEF[id]; const k = id === 'fac' ? (r() * 20) | 0 : D.k[(r() * D.k.length) | 0]; return { id, k, p: 0, ok: 0 }; });
     QST.day = dk;
   }
   if (QST.week !== wk) {
-    const r = seeded(wk + SET.pid), ids = Object.keys(QDEF).filter(i => QDEF[i].wk && (i !== 'online' || Object.keys(ST.vs || {}).length)), id = ids[(r() * ids.length) | 0];
+    const r = seeded(wk + SET.pid), ids = Object.keys(QDEF).filter(i => QDEF[i].wk && (i !== 'online' || Object.keys(ST.vs || {}).length) && (!QDEF[i].need || QDEF[i].need())), id = ids[(r() * ids.length) | 0];
     QST.w = { id, k: QDEF[id].wk, p: 0, ok: 0 }; QST.week = wk;
   }
   store('aow-quest', QST);
@@ -183,7 +187,8 @@ function genRecord(won, V) {
   const me = V.pl[mySide], online = role !== 'solo' && !coop;
   if (won && (role === 'solo' || coop)) { GEAR.w[me.age]++; store('aow-gear', GEAR); if (GEAR_AT.includes(GEAR.w[me.age])) achId('gear'), toasts.push({ a: { n: `${HERO_N[me.age]}: ${GEAR_N[GEAR_AT.indexOf(GEAR.w[me.age])]}` }, h: '🎖 VÝBAVA HRDINY', l: 4 }); }
   questTrack({ won, kills: me.kills, built: me.built, age: me.age, online: role !== 'solo', stars: V.camp != null && curDef == null ? lastStars : 0,
-    spec: S && S.st ? S.st.spec[mySide] : 0, fac: me.age * 4 + ((me.af && me.af[me.age]) | 0) });
+    spec: S && S.st ? S.st.spec[mySide] : 0, fac: me.age * 4 + ((me.af && me.af[me.age]) | 0),
+    abil: BSTAT.abil, sbon: BSTAT.sbon, boss: S && S.bossK ? S.bossK[mySide] || 0 : 0, hero: won && curHero != null });
   // Rudá horda občas zaútočí na dobyté území
   if (role === 'solo' && !online) {
     const held = terrActive();
@@ -281,6 +286,8 @@ $('bHQ').addEventListener('click', () => {
   tip('gen', '🎖 Generál: body za úrovně profilu, hvězdy a úkoly rozděl do stromu dovedností – armáda bude silnější.');
   tip('quest', '✅ Úkoly: každý den tři nové a jeden týdenní. Odměnou jsou body generála a skiny armády.');
 });
+$('bLb').addEventListener('click', () => tip('league', '🏆 Ligy: podle hodnocení z online soubojů postupuješ z Dřevěné až do Mistrovské ligy. Klany spolu bojují v týdenní klanové válce.'));
+$('bLastRep').addEventListener('click', () => tip('rep', '🎬 Záznam: „⟲ Celá“ přehraje celou bitvu, klepnutím na časovou osu přeskočíš. Sestřih pošleš příteli v chatu.'));
 $('bCamp').addEventListener('click', () => tip('terr', '🗺 Každé dobyté území dává trvalý bonus. Když na něj Rudá horda zaútočí (⚔), ubraň ho.'));
 $('bMP').addEventListener('click', () => tip('mpNew', '🌍 Online žebříček, emoty v chatu a 👁 divácký režim – zadej kód hry a klikni na oko.'));
 function tipTick() {
@@ -289,6 +296,10 @@ function tipTick() {
   if (V.time > 3 && FIELD !== 'meadow' && FIELD_FX[FIELD]) tip('field-' + FIELD, '🗺 ' + FIELD_FX[FIELD].n + '.');
   if (nightK(V.time) > 0.5) tip('night', '🌙 Padla noc – je to jen vzhled, bojuje se úplně stejně.');
   if (V.units.some(u => u.ty === 5)) tip('boss', '👹 Boss! Má obrovské zdraví – soustřeď na něj věže, hrdinu a speciální útok.');
+  const me = V.pl[mySide];
+  if (me.abc && me.abc.every(v => v <= 0) && V.time > 5) tip('abil', '✨ Schopnosti armády jsou nabité – tlačítka dole v zemi (klávesy A S D F). Na pár sekund posílí celou armádu, pak se zase nabíjí.');
+  if (V.survPick) tip('sbon', '🎁 Po každém bossovi si v přežití vybereš bonus. Bonusy se sčítají – rozmysli si, co tvé armádě chybí.');
+  if (V.speed > 1) tip('speed3', '⏩ Zrychlení přepíná 1× → 2× → 3× (na počítači klávesa Tab).');
 }
 
 // ---------- emoty (online) ----------

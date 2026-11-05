@@ -92,7 +92,7 @@ async function renderLb() {
   box.innerHTML = tabs + '<p class="muted">Načítám žebříček…</p>';
   const wire = () => box.querySelectorAll('.lb-tabs button').forEach(b => b.onclick = () => { lbTab = b.dataset.t; sfx('click'); renderLb(); });
   wire();
-  const me = load('aow-fb', {}).uid, tag = p => p.c ? `<small class="ctag">[${esc(p.c)}]</small> ` : '';
+  const me = load('aow-fb', {}).uid, tag = p => p.c ? `<small class="ctag">${typeof clanBadge === 'function' ? clanBadge(p.c) : ''}[${esc(p.c)}]</small> ` : '';
   if (lbTab === 'surv') {
     await survPush();
     let list; try { list = await survFetch(); } catch (e) { box.innerHTML = tabs + '<p class="muted">Žebříček se nepodařilo načíst – jsi online?</p>'; wire(); return; }
