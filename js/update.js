@@ -97,6 +97,19 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.21', d: '2026-11-05', cs: [
+    'Schopnosti armády: dole v zemi jsou 4 tlačítka (A S D F) – ⚔️ Do útoku!, 🛡️ Štíty!, 💨 Vpřed! a ❤️ Lazaret. Na pár sekund posílí celou armádu, pak se minutu nabíjí. Počítač je používá taky.',
+    'Hrdinská obtížnost: každou dobytou misi kampaně můžeš zahrát znovu těžší – za výhru dostaneš 👑 korunu. Nové úspěchy Hrdina kampaně a Legenda.',
+    'Nekonečné přežití: po každém bossovi si vybereš jeden ze tří bonusů (zlato, útok, zdraví, věže, hradby…).',
+    'Bossové mají speciální útoky: tygr řve a omračuje, drak spálí věže, obrněný vůz pálí salvy, tank volá nálet a Titán vypouští drony.',
+    'Zrychlení hry proti počítači teď přepíná 1× / 2× / 3×.',
+    'Nový nástroj na test balance (tools/balance.js) – boti přehrají kampaň a přežití.'], en: [
+    'Army abilities: 4 buttons set into the ground (A S D F) – ⚔️ Charge!, 🛡️ Shields!, 💨 Forward! and ❤️ Field hospital. They boost your whole army for a few seconds, then recharge for about a minute. The computer uses them too.',
+    'Heroic difficulty: every conquered campaign mission can be replayed harder – a win gives you a 👑 crown. New achievements Campaign hero and Legend.',
+    'Endless survival: after every boss you pick one of three bonuses (gold, attack, health, towers, walls…).',
+    'Bosses have special attacks: the tiger roars and stuns, the dragon burns towers, the armoured car fires volleys, the tank calls an airstrike and the Titan launches drones.',
+    'Game speed against the computer now cycles 1× / 2× / 3×.',
+    'New balance testing tool (tools/balance.js) – bots play through the campaign and survival.'] },
   { v: '2.20', d: '2026-11-05', cs: [
     'Nekonečné přežití je těžší: od 21. vlny nepřátelé sílí každou vlnou rychleji (víc zdraví, silnější útok, supervojáci) a vlny se rychleji vypouštějí.',
     'Boss přijde hned po ohlášení vlny, ne až na jejím konci. Od 25. vlny chodí boss každou pátou vlnu, později i víc bossů najednou.'], en: [

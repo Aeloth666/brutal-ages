@@ -4,6 +4,15 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.21 – 5. 11. 2026
+
+- Schopnosti armády: dole v zemi jsou 4 tlačítka (A S D F) – ⚔️ Do útoku!, 🛡️ Štíty!, 💨 Vpřed! a ❤️ Lazaret. Na pár sekund posílí celou armádu, pak se minutu nabíjí. Počítač je používá taky.
+- Hrdinská obtížnost: každou dobytou misi kampaně můžeš zahrát znovu těžší – za výhru dostaneš 👑 korunu. Nové úspěchy Hrdina kampaně a Legenda.
+- Nekonečné přežití: po každém bossovi si vybereš jeden ze tří bonusů (zlato, útok, zdraví, věže, hradby…).
+- Bossové mají speciální útoky: tygr řve a omračuje, drak spálí věže, obrněný vůz pálí salvy, tank volá nálet a Titán vypouští drony.
+- Zrychlení hry proti počítači teď přepíná 1× / 2× / 3×.
+- Nový nástroj na test balance (tools/balance.js) – boti přehrají kampaň a přežití.
+
 ## Verze 2.20 – 5. 11. 2026
 
 - Nekonečné přežití je těžší: od 21. vlny nepřátelé sílí každou vlnou rychleji (víc zdraví, silnější útok, supervojáci) a vlny se rychleji vypouštějí.

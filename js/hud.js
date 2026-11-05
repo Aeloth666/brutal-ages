@@ -71,7 +71,7 @@ function hud(V) {
   const RIGHT = W - 236, last = btns[btns.length - 1];
   if (last && last.x + last.w > RIGHT) { const step = (RIGHT - 246) / btns.length; btns.forEach((b, i) => { b.x = 246 + i * step; b.w = step - 5; }); }
   for (const b of btns) drawBtn(b);
-  if (V.over < 0 && !replay) drawOrders(p); else orderBtns = [];
+  if (V.over < 0 && !replay) { drawOrders(p); drawAbils(p); } else { orderBtns = []; abilBtns = []; }
 
   c.textAlign = 'right';
   c.fillStyle = '#64748b'; c.font = '700 12px system-ui';
@@ -86,7 +86,7 @@ function hud(V) {
   if (V.daily) label = DAILY.n.toUpperCase() + tl;
   if (V.surv || curSurv) label = `♾ PŘEŽITÍ · VLNA ${V.surv} · DALŠÍ ZA ${V.survT} S · REKORD ${SURVB.best}`;
   else if (specMode) label = '👁 DIVÁK · ' + (OPP.n || 'hostitel').toUpperCase() + ' vs SOUPEŘ';
-  else if (cm) label = (curDef != null ? 'OBRANA ÚZEMÍ: ' : `KAMPAŇ ${V.camp + 1}/${CAMP.length}: `) + cm.n.toUpperCase() + tl;
+  else if (cm) label = (curDef != null ? 'OBRANA ÚZEMÍ: ' : curHero != null ? `🔥 HRDINSKÁ ${V.camp + 1}: ` : `KAMPAŇ ${V.camp + 1}/${CAMP.length}: `) + cm.n.toUpperCase() + tl;
   c.fillText(label, W - 14, 72, 222);
   c.fillStyle = '#fca5a5'; c.font = '800 14px system-ui';
   c.fillText(V.surv ? 'Nepřítel: ' + AGES[e.age].name + ' · základna ∞' : 'Soupeř: ' + AGES[e.age].name, W - 14, 92, 222);
@@ -113,7 +113,27 @@ function hud(V) {
     c.fillStyle = '#1e293b'; for (let i = 0; i < 3; i++) circ(b.x + 16 + i * 7, b.y + 18, 2);
   }
 }
-let facBtns = [];
+let facBtns = [], sbonBtns = [];
+// nekonečné přežití: výběr bonusu po bossovi (3 karty)
+function drawSbonPick() {
+  sbonBtns = [];
+  const P = V.survPick; if (!P || V.over >= 0 || replay) return;
+  const w = 250, gap = 12, n = P.length - 1, tw = n * w + (n - 1) * gap, x0 = W / 2 - tw / 2, y = HUD + 100;
+  rr(x0 - 14, y - 40, tw + 28, 136, 14); c.fillStyle = 'rgba(15,21,34,.95)'; c.fill(); c.strokeStyle = '#e5c04a'; c.lineWidth = 2; c.stroke();
+  c.textAlign = 'center'; c.fillStyle = '#fde68a'; c.font = '800 16px system-ui';
+  c.fillText(`Vyber si bonus (${P[n]} s)`, W / 2, y - 14);
+  for (let i = 0; i < n; i++) {
+    const B = SBON[P[i]], b = { x: x0 + i * (w + gap), y, w, h: 80, i };
+    sbonBtns.push(b);
+    rr(b.x, b.y, w, b.h, 10); c.fillStyle = '#1e293b'; c.fill(); c.strokeStyle = '#fbbf24'; c.lineWidth = 1.5; c.stroke();
+    c.textAlign = 'left'; c.font = '30px system-ui'; c.fillStyle = '#fff'; c.fillText(B.ic, b.x + 12, b.y + 50);
+    c.font = '800 16px system-ui'; c.fillStyle = '#fde68a'; c.fillText(B.n, b.x + 56, b.y + 30, w - 64);
+    c.font = '600 12px system-ui'; c.fillStyle = '#cbd5e1';
+    const words = B.d.split(' '); let line = '', ly = b.y + 50;
+    for (const wd of words) { if (c.measureText(line + wd).width > w - 66) { c.fillText(line, b.x + 56, ly); line = ''; ly += 14; } line += wd + ' '; }
+    c.fillText(line, b.x + 56, ly);
+  }
+}
 function drawFacPick(p) {
   facBtns = [];
   if (!(p.pick > 0) || V.over >= 0 || replay || tut) return;
@@ -134,7 +154,7 @@ function drawFacPick(p) {
     c.fillText(line, b.x + 44, ly);
   });
 }
-let extraBtn = null, infoBtn = null, orderBtns = [], evtBanner = null, shake = 0;
+let extraBtn = null, infoBtn = null, orderBtns = [], abilBtns = [], evtBanner = null, shake = 0;
 const TREX_TEAM = ['#6b4423', '#4a2c14', '#a07040'];
 function drawTrex(x, dir) {
   c.save(); c.translate(x, GY); c.scale(dir * 4, 4);                  // kyčel ~4,8 m – T-Rex má budit respekt
@@ -188,6 +208,33 @@ function drawOrders(p) {
     c.fillText(raging ? '😡 Zuří!' : p.rgcd > 0 ? '😡 ' + p.rgcd + ' s' : '😡 Vztek', b.x + b.w / 2, b.y + 22);
     orderBtns.push(b);
   }
+}
+// schopnosti armády: kamenné desky zapuštěné do hlíny pod bojištěm (klávesy A S D F)
+function drawAbils(p) {
+  abilBtns = [];
+  if (!p.abc || tut) return;
+  const w = 128, h = 60, gap = 12, x0 = W / 2 - (ABIL.length * w + (ABIL.length - 1) * gap) / 2, y = GY + 22;
+  ABIL.forEach((A, k) => {
+    const b = { x: x0 + k * (w + gap), y, w, h, k }, act = p.ab[k] > 0, cd = p.abc[k], ok = cd <= 0;
+    // zapuštění do země: tmavý okraj a vnitřní stín
+    rr(b.x - 3, b.y - 3, w + 6, h + 6, 12); c.fillStyle = 'rgba(20,12,6,.75)'; c.fill();
+    rr(b.x, b.y, w, h, 10); c.fillStyle = act ? `rgba(${A.col},.55)` : ok ? '#3a3027' : '#241d17'; c.fill();
+    c.strokeStyle = act ? `rgb(${A.col})` : ok ? '#a8865a' : '#4a3b2c'; c.lineWidth = act || ok ? 2 : 1.5; c.stroke();
+    if (!ok && !act) {                                 // nabíjení: tmavá výplň, která ubývá
+      const f = Math.min(1, cd / A.cd); rr(b.x + 2, b.y + 2, w - 4, (h - 4) * f, 8); c.fillStyle = 'rgba(0,0,0,.45)'; c.fill();
+    }
+    if (act) { rr(b.x + 4, b.y + h - 9, (w - 8) * (p.ab[k] / A.t), 5, 2.5); c.fillStyle = '#fff'; c.fill(); }
+    if (ok) { c.save(); c.globalAlpha = 0.25 + Math.sin(T * 4 + k) * 0.15; rr(b.x, b.y, w, h, 10); c.strokeStyle = `rgb(${A.col})`; c.lineWidth = 3; c.stroke(); c.restore(); }
+    const fl = BTN_FLASH.get('ab' + k); if (fl && T - fl < 0.25) { rr(b.x, b.y, w, h, 10); c.fillStyle = `rgba(255,255,255,${0.5 * (1 - (T - fl) / 0.25)})`; c.fill(); }
+    c.globalAlpha = ok || act ? 1 : 0.6;
+    c.textAlign = 'left'; c.font = '24px system-ui'; c.fillStyle = '#fff'; c.fillText(A.ic, b.x + 8, b.y + 38);
+    c.font = '800 14px system-ui'; c.fillStyle = '#f5e6c4'; c.fillText(A.n, b.x + 42, b.y + 25);
+    c.font = '700 12px system-ui'; c.fillStyle = act ? '#fff' : ok ? '#fde68a' : '#cbd5e1';
+    c.fillText(act ? Math.ceil(p.ab[k]) + ' s' : ok ? 'PŘIPRAVENO' : Math.ceil(cd) + ' s', b.x + 42, b.y + 44);
+    c.font = '700 10px system-ui'; c.fillStyle = 'rgba(245,230,196,.5)'; c.textAlign = 'right'; c.fillText('ASDF'[k], b.x + w - 7, b.y + 15);
+    c.globalAlpha = 1;
+    abilBtns.push(b);
+  });
 }
 const fmtTime = t => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
 
@@ -341,6 +388,7 @@ function render(dt) {
     if (u.ty !== 5) {
       const au = [];
       if (V.pl[u.side].cry) au.push('255,200,60');
+      const ab = V.pl[u.side].ab; if (ab) ab.forEach((v, k) => { if (v > 0) au.push(ABIL[k].col); });
       if (near(drums, u, 160)) au.push('251,146,60');
       if (near(heals, u, 140) && u.hp < u.mx) au.push('74,222,128');
       au.forEach((col, i) => { c.strokeStyle = `rgba(${col},${0.5 + Math.sin(T * 5 + i * 2) * 0.2})`; c.lineWidth = 2;

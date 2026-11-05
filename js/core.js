@@ -188,11 +188,20 @@ const DIFF = [
   { n: 'Šílená',   think: [0.2, 0.3],   gm: 2.4,  xm: 2.0, evo: 0,  smart: 1,   spMin: 1, gold: 800 },   // odemkne se po dohrání kampaně
 ];
 
+// schopnosti armády: tlačítka dole „v zemi“; na pár sekund posílí celou armádu, pak se nabíjí (t = trvání, cd = nabíjení v s)
+const ABIL = [
+  { ic: '⚔️', n: 'Do útoku!', d: 'Celá armáda útočí o 35 % silněji.', t: 8, cd: 60, col: '239,68,68' },
+  { ic: '🛡️', n: 'Štíty!', d: 'Celá armáda dostává o 40 % menší zranění.', t: 8, cd: 60, col: '59,130,246' },
+  { ic: '💨', n: 'Vpřed!', d: 'Armáda běží o 50 % rychleji a útočí o 30 % rychleji.', t: 6, cd: 50, col: '34,197,94' },
+  { ic: '❤️', n: 'Lazaret', d: 'Armáda si každou sekundu doplní 4 % zdraví.', t: 8, cd: 75, col: '236,72,153' },
+];
+const ABIL_START = 20;                                 // na začátku bitvy se schopnosti nejdřív nabíjí
+const abOn = (s, k) => { const p = S.pl[s]; return p && p.ab && p.ab[k] > 0; };
 function newPlayer() {
   return { gold: START_GOLD, xp: 0, age: 0, hp: AGES[0].baseHp, mhp: AGES[0].baseHp,
     slots: 1, tur: [], q: [], qt: 0, spcd: 0,
     gm: 1, xm: 1, kills: 0, spk: 0, spBest: 0, supers: 0, built: 0, up: [0, 0, 0], hcd: 0, acd: 0, ord: 0, emb: 0,
-    af: [0, 0, 0, 0, 0], pref: [0, 0, 0, 0, 0], bm: 1, pick: 0 };
+    af: [0, 0, 0, 0, 0], pref: [0, 0, 0, 0, 0], bm: 1, pick: 0, ab: [0, 0, 0, 0], abc: ABIL.map(() => ABIL_START) };
 }
 function newState() { return { pl: [newPlayer(), newPlayer()], units: [], proj: [], nid: 1, over: -1, ev: [], time: 0, mods: null, chal: null, camp: null, daily: 0, speed: 1, events: false, evT: 75, dark: 0, chest: null }; }
 
@@ -264,6 +273,13 @@ function applyCmd0(s, c) {
       if (p.spcd > 0) return;
       p.spcd = SP_CD * (facOf(s).spcd || 1); p.spk = 0; special(s); S.ev.push([W / 2, 200, 'sp', s]); break;
     }
+    case 'sbon': if (s === 0 && S.surv) survPickBon(c.i); break;
+    case 'abil': {
+      const k = c.k | 0, A = ABIL[k];
+      if (!A || !p.abc || p.abc[k] > 0) return;
+      p.ab[k] = A.t; p.abc[k] = A.cd;
+      S.ev.push([BX[s] + (s ? -160 : 160), GY - 120, 'abil', s, k]); break;
+    }
     case 'rage': {
       if (!S.rage || p.rgcd > 0 || S.units.some(u => u.side === s && u.rage)) return;
       const dir = s ? -1 : 1, u = S.units.filter(u => u.side === s && u.ty <= 2 && !u.dead).sort((a, b) => (b.x - a.x) * dir)[0];
@@ -330,7 +346,7 @@ function spawn(s, q) {
   const d = uDef(q.a, q.ty, q.f), g = GB(S.pl[s]);
   const F = facOf(s), hp = Math.round(d.hp * (1 + UPS[1].k * S.pl[s].up[1]) * (F.hp || 1) * (q.ty === 2 ? F.heavy || 1 : 1) * (q.ty === 4 ? g.heroHp * ((g.gear && g.gear[q.a][0]) || 1) : g.hp));
   const mm = q.a === 0 && q.ty === 2 ? mountMod(s, q.m) : null;
-  const hp2 = mm && mm.hp ? Math.round(hp * mm.hp) : hp;
+  const hp2 = Math.round((mm && mm.hp ? hp * mm.hp : hp) * (S.pl[s].sb ? S.pl[s].sb.hp : 1));
   S.units.push({ id: S.nid++, side: s, a: q.a, ty: q.ty, f: q.f | 0, x: SPAWN[s], hp: hp2, mx: hp2,
     w: unitW(q.ty, s, q.a, q.m), m: q.m | 0, st: 0, at: 0, cd: 0.3 });
   if (S.st) { S.st.made[s]++; if (q.ty === 6) S.st.spec[s]++; }
@@ -359,6 +375,7 @@ function hurt(t, dmg, by, fromSpecial) {
   if (t.dead) return;
   if (t.ty === 6 && uDefU(t).ab === 'dodge' && Math.random() < 0.4) return;   // ninja uhne
   if (S.st && by >= 0) S.st.dmg[by][fromSpecial ? 's' : dmgSrc] += Math.min(dmg, Math.max(0, t.hp));
+  if (abOn(t.side, 1)) dmg *= 0.6;                     // schopnost Štíty!
   t.hp -= dmg;
   if (t.hp <= 0) {
     t.dead = 1;
@@ -388,11 +405,35 @@ function hitBase(s, dmg, by) {
 function splash(x, r, d, side, fromSpecial) {
   for (const u of S.units) if (u.side !== side && !u.dead && Math.abs(u.x - x) <= r + u.w / 2) hurt(u, d, side, fromSpecial);
 }
+// speciální útoky bossů – každý boss je použije zhruba každých 11–15 s, když má nepřátele na dosah
+const BOSS_SK = [
+  { ic: '🐯', n: 'Řev', d: 'Omráčí nepřátele kolem sebe na 1,6 s.' },
+  { ic: '🔥', n: 'Ohnivý dech', d: 'Spálí nepřátele před sebou a na 5 s vyřadí jejich věže.' },
+  { ic: '💥', n: 'Salva', d: 'Zasype pole před sebou pěti granáty.' },
+  { ic: '✈️', n: 'Nálet', d: 'Přivolá dělostřelectvo na přední linii nepřítele.' },
+  { ic: '🤖', n: 'Drony', d: 'Vypustí tři bojové drony.' },
+];
+function bossSkill(u) {
+  const s = u.side, dir = s ? -1 : 1, d = uDefU(u), dmg = d.d * atkMul(s) * (u.sm || 1);
+  const ahead = (R, back = 40) => S.units.filter(e => e.side !== s && !e.dead && (e.x - u.x) * dir > -back && (e.x - u.x) * dir < R);
+  dmgSrc = 'u'; dmgMem = null;
+  switch (u.a) {
+    case 0: { const L = ahead(230, 120); if (!L.length) return false; L.forEach(e => { if (e.ty !== 5) e.stun = 1.6; }); break; }
+    case 1: { const L = ahead(270); if (!L.length) return false; L.forEach(e => hurt(e, dmg * 1.2, s, true)); S.pl[1 - s].turOff = 5; S.ev.push([BX[1 - s], GY - 150, 'burn', 1 - s]); break; }
+    case 2: { if (!ahead(420).length) return false; for (let i = 0; i < 5; i++) { const x = u.x + dir * (110 + i * 65); splash(x, 50, dmg * 0.8, s, true); S.ev.push([x, GY - 10, 'boom']); } break; }
+    case 3: { const L = ahead(700).sort((a, b) => (a.x - b.x) * dir); if (!L.length) return false;
+      for (let i = 0; i < 3; i++) { const x = L[Math.min(L.length - 1, i * 2)].x + rnd(-20, 20); splash(x, 70, dmg * 1.4, s, true); S.ev.push([x, GY - 10, 'boom']); } break; }
+    case 4: { if (!ahead(600).length) return false;
+      for (let i = 0; i < 3; i++) { spawn(s, { a: 4, ty: 1, f: 0 }); const r = S.units[S.units.length - 1]; r.x = u.x - dir * (40 + i * 30); if (u.sm) { r.mx = r.hp = Math.round(r.hp * (u.mx / d.hp)); r.sm = u.sm; } } break; }
+  }
+  S.ev.push([u.x, GY - (d.y || 60) - 40, 'bsk', s, u.a]);
+  return true;
+}
 function slotPos(s, k) { return { x: BX[s] + (s ? -1 : 1) * 70, y: GY - 172 + k * 36 }; }
 
 function attack(u, d0, tgt, dir) {
   const F = facOf(u.side), WP = u.ty === 1 && F.g && WEAP[F.g], pp = (WP && WP.proj) || d0.p, P = S.pl[u.side], g = GB(P);
-  let k = (u.ty === 4 ? g.heroD * ((g.gear && g.gear[u.a][1]) || 1) : g.dmg) * (P.cryT > 0 ? 1.3 : 1) * (u.sm || 1);
+  let k = (u.ty === 4 ? g.heroD * ((g.gear && g.gear[u.a][1]) || 1) : g.dmg) * (P.cryT > 0 ? 1.3 : 1) * (u.sm || 1) * (P.ab && P.ab[0] > 0 ? 1.35 : 1) * (P.sb ? P.sb.dmg : 1);
   if (u.ty === 6) {                                    // schopnosti speciálních jednotek
     if (d0.ab === 'charge' && !u.hit) k *= d0.chg || 3;          // nájezd: první úder násobně silnější
     if (d0.ab === 'berserk') k *= 2 - u.hp / u.mx;
@@ -467,12 +508,17 @@ function step(dt) {
     if (p.pick > 0) p.pick = Math.max(0, p.pick - dt / (S.speed || 1));   // reálné sekundy i při 2×
     if (p.rgcd > 0) p.rgcd = Math.max(0, p.rgcd - dt);
     if (p.acd > 0) p.acd = Math.max(0, p.acd - dt);
+    if (p.ab) for (let k = 0; k < ABIL.length; k++) {
+      if (p.ab[k] > 0) p.ab[k] = Math.max(0, p.ab[k] - dt);
+      if (p.abc[k] > 0) p.abc[k] = Math.max(0, p.abc[k] - dt * (p.sb ? p.sb.ab : 1));
+    }
+    if (p.ab && p.ab[3] > 0) for (const u of S.units) if (u.side === s && !u.dead && u.hp < u.mx) u.hp = Math.min(u.mx, u.hp + u.mx * 0.04 * dt);
     if (GB(p).cry) {                                  // generálův pokřik: každých 45 s armáda útočí o 30 % silněji
       p.cryC = (p.cryC ?? 30) - dt; if (p.cryT > 0) p.cryT -= dt;
       if (p.cryC <= 0) { p.cryC = 45; p.cryT = 8; S.ev.push([BX[s], GY - 120, 'gcry', s]); }
     }
     if (p.q.length) {
-      const q = p.q[0], d = uDef(q.a, q.ty, q.f), bt = d.t * (facOf(s).build || 1) * GB(p).build;
+      const q = p.q[0], d = uDef(q.a, q.ty, q.f), bt = d.t * (facOf(s).build || 1) * GB(p).build * (p.sb ? p.sb.bld : 1);
       p.qt += dt;
       if (p.qt >= bt) {
         p.qt = bt;
@@ -510,7 +556,9 @@ function step(dt) {
       const u = F[i];
       if (u.dead) continue;
       if (fe && fe.dead) fe = E.find(e => !e.dead);
+      if (u.stun > 0) { u.stun -= dt; u.st = 1; continue; }        // omráčený (řev tygra)
       const d = uDefU(u);
+      if (u.ty === 5 && (u.bt = (u.bt ?? 7) - dt) <= 0) u.bt = bossSkill(u) ? rnd(11, 15) : 1;
       u.at = Math.max(0, u.at - dt * 3);
       u.cd = Math.max(0, u.cd - dt);
       const de = fe ? (fe.x - u.x) * dir - (u.w + fe.w) / 2 : 1e9;
@@ -527,9 +575,9 @@ function step(dt) {
         u.x -= Math.min(d.s * (facOf(s).spd || 1) * 1.25 * dt, back) * dir; u.st = 0; u.back = 1;
       } else if (tgt) {
         u.st = 2;
-        if (u.cd <= 0) { u.cd = d.cd * (u.rage ? 0.8 : 1); u.at = 1; attack(u, d, tgt, dir); }
+        if (u.cd <= 0) { u.cd = d.cd * (u.rage ? 0.8 : 1) * (abOn(s, 2) ? 0.77 : 1); u.at = 1; attack(u, d, tgt, dir); }
       } else {
-        let mv = d.s * (facOf(s).spd || 1) * (u.rage ? 1.2 : 1) * fieldSpd(u) * dt;
+        let mv = d.s * (facOf(s).spd || 1) * (u.rage ? 1.2 : 1) * (abOn(s, 2) ? 1.5 : 1) * fieldSpd(u) * dt;
         if (ord === 2) mv = 0;
         if (ord === 1) mv = Math.min(mv, (BX[s] + dir * HOLD - u.x) * dir);   // drž linii u věží
         for (let j = i - 1; j >= 0; j--) if (!F[j].dead) {
@@ -544,6 +592,7 @@ function step(dt) {
   // věže
   for (let s = 0; s < 2; s++) {
     const p = S.pl[s], fe = side[1 - s].find(e => !e.dead);
+    if (p.turOff > 0) { p.turOff = Math.max(0, p.turOff - dt); continue; }   // věže hoří (dračí dech)
     p.tur.forEach((t, k) => {
       const d = AGES[t.a].turrets[t.i];
       t.cd = Math.max(0, t.cd - dt);
@@ -551,7 +600,7 @@ function step(dt) {
         t.cd = d.cd;
         const o = slotPos(s, k);
         S.proj.push({ id: S.nid++, x: o.x, y: o.y, tid: fe.id, tx: fe.x, ty: GY - 22,
-          d: d.d * atkMul(s), side: s, p: d.p, sp: d.sp || 0, v: SPD[d.p], src: 't' });
+          d: d.d * atkMul(s) * (p.sb ? p.sb.tur : 1), side: s, p: d.p, sp: d.sp || 0, v: SPD[d.p], src: 't' });
         S.ev.push([o.x + (s ? -12 : 12), o.y, 'muz']);
       }
     });
@@ -624,6 +673,16 @@ function ai(dt) {
   const foes = S.units.filter(u => u.side === 0);
   const threats = foes.filter(u => u.x > W * 0.45).length;
   if (p.spcd <= 0 && threats >= D.spMin) return applyCmd(1, { a: 'special' });
+  // schopnosti armády: když se bojuje (nebo hoří u základny), použije tu, která se hodí
+  if (p.abc && Math.random() < 0.15 + D.smart * 0.5) {
+    const mine = S.units.filter(u => u.side === 1 && !u.dead), front = mine.length ? Math.min(...mine.map(u => u.x)) : W;
+    const engaged = foes.filter(u => u.x > front - 260).length;
+    if (mine.length >= 3 && engaged >= 3) {
+      const hurtA = mine.reduce((a, u) => a + u.hp / u.mx, 0) / mine.length < 0.55;
+      const want = [hurtA ? 3 : -1, threats >= 4 ? 1 : -1, 0, 2, 1].filter(k => k >= 0 && p.abc[k] <= 0 && !p.ab.some(v => v > 0));
+      if (want.length) return applyCmd(1, { a: 'abil', k: want[0] });
+    }
+  }
   if (D.smart > 0) {
     const mine = S.units.filter(u => u.side === 1).length, near = foes.filter(u => u.x > W * 0.55).length;
     const o = mine < foes.length * 0.6 && foes.length >= 3 ? (near > mine + 2 ? 2 : 1) : 0;
@@ -683,8 +742,8 @@ function snap(ev) {
     P: S.pl.map(p => [Math.floor(p.gold), Math.floor(p.xp), p.age, Math.ceil(p.hp), p.mhp, p.slots,
       p.tur.map(t => t.a * 3 + t.i), p.q.map(q => q.a * 8 + q.ty),
       p.q.length ? Math.round(p.qt / (uDef(p.q[0].a, p.q[0].ty, p.q[0].f).t * (facOf(S.pl.indexOf(p)).build || 1) * GB(p).build) * 100) / 100 : 0, Math.ceil(p.spcd),
-      p.kills, p.spBest, p.supers, p.built, p.up, Math.ceil(p.hcd), Math.ceil(p.acd), p.ord, p.af, p.emb, Math.ceil(p.pick), Math.ceil(p.rgcd || 0), p.cryT > 0 ? 1 : 0, p.w ? p.w.map(v => Math.floor(v)) : 0, p.afm || 0]),
-    Tm: Math.floor(S.time), D: S.diff, X: S.chal, K: S.camp, Dy: S.daily, Dk: Math.ceil(S.dark), Ch: S.chest ? Math.round(S.chest.x) : 0, Tx: S.trex ? [Math.round(S.trex.x), S.trex.dir] : 0, Rg: S.rage ? 1 : 0, Sp: S.speed, Wt: netWait ? 1 : 0, Sm: S.storm > 0 ? 1 : 0, Sv: S.surv ? [S.surv.wave, Math.ceil(S.surv.t)] : 0,
+      p.kills, p.spBest, p.supers, p.built, p.up, Math.ceil(p.hcd), Math.ceil(p.acd), p.ord, p.af, p.emb, Math.ceil(p.pick), Math.ceil(p.rgcd || 0), p.cryT > 0 ? 1 : 0, p.w ? p.w.map(v => Math.floor(v)) : 0, p.afm || 0, p.ab ? [...p.ab.map(v => Math.ceil(v)), ...p.abc.map(v => Math.ceil(v))] : 0]),
+    Tm: Math.floor(S.time), D: S.diff, X: S.chal, K: S.camp, Dy: S.daily, Dk: Math.ceil(S.dark), Ch: S.chest ? Math.round(S.chest.x) : 0, Tx: S.trex ? [Math.round(S.trex.x), S.trex.dir] : 0, Rg: S.rage ? 1 : 0, Sp: S.speed, Wt: netWait ? 1 : 0, Sm: S.storm > 0 ? 1 : 0, Sv: S.surv ? [S.surv.wave, Math.ceil(S.surv.t), S.surv.pick ? [...S.surv.pick, Math.ceil(S.surv.pt)] : 0, S.surv.got] : 0,
     U: S.units.map(u => [u.id, u.side, u.a, u.ty, Math.round(u.x * 10) / 10, Math.ceil(u.hp), u.mx, u.st,
       Math.round(u.at * 100) / 100, u.back ? 1 : 0, u.rage ? 1 : 0, u.m | 0]),
     R: S.proj.map(p => [p.id, Math.round(p.x), Math.round(p.y), p.p, Math.round(p.dx || 0), Math.round(p.dy || 0)]),
@@ -696,8 +755,8 @@ function decode(sn) {
     // v týmu vidí každý své zlato a svůj národ (a[23] peněženky, a[24] národy hráčů týmu)
     pl: sn.P.map((a, i) => ({ gold: i === mySide && a[23] ? a[23][MYMEM] ?? a[0] : a[0], xp: a[1], age: a[2], hp: a[3], mhp: a[4], slots: a[5],
       tur: a[6].map(v => ({ a: (v / 3) | 0, i: v % 3 })), q: a[7].map(v => ({ a: v >> 3, ty: v & 7 })),
-      qf: a[8], spcd: a[9], kills: a[10] || 0, spBest: a[11] || 0, supers: a[12] || 0, built: a[13] || 0, up: a[14] || [0, 0, 0], hcd: a[15] || 0, acd: a[16] || 0, ord: a[17] || 0, af: i === mySide && a[24] ? a[24][MYMEM] || a[18] : Array.isArray(a[18]) ? a[18] : [0, 0, 0, 0, 0], emb: a[19] || 0, pick: a[20] || 0, rgcd: a[21] || 0, cry: a[22] || 0, afm: a[24] || null, w: a[23] || null })),
-    time: sn.Tm || 0, diff: sn.D, chal: sn.X, camp: sn.K, daily: sn.Dy, dark: sn.Dk || 0, chest: sn.Ch || 0, trex: sn.Tx || 0, rage: !!sn.Rg, speed: sn.Sp || 1, wait: !!sn.Wt, storm: !!sn.Sm, surv: sn.Sv ? sn.Sv[0] : 0, survT: sn.Sv ? sn.Sv[1] : 0,
+      qf: a[8], spcd: a[9], kills: a[10] || 0, spBest: a[11] || 0, supers: a[12] || 0, built: a[13] || 0, up: a[14] || [0, 0, 0], hcd: a[15] || 0, acd: a[16] || 0, ord: a[17] || 0, af: i === mySide && a[24] ? a[24][MYMEM] || a[18] : Array.isArray(a[18]) ? a[18] : [0, 0, 0, 0, 0], emb: a[19] || 0, pick: a[20] || 0, rgcd: a[21] || 0, cry: a[22] || 0, afm: a[24] || null, w: a[23] || null, ab: a[25] ? a[25].slice(0, 4) : [0, 0, 0, 0], abc: a[25] ? a[25].slice(4) : [0, 0, 0, 0] })),
+    time: sn.Tm || 0, diff: sn.D, chal: sn.X, camp: sn.K, daily: sn.Dy, dark: sn.Dk || 0, chest: sn.Ch || 0, trex: sn.Tx || 0, rage: !!sn.Rg, speed: sn.Sp || 1, wait: !!sn.Wt, storm: !!sn.Sm, surv: sn.Sv ? sn.Sv[0] : 0, survT: sn.Sv ? sn.Sv[1] : 0, survPick: sn.Sv && sn.Sv[2] ? sn.Sv[2] : null, survGot: sn.Sv ? sn.Sv[3] || [] : [],
     units: sn.U.map(a => ({ id: a[0], side: a[1], a: a[2], ty: a[3], x: a[4], hp: a[5], mx: a[6], st: a[7], at: a[8], back: a[9], rg: a[10], m: a[11] | 0 })),
     proj: sn.R.map(a => ({ id: a[0], x: a[1], y: a[2], p: a[3], dx: a[4], dy: a[5] })),
     over: sn.O,

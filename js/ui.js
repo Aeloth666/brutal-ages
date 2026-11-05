@@ -35,6 +35,8 @@ const ACH = [
   { id: 'campAll', n: 'Pán světa',         d: 'Dokonči první kapitolu kampaně.',             w: () => chapDone(0) },
   { id: 'camp45',  n: 'Perfekcionista',    d: 'Získej všech 45 hvězd v první kapitole.', w: () => chapStars(0) >= 45 },
   { id: 'camp2',   n: 'Pán času',          d: 'Dokonči druhou kapitolu kampaně.',            w: () => chapDone(1) },
+  { id: 'hero1',   n: 'Hrdina kampaně',    d: 'Vyhraj první misi na hrdinskou obtížnost.',   w: () => Object.keys(CAMPH).length >= 1 },
+  { id: 'heroAll', n: 'Legenda',           d: 'Vyhraj všechny mise kampaně na hrdinskou obtížnost.', w: () => Object.keys(CAMPH).length >= CAMP.length },
   { id: 'camp75',  n: 'Mistr času',        d: 'Získej v kampani všech 75 hvězd.',            w: () => chapStars(0) + chapStars(1) >= 75 },
   { id: 'rematch', n: 'Ještě jednou!',     d: 'Vyhraj odvetu proti kámošovi.',               w: () => role !== 'solo' && !coop && rematchN > 0 },
   // ---- bossové ----
@@ -217,7 +219,7 @@ function overlays(dt) {
     baseVib(V, dt);
     drawChat(dt);
     drawWait();
-    if (!paused && V.pl) drawFacPick(V.pl[mySide]);
+    if (!paused && V.pl) { drawFacPick(V.pl[mySide]); drawSbonPick(); }
     drawTut();
     if (paused) drawPause();
   }

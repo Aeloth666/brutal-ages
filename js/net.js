@@ -317,11 +317,13 @@ function startGame(r, chal = null, camp = null, daily = false) {
   if (r !== 'guest') { S = newState(); acc = 0; aiWant = null; aiT = 1; aiEvoT = 0; aiBroke = 0; }
   if (r === 'guest' && camp != null) { curCamp = camp; if (SET.weather !== 'real') wxForce(CAMP[camp].wx); }
   curDef = r === 'solo' && camp != null && defNext === camp ? camp : null; defNext = null;   // obrana dobytého území
+  curHero = r === 'solo' && camp != null && curDef == null && heroNext === camp ? camp : null; heroNext = null;   // hrdinská obtížnost
+  heroM = curHero != null ? heroMission(camp) : null;
   curSurv = r === 'solo' && survNext && chal == null && camp == null; survNext = false;
   lastBst = null;
   if (r === 'solo' || (r === 'host' && coop)) {
     curChal = chal; curCamp = camp; curDaily = daily;
-    const ch = chal != null ? CHAL[chal] : camp != null ? (curDef != null ? defMission(camp) : CAMP[camp]) : daily ? DAILY : curSurv ? SURV : null, di = ch ? ch.diff : SET.diff, D = DIFF[di];
+    const ch = chal != null ? CHAL[chal] : camp != null ? (curDef != null ? defMission(camp) : heroM || CAMP[camp]) : daily ? DAILY : curSurv ? SURV : null, di = ch ? ch.diff : SET.diff, D = DIFF[di];
     S.diff = di; Object.assign(S.pl[1], { gm: D.gm, xm: D.xm, gold: D.gold });
     if (ch) {
       const M = S.mods = ch.mods, me = S.pl[0], e = S.pl[1];

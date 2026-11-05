@@ -262,7 +262,15 @@ const CAMP_CH = [{ n: 'I. Dějiny světa', a: 0, b: 15 }, { n: 'II. Návrat hord
 const chapOf = i => (CAMP_CH.findIndex(c => i >= c.a && i < c.b) + 1 || 1) - 1;
 const chapDone = c => { const C = CAMP_CH[c]; for (let i = C.a; i < C.b; i++) if (!CAMPS[i]) return false; return true; };
 const chapStars = c => { const C = CAMP_CH[c]; let n = 0; for (let i = C.a; i < C.b; i++) n += CAMPS[i] || 0; return n; };
-const modsOf = V => (V.chal != null ? CHAL[V.chal].mods : V.camp != null ? CAMP[V.camp].mods : V.daily ? DAILY.mods : null) || {};
+// hrdinská obtížnost: mise po dobytí jde zahrát ještě jednou, těžší – za výhru 👑 koruna
+const CAMPH = load('aow-camph', {});
+let curHero = null, heroNext = null, heroM = null;
+const heroMission = i => { const m = CAMP[i], md = { ...m.mods }, a = md.age || 0;
+  md.eHp = Math.round((md.eHp || 1) * 1.35 * 100) / 100; md.eGold = (md.eGold || 0) + Math.round(AGE_GOLD[a] * 0.5);
+  if (md.survive) md.survive = Math.round(md.survive * 1.2 / 30) * 30;
+  if (md.limit) md.limit = Math.round(md.limit * 0.9 / 30) * 30;
+  return { ...m, diff: Math.min(4, m.diff + 1), mods: md, par: m.par && Math.round(m.par * 1.1) }; };
+const modsOf = V => (V.chal != null ? CHAL[V.chal].mods : V.camp != null ? (curHero === V.camp && heroM ? heroM.mods : CAMP[V.camp].mods) : V.daily ? DAILY.mods : null) || {};
 
 // hvězdy: 1 za vítězství, 2 za základnu nad polovinou, 3 za rychlost (u obrany za téměř nedotčenou základnu)
 function starRules(m) {
@@ -272,6 +280,10 @@ function campResult(won, V) {
   if (!won) { lastStars = 0; return; }
   const m = CAMP[V.camp], me = V.pl[mySide], hp = me.hp / me.mhp;
   lastStars = 1 + (hp >= 0.5 ? 1 : 0) + ((m.mods.survive ? hp >= 0.85 : V.time <= m.par) ? 1 : 0);
+  if (curHero === V.camp) {
+    const nw = !CAMPH[V.camp]; CAMPH[V.camp] = 1; store('aow-camph', CAMPH);
+    if (nw) toasts.push({ a: { n: m.n }, h: '👑 HRDINSKÁ VÝHRA', l: 4 });
+  }
   const first = !CAMPS[V.camp];
   if (lastStars > (CAMPS[V.camp] || 0)) { CAMPS[V.camp] = lastStars; store('aow-camp', CAMPS); }
   if (first) toasts.push({ a: { n: m.n + ' ' + '★'.repeat(lastStars) }, h: 'ÚZEMÍ DOBYTO', l: 4 });
@@ -308,6 +320,7 @@ function renderCampMap() {
       ${WORLD.att === i ? `<text x="${x + 30}" y="${y - 26}" class="att">⚔</text>` : ''}
       <text x="${x}" y="${y + 36}" class="st">${st ? '★'.repeat(st) + '☆'.repeat(3 - st) : open ? (i + 1) : ''}</text>
       ${st ? `<path d="M${x + 16} ${y - 42} v-18 l14 5 l-14 5" fill="${me[2]}" stroke="#111" stroke-width="1.5"/>` : ''}
+      ${CAMPH[i] ? `<text x="${x - 26}" y="${y - 30}" class="crown">👑</text>` : ''}
     </g>`;
   });
   const tabs = CAMP_CH.map((c, k) => `<button data-c="${k}" class="${k === campChap ? 'on' : ''}">${campOpen(c.a) ? '' : '🔒 '}${c.n} <small>${chapStars(k)}/${(c.b - c.a) * 3} ★</small></button>`).join('');
@@ -331,7 +344,8 @@ function renderCamp() {
   renderCampMap();
   const m = CAMP[campSel], st = CAMPS[campSel] || 0, rules = starRules(m);
   const total = Object.values(CAMPS).reduce((a, b) => a + b, 0);
-  $('campCount').textContent = `${Object.keys(CAMPS).length} / ${CAMP.length} území · ${total} ★`;
+  const crowns = Object.keys(CAMPH).length;
+  $('campCount').textContent = `${Object.keys(CAMPS).length} / ${CAMP.length} území · ${total} ★${crowns ? ` · ${crowns} 👑` : ''}`;
   const goal = m.mods.survive ? `Vydrž ${fmtTime(m.mods.survive)}` : m.mods.limit ? `Znič základnu do ${fmtTime(m.mods.limit)}` : 'Znič nepřátelskou základnu';
   const extra = [m.mods.eHp && 'nepřítel má silnější základnu', WORLD.att === campSel && '⚔ ÚZEMÍ JE POD ÚTOKEM', m.mods.eGold && 'nepřítel má víc zlata', m.mods.noTower && 'nesmíš stavět věže', m.mods.boss != null && '👹 boss: ' + BOSSES[m.mods.boss].n].filter(Boolean);
   const done = m.end && st;
@@ -340,8 +354,10 @@ function renderCamp() {
     <p class="cb-story">${done ? m.end : m.t}</p>
     <div class="cb-meta"><b>Cíl:</b> ${goal}${extra.length ? ' · ' + extra.join(', ') : ''}<br><b>Soupeř:</b> ${DIFF[m.diff].n} · <b>Počasí:</b> ${m.wx === 'night' ? 'Noc' : WX_KINDS[m.wx]}</div>
     <div class="cb-meta"><b>Bonus území:</b> ${TERR[campSel].t}${!st ? ' (po dobytí)' : WORLD.att === campSel ? ' – neplatí, dokud území neubráníš' : ' ✔'}</div>
+    ${st ? `<div class="cb-meta"><b>🔥 Hrdinská:</b> soupeř o stupeň těžší, hradby o 35 % silnější a víc zlata${CAMPH[campSel] ? ' – 👑 splněno' : ' – za výhru 👑'}</div>` : ''}
     <ul class="cb-stars">${rules.map((r, k) => `<li class="${st > k ? 'got' : ''}">${st > k ? '★' : '☆'} ${r}</li>`).join('')}</ul>
-    <div class="cb-btns">${WORLD.att === campSel ? '<button id="bCampDef" class="def">🛡 Bránit území</button>' : ''}<button id="bCampGo">${st ? 'Hrát znovu' : 'Do boje!'}</button><button id="bCampCoop">🤝 S kámošem</button></div>`;
+    <div class="cb-btns">${WORLD.att === campSel ? '<button id="bCampDef" class="def">🛡 Bránit území</button>' : ''}<button id="bCampGo">${st ? 'Hrát znovu' : 'Do boje!'}</button>${st ? `<button id="bCampHero" class="hero">${CAMPH[campSel] ? '👑' : '🔥'} Hrdinská</button>` : ''}<button id="bCampCoop">🤝 S kámošem</button></div>`;
+  if ($('bCampHero')) $('bCampHero').onclick = () => { $('campPanel').classList.add('hidden'); cleanupNet(); heroNext = campSel; startGame('solo', null, campSel); };
   $('bCampGo').onclick = () => { $('campPanel').classList.add('hidden'); cleanupNet(); startGame('solo', null, campSel); };
   if ($('bCampDef')) $('bCampDef').onclick = () => { $('campPanel').classList.add('hidden'); cleanupNet(); defNext = campSel; startGame('solo', null, campSel); };
   $('bCampCoop').onclick = () => { $('campPanel').classList.add('hidden'); hostGame({ coop: true, camp: campSel }); };

@@ -86,6 +86,16 @@ const EN = {
   'Umělá inteligence republiky staví stroje rychleji': "The republic's AI builds machines faster", 'než je stíháš ničit. Znič továrnu do': 'than you can destroy them. Destroy the factory within', 'jinak bude pozdě.': "or it'll be too late.",
   'Vše se rozhodne teď. Horda': 'Everything is decided now. Horde', 'vévodství': 'duchy', 'říše': 'empire', 'republika i stroje': 'republic and machines', 'celá jejich historie proti té tvé. Vyhraj a svět bude tvůj.': 'their whole history against yours. Win and the world is yours.',
   'Rudá horda je minulostí. Tvůj kmen prošel celou historií': 'The Red Horde is history. Your tribe went through all of history', 'od jeskyně až ke hvězdám. Svět patří tobě': 'from the cave to the stars. The world is yours',
+  // schopnosti armády, bonusy přežití, útoky bossů, hrdinská obtížnost
+  'Do útoku': 'Charge', 'Celá armáda útočí o': 'The whole army attacks', 'Štíty': 'Shields', 'Celá armáda dostává o': 'The whole army takes', 'menší zranění': 'less damage',
+  'Vpřed': 'Forward', 'Armáda běží o': 'The army runs', 'rychleji a útočí o': 'faster and attacks', 'Lazaret': 'Field hospital', 'Armáda si každou sekundu doplní': 'Every second the army restores',
+  'Kořist': 'Loot', 'Ostré zbraně': 'Sharp weapons', 'Jednotky útočí o': 'Units attack', 'Výcvik': 'Training', 'Opevnění': 'Fortification', 'Věže útočí o': 'Towers attack',
+  'Nabití': 'Recharge', 'Schopnosti armády se nabíjí o': 'Army abilities recharge', 'Nové hradby': 'New walls', 'Základna má o': 'The base gets', 'víc zdraví a opraví se': 'more health and is repaired',
+  'Poklad': 'Treasure', 'Hned dostaneš zlato podle věku': 'Get gold right away based on your age', 'Vyber si bonus': 'Choose a bonus',
+  'Řev': 'Roar', 'Omráčí nepřátele kolem sebe na': 'Stuns nearby enemies for', 'Ohnivý dech': 'Fire breath', 'Spálí nepřátele před sebou a na': 'Burns the enemies in front of it and for', 's vyřadí jejich věže': 's disables their towers',
+  'Salva': 'Volley', 'Zasype pole před sebou pěti granáty': 'Showers the field ahead with five shells', 'Přivolá dělostřelectvo na přední linii nepřítele': "Calls artillery on the enemy's front line", 'Drony': 'Drones', 'Vypustí tři bojové drony': 'Launches three combat drones',
+  'Hrdinská': 'Heroic', 'soupeř o stupeň těžší': 'opponent one level harder', 'silnější a víc zlata': 'stronger and more gold', 'za výhru': 'for a win', 'HRDINSKÁ VÝHRA': 'HEROIC VICTORY',
+  'Hrdina kampaně': 'Campaign hero', 'Vyhraj první misi na hrdinskou obtížnost.': 'Win your first mission on heroic difficulty.', 'Vyhraj všechny mise kampaně na hrdinskou obtížnost.': 'Win every campaign mission on heroic difficulty.', 'splněno': 'done',
   // kampaň – 2. kapitola
   'Trhlina v čase': 'Rift in time', 'Myslel sis': 'Did you think', 'že je konec': 'it was over', 'Šaman Rudé hordy otevřel trhlinu v čase a jeho válečníci se vrací na úsvit dějin': "The Red Horde's shaman opened a rift in time and his warriors are returning to the dawn of history",
   'silnější a zuřivější než kdy dřív': 'stronger and fiercer than ever', 'Zavři trhlinu': 'Close the rift', 'dokud je malá': "while it's still small",

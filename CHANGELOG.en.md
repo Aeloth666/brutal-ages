@@ -4,6 +4,15 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.21 – 5. 11. 2026
+
+- Army abilities: 4 buttons set into the ground (A S D F) – ⚔️ Charge!, 🛡️ Shields!, 💨 Forward! and ❤️ Field hospital. They boost your whole army for a few seconds, then recharge for about a minute. The computer uses them too.
+- Heroic difficulty: every conquered campaign mission can be replayed harder – a win gives you a 👑 crown. New achievements Campaign hero and Legend.
+- Endless survival: after every boss you pick one of three bonuses (gold, attack, health, towers, walls…).
+- Bosses have special attacks: the tiger roars and stuns, the dragon burns towers, the armoured car fires volleys, the tank calls an airstrike and the Titan launches drones.
+- Game speed against the computer now cycles 1× / 2× / 3×.
+- New balance testing tool (tools/balance.js) – bots play through the campaign and survival.
+
 ## Version 2.20 – 5. 11. 2026
 
 - Endless survival is harder: from wave 21 enemies get stronger faster each wave (more health, stronger attacks, super soldiers) and waves are released faster.

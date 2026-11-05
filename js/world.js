@@ -854,6 +854,25 @@ function addFx(e) {
       fx.push({ ring: 1, x, y, l: 0.9, ml: 0.9, r: 160, col: '#4ade80' }); fx.push({ txt: '🛡 POSLEDNÍ BAŠTA!', x, y: y - 40, vy: -25, l: 2.2, ml: 2.2 }); sfx('evo'); break;
     case 'gcry': if (e[3] === mySide) { achId('gcry'); fx.push({ txt: '📯 VÁLEČNÝ POKŘIK!', x, y: y - 20, vy: -25, l: 2, ml: 2 }); const p = V.pl[e[3]]; cry(p.age * 4 + ((p.af && p.af[p.age]) | 0), x, e[3], true); } break;
     case 'lava': achId('lava'); fx.push({ fire: 1, x, y, r: 55, l: 0.7, ml: 0.7 }); part(24, '#ff6a14', 260, 3, 0.9, -200); smoke(6, 14, 1.2); shake = Math.max(shake, 0.6); sfx('boom', x); break;
+    case 'bsk': {
+      const K = BOSS_SK[e[4]]; if (!K) break;
+      fx.push({ txt: K.ic + ' ' + K.n.toUpperCase() + '!', x, y, vy: -22, l: 1.8, ml: 1.8 });
+      if (e[4] === 0) { fx.push({ ring: 1, x, y: GY - 40, l: 0.7, ml: 0.7, r: 230, col: '#fbbf24' }); sfx('tiger', x); shake = Math.max(shake, 0.5); }
+      else if (e[4] === 1) { sfx('dragon', x); for (let i = 0; i < 6; i++) fx.push({ fire: 1, x: x + (e[3] ? -1 : 1) * (40 + i * 40), y: GY - 40 - i * 4, r: 40, l: 0.8, ml: 0.8 }); }
+      else if (e[4] === 4) { sfx('zap', x); fx.push({ ring: 1, x, y: GY - 60, l: 0.6, ml: 0.6, r: 90, col: '#38bdf8' }); }
+      else sfx('evt', x);
+      break;
+    }
+    case 'burn': for (let i = 0; i < 5; i++) fx.push({ fire: 1, x: x + rnd(-30, 30), y: y + i * 30, r: 30, l: 2.5, ml: 2.5 }); break;
+    case 'sbon': { const B = SBON[e[4]]; if (B) { fx.push({ txt: B.ic + ' ' + B.n.toUpperCase(), x, y, vy: -25, l: 2, ml: 2 }); sfx('up', x); } break; }
+    case 'abil': {
+      const A = ABIL[e[4]]; if (!A) break;
+      fx.push({ ring: 1, x, y: GY - 40, l: 0.8, ml: 0.8, r: 200, col: `rgb(${A.col})` });
+      fx.push({ txt: A.ic + ' ' + A.n.toUpperCase(), x, y: y - 20, vy: -25, l: 1.8, ml: 1.8 });
+      sfx(e[4] === 3 ? 'up' : 'evt', x);
+      if (e[3] === mySide) { vib(40); if (V) { const p = V.pl[e[3]]; cry(p.age * 4 + ((p.af && p.af[p.age]) | 0), x, e[3], true); } }
+      break;
+    }
     case 'rage':
       if (V) { const p = V.pl[e[3]]; cry(p.age * 4 + ((p.af && p.af[p.age]) | 0), x, e[3], true); }
       fx.push({ ring: 1, x, y, l: 0.6, ml: 0.6, r: 80, col: '#ef4444' }); fx.push({ txt: '😡 VZTEK!', x, y: y - 30, vy: -30, l: 1.4, ml: 1.4 }); shake = 0.6; vib([60, 40, 120]); break;

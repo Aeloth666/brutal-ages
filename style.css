@@ -330,3 +330,5 @@ table.cmp td.win { color: #4ade80; font-weight: 800; } table.cmp { margin-top: 8
 .camp-tabs button.on { border-color: #fbbf24; color: #fde68a; background: #3b2a10; }
 .camp-tabs small { opacity: .8; font-weight: 600; margin-left: 4px; }
 #campMap text.lockmsg { font-size: 26px; }
+#campMap text.crown { font-size: 24px; text-anchor: middle; pointer-events: none; }
+.cb-btns button.hero { background: linear-gradient(#b45309, #7c2d12); }
