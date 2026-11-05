@@ -228,12 +228,40 @@ const CAMP = [
   { n: 'Poslední bitva', ic: '👑', diff: 3, wx: 'storm', par: 1080, mods: { age: 4, boss: 4 },
     t: 'Vše se rozhodne teď. Horda, vévodství, říše, republika i stroje – celá jejich historie proti té tvé. Vyhraj a svět bude tvůj.',
     end: 'Rudá horda je minulostí. Tvůj kmen prošel celou historií – od jeskyně až ke hvězdám. Svět patří tobě! 🏆' },
+  // ---- 2. kapitola: Návrat hordy – každá mise těžší než ta předchozí ----
+  { n: 'Trhlina v čase', ic: '⏳', diff: 3, wx: 'fog', par: 780, mods: { eHp: 1.4, eGold: 150 },
+    t: 'Myslel sis, že je konec? Šaman Rudé hordy otevřel trhlinu v čase a jeho válečníci se vrací na úsvit dějin – silnější a zuřivější než kdy dřív. Zavři trhlinu, dokud je malá!' },
+  { n: 'Zamrzlé jezero', ic: '🧊', diff: 3, wx: 'snow', mods: { survive: 480, boss: 0, gm: 0.8 },
+    t: 'Horda tě zatlačila na zamrzlé jezero. Led praská, kořisti je málo a z vánice se vynořuje šavlozubý tygr. Vydrž 8 minut, než přijdou posily.' },
+  { n: 'Templářská pevnost', ic: '🛡️', diff: 3, wx: 'rain', par: 1020, mods: { age: 1, eHp: 2.6, eGold: 2500, gm: 0.9 },
+    t: 'Rudí rytíři obsadili pevnost s hradbami dvaapůlkrát silnějšími než tvoje a plnými sklepy. Obléhání bude dlouhé a krvavé.' },
+  { n: 'Morová vesnice', ic: '☠️', diff: 3, wx: 'fog', par: 960, mods: { age: 1, gm: 0.75, limit: 1260, boss: 1 },
+    t: 'V kraji řádí mor. Padlým nepřátelům není co vzít, takže za zabití dostaneš méně zlata – a nad údolím už krouží drak. Musíš to skončit do 21 minut.' },
+  { n: 'Pirátská zátoka', ic: '🏴‍☠️', diff: 3, wx: 'storm', par: 960, mods: { age: 2, noTower: 1, eGold: 12000, gm: 0.85, boss: 2 },
+    t: 'Rudí piráti ukrývají v zátoce poklad celé říše. V bouři na útesech věže nepostavíš – zvládne to jen tvá armáda.' },
+  { n: 'Obležené město', ic: '🏚️', diff: 4, wx: 'snow', mods: { age: 3, survive: 660, eGold: 25000, gm: 0.8, boss: 3 },
+    t: 'Město je obklíčené, zima krutá a nepřítel má zásob na rok. Udrž ho 11 minut, než dorazí pomoc.' },
+  { n: 'Železná opona', ic: '🚂', diff: 3, wx: 'night', par: 1020, mods: { age: 3, eHp: 2.2, noEvo: 1, limit: 1380 },
+    t: 'Horda spustila železnou oponu – technologie se tu dál nevyvíjí, ani u tebe, ani u nich. Jejich opevnění musíš prorazit do 23 minut jen se současnou technikou.' },
+  { n: 'Měsíční základna', ic: '🌑', diff: 3, wx: 'night', par: 1080, mods: { age: 4, eHp: 2.6, gm: 0.75, boss: 4 },
+    t: 'Na Měsíci horda staví nový stroj času. Kořisti je málo, hradby silné a stráží je Titán.' },
+  { n: 'Vzpoura strojů', ic: '⚙️', diff: 4, wx: 'storm', mods: { age: 4, survive: 900, eGold: 100000, gm: 0.7, boss: 4 },
+    t: 'Všechny stroje světa se obrátily proti tobě. Šílená umělá inteligence hordy útočí ze všech sil a kořisti je málo. Vydrž 15 minut.' },
+  { n: 'Konec času', ic: '♾️', diff: 4, wx: 'storm', par: 1320, mods: { age: 4, eHp: 2.6, eGold: 90000, gm: 0.85, boss: 4 },
+    t: 'Šaman hordy sedí ve stroji času na samém konci dějin. Má nekonečné armády, plnou pokladnici a hradby jako hora. Tohle je opravdu poslední bitva.',
+    end: 'Stroj času je rozbitý a trhlina zavřená. Rudá horda už se nikdy nevrátí – ani do minulosti, ani do budoucnosti. Jsi skutečný pán času! ⏳🏆' },
 ];
-['meadow', 'winter', 'volcano', 'meadow', 'meadow', 'meadow', 'desert', 'desert', 'meadow', 'meadow', 'meadow', 'winter', 'desert', 'volcano', 'volcano']
+['meadow', 'winter', 'volcano', 'meadow', 'meadow', 'meadow', 'desert', 'desert', 'meadow', 'meadow', 'meadow', 'winter', 'desert', 'volcano', 'volcano',
+ 'volcano', 'winter', 'meadow', 'meadow', 'desert', 'winter', 'meadow', 'desert', 'volcano', 'volcano']
   .forEach((f, i) => { CAMP[i].field = f; });
 const CAMPS = load('aow-camp', {});               // index mise → počet hvězd
-let lastStars = 0, campSel = 0;
+let lastStars = 0, campSel = 0, campChap = 0;
 const campOpen = i => i === 0 || !!CAMPS[i - 1];
+// kapitoly kampaně (a = první mise, b = za poslední); 2. kapitola se odemkne dobytím posledního území 1. kapitoly
+const CAMP_CH = [{ n: 'I. Dějiny světa', a: 0, b: 15 }, { n: 'II. Návrat hordy', a: 15, b: 25 }];
+const chapOf = i => (CAMP_CH.findIndex(c => i >= c.a && i < c.b) + 1 || 1) - 1;
+const chapDone = c => { const C = CAMP_CH[c]; for (let i = C.a; i < C.b; i++) if (!CAMPS[i]) return false; return true; };
+const chapStars = c => { const C = CAMP_CH[c]; let n = 0; for (let i = C.a; i < C.b; i++) n += CAMPS[i] || 0; return n; };
 const modsOf = V => (V.chal != null ? CHAL[V.chal].mods : V.camp != null ? CAMP[V.camp].mods : V.daily ? DAILY.mods : null) || {};
 
 // hvězdy: 1 za vítězství, 2 za základnu nad polovinou, 3 za rychlost (u obrany za téměř nedotčenou základnu)
@@ -250,25 +278,28 @@ function campResult(won, V) {
 }
 
 // --- mapa ---
-const campPos = i => [70 + i * 61, i % 2 ? 150 : 290];
+const campPos = i => { const C = CAMP_CH[chapOf(i)], j = i - C.a; return [70 + j * 860 / (C.b - C.a - 1), j % 2 ? 150 : 290]; };
 function hexPts(x, y, r) {
   return Array.from({ length: 6 }, (_, k) => { const a = Math.PI / 3 * k - Math.PI / 2; return `${(x + r * Math.cos(a)).toFixed(1)},${(y + r * Math.sin(a)).toFixed(1)}`; }).join(' ');
 }
 function renderCampMap() {
   const me = COLS[SET.col || 0].c;
+  const C = CAMP_CH[campChap], inCh = (_, i) => i >= C.a && i < C.b, ch2 = campChap > 0, lockCh = !campOpen(C.a);
   let land = '', beach = '', cells = '', path = '';
   CAMP.forEach((m, i) => {
+    if (!inCh(m, i)) return;
     const [x, y] = campPos(i);
     beach += `<circle cx="${x}" cy="${y}" r="92"/>`;
     land += `<circle cx="${x}" cy="${y}" r="80"/>`;
-    path += (i ? ' L' : 'M') + x + ' ' + y;
+    path += (i > C.a ? ' L' : 'M') + x + ' ' + y;
   });
-  // podklad věků
+  // podklad věků: popisek nad středem misí daného věku
   const ages = AGES.map((a, k) => {
-    const [x] = campPos(k * 3 + 1);
-    return `<text x="${x}" y="34" class="age">${a.name.toUpperCase()}</text>`;
+    const xs = CAMP.map((m, i) => inCh(m, i) && (m.mods.age || 0) === k ? campPos(i)[0] : null).filter(v => v != null);
+    return xs.length ? `<text x="${(xs[0] + xs[xs.length - 1]) / 2}" y="34" class="age">${a.name.toUpperCase()}</text>` : '';
   }).join('');
   CAMP.forEach((m, i) => {
+    if (!inCh(m, i)) return;
     const [x, y] = campPos(i), st = CAMPS[i] || 0, open = campOpen(i);
     const fill = st ? me[0] : open ? '#a16207' : '#3b4556', stroke = i === campSel ? '#fde68a' : st ? me[1] : open ? '#fbbf24' : '#1e293b';
     cells += `<g class="cell ${open ? 'open' : 'locked'} ${i === campSel ? 'sel' : ''} ${open && !st ? 'next' : ''}" data-i="${i}">
@@ -279,22 +310,31 @@ function renderCampMap() {
       ${st ? `<path d="M${x + 16} ${y - 42} v-18 l14 5 l-14 5" fill="${me[2]}" stroke="#111" stroke-width="1.5"/>` : ''}
     </g>`;
   });
-  $('campMap').innerHTML = `<svg viewBox="0 0 1000 420" preserveAspectRatio="xMidYMid meet">
-    <defs><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e3a5f"/><stop offset="1" stop-color="#0f2140"/></linearGradient></defs>
+  const tabs = CAMP_CH.map((c, k) => `<button data-c="${k}" class="${k === campChap ? 'on' : ''}">${campOpen(c.a) ? '' : '🔒 '}${c.n} <small>${chapStars(k)}/${(c.b - c.a) * 3} ★</small></button>`).join('');
+  $('campMap').innerHTML = `<div class="camp-tabs">${tabs}</div><svg viewBox="0 0 1000 420" preserveAspectRatio="xMidYMid meet">
+    <defs><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${ch2 ? '#3b1d5c' : '#1e3a5f'}"/><stop offset="1" stop-color="${ch2 ? '#170a2b' : '#0f2140'}"/></linearGradient></defs>
     <rect width="1000" height="420" fill="url(#sea)"/>
-    <g fill="#c9b27a">${beach}</g><g fill="#5f8f3e">${land}</g>
+    <g fill="${ch2 ? '#a8865a' : '#c9b27a'}">${beach}</g><g fill="${ch2 ? '#5b4a3a' : '#5f8f3e'}">${land}</g>
     <path d="${path}" fill="none" stroke="#f5e6c4" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round" opacity=".7"/>
-    ${ages}${cells}</svg>`;
+    ${ages}${cells}
+    ${lockCh ? `<rect x="200" y="188" width="600" height="52" rx="14" fill="#0b0614" opacity=".85"/><text x="500" y="223" class="age lockmsg">🔒 Odemkne se po dobytí území ${CAMP_CH[campChap - 1].b}</text>` : ''}</svg>`;
   $('campMap').querySelectorAll('.cell.open').forEach(g => g.onclick = () => { campSel = +g.dataset.i; sfx('click'); renderCamp(); });
+  $('campMap').querySelectorAll('.camp-tabs button').forEach(b => b.onclick = () => {
+    campChap = +b.dataset.c; sfx('click');
+    const c = CAMP_CH[campChap]; let i = c.a; while (i < c.b - 1 && CAMPS[i]) i++;
+    if (campOpen(i)) campSel = i;
+    renderCamp();
+  });
 }
 function renderCamp() {
+  if (!campOpen(campSel)) campSel = 0;
   renderCampMap();
   const m = CAMP[campSel], st = CAMPS[campSel] || 0, rules = starRules(m);
   const total = Object.values(CAMPS).reduce((a, b) => a + b, 0);
   $('campCount').textContent = `${Object.keys(CAMPS).length} / ${CAMP.length} území · ${total} ★`;
   const goal = m.mods.survive ? `Vydrž ${fmtTime(m.mods.survive)}` : m.mods.limit ? `Znič základnu do ${fmtTime(m.mods.limit)}` : 'Znič nepřátelskou základnu';
   const extra = [m.mods.eHp && 'nepřítel má silnější základnu', WORLD.att === campSel && '⚔ ÚZEMÍ JE POD ÚTOKEM', m.mods.eGold && 'nepřítel má víc zlata', m.mods.noTower && 'nesmíš stavět věže', m.mods.boss != null && '👹 boss: ' + BOSSES[m.mods.boss].n].filter(Boolean);
-  const done = campSel === CAMP.length - 1 && st;
+  const done = m.end && st;
   $('campBrief').innerHTML = `
     <div class="cb-head"><span class="cb-ic">${m.ic}</span><div><small>Mise ${campSel + 1} · ${AGES[m.mods.age || 0].name}</small><h3>${m.n}</h3></div></div>
     <p class="cb-story">${done ? m.end : m.t}</p>
@@ -308,7 +348,7 @@ function renderCamp() {
 }
 function openCamp(i) {
   if (i == null) { i = 0; while (i < CAMP.length - 1 && CAMPS[i]) i++; }
-  campSel = campOpen(i) ? i : 0;
+  campSel = campOpen(i) ? i : 0; campChap = chapOf(campSel);
   renderCamp(); $('campPanel').classList.remove('hidden');
 }
 $('bCamp').onclick = () => { sfx('click'); openCamp(); };

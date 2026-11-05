@@ -325,3 +325,8 @@ table.cmp td.win { color: #4ade80; font-weight: 800; } table.cmp { margin-top: 8
 #fps { position: fixed; bottom: max(4px, env(safe-area-inset-bottom)); left: max(6px, env(safe-area-inset-left)); z-index: 999; pointer-events: none;
   font: 800 11px/1 ui-monospace, Consolas, monospace; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.55); color: #4ade80; }
 #fps.mid { color: #facc15; } #fps.low { color: #f87171; } #fps.hidden { display: none; }
+.camp-tabs { display: flex; gap: 6px; margin-bottom: 6px; }
+.camp-tabs button { flex: 1; padding: 6px 8px; border-radius: 10px; border: 2px solid #334155; background: #1e293b; color: #cbd5e1; font: 700 13px system-ui; cursor: pointer; }
+.camp-tabs button.on { border-color: #fbbf24; color: #fde68a; background: #3b2a10; }
+.camp-tabs small { opacity: .8; font-weight: 600; margin-left: 4px; }
+#campMap text.lockmsg { font-size: 26px; }

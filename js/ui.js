@@ -32,8 +32,10 @@ const ACH = [
   { id: 'chal1',   n: 'Vyzyvatel',         d: 'Splň první výzvu.',                           w: () => Object.keys(CHS).length >= 1 },
   { id: 'chalAll', n: 'Mistr výzev',       d: 'Splň všechny výzvy.',                         w: () => Object.keys(CHS).length >= CHAL.length },
   { id: 'camp1',   n: 'Dobyvatel',         d: 'Dobyj první území v kampani.',                w: () => Object.keys(CAMPS).length >= 1 },
-  { id: 'campAll', n: 'Pán světa',         d: 'Dokonči celou kampaň.',                       w: () => Object.keys(CAMPS).length >= CAMP.length },
-  { id: 'camp45',  n: 'Perfekcionista',    d: 'Získej v kampani všech 45 hvězd.',            w: () => Object.values(CAMPS).reduce((a, b) => a + b, 0) >= CAMP.length * 3 },
+  { id: 'campAll', n: 'Pán světa',         d: 'Dokonči první kapitolu kampaně.',             w: () => chapDone(0) },
+  { id: 'camp45',  n: 'Perfekcionista',    d: 'Získej všech 45 hvězd v první kapitole.', w: () => chapStars(0) >= 45 },
+  { id: 'camp2',   n: 'Pán času',          d: 'Dokonči druhou kapitolu kampaně.',            w: () => chapDone(1) },
+  { id: 'camp75',  n: 'Mistr času',        d: 'Získej v kampani všech 75 hvězd.',            w: () => chapStars(0) + chapStars(1) >= 75 },
   { id: 'rematch', n: 'Ještě jednou!',     d: 'Vyhraj odvetu proti kámošovi.',               w: () => role !== 'solo' && !coop && rematchN > 0 },
   // ---- bossové ----
   { id: 'surv10',  n: 'Ještě dýchám',      d: 'Přežij 10 vln v Nekonečném přežití.', t: (m, V) => V.surv > 10 },
@@ -232,7 +234,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 function refreshMenu() {
   document.querySelectorAll('.seg button[data-d]').forEach(b => b.classList.toggle('on', +b.dataset.d === SET.diff));
-  const ins = $('bInsane'); if (ins && typeof CAMPS !== 'undefined') { ins.classList.toggle('locked', !CAMPS[CAMP.length - 1]); ins.textContent = CAMPS[CAMP.length - 1] ? '🔥 Šílená' : '🔒 Šílená'; }
+  const ins = $('bInsane'); if (ins && typeof CAMPS !== 'undefined') { ins.classList.toggle('locked', !CAMPS[CAMP_CH[0].b - 1]); ins.textContent = CAMPS[CAMP_CH[0].b - 1] ? '🔥 Šílená' : '🔒 Šílená'; }
   document.querySelectorAll('#netMode button').forEach(b => b.classList.toggle('on', b.dataset.m === (SET.net || 'duel')));
   $('bMusic').textContent = 'Hudba: ' + (SET.music ? 'ZAP' : 'VYP');
   $('bSfx').textContent = 'Zvuky: ' + (SET.sfx ? 'ZAP' : 'VYP');
@@ -279,7 +281,7 @@ function renderChal() {
 }
 
 document.querySelectorAll('.seg button[data-d]').forEach(b => b.onclick = () => {
-  if (+b.dataset.d === 4 && !CAMPS[CAMP.length - 1]) { toasts.push({ a: { n: 'Nejdřív dohraj celou kampaň' }, h: '🔒 ŠÍLENÁ OBTÍŽNOST', l: 3 }); return; }
+  if (+b.dataset.d === 4 && !CAMPS[CAMP_CH[0].b - 1]) { toasts.push({ a: { n: 'Nejdřív dohraj celou kampaň' }, h: '🔒 ŠÍLENÁ OBTÍŽNOST', l: 3 }); return; }
   SET.diff = +b.dataset.d; saveSet(); sfx('click');
 });
 document.querySelectorAll('#netMode button').forEach(b => b.onclick = () => { SET.net = b.dataset.m; saveSet(); sfx('click'); });

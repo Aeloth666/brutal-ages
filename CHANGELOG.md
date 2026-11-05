@@ -4,6 +4,12 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.19 – 5. 11. 2026
+
+- Kampaň má 2. kapitolu – Návrat hordy: 10 nových map (mise 16–25) napříč všemi věky. Každá mise je těžší než ta předchozí, poslední je opravdu tvrdý oříšek.
+- Mapa kampaně má záložky kapitol; 2. kapitola se odemkne dobytím 15. území. Nová území dávají větší bonusy.
+- Nové úspěchy Pán času (dokonči 2. kapitolu) a Mistr času (všech 75 hvězd).
+
 ## Verze 2.18.1 – 5. 11. 2026
 
 - Wiki o hře je i v angličtině (aeloth666.github.io/brutal-ages/wiki/en/), doplněné anglické texty ve hře.

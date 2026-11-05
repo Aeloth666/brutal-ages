@@ -23,6 +23,11 @@ const TERR = [
   { k: 'sgold', v: 1.15, t: '+15 % zlata na začátku' }, { k: 'tur', v: 0.96, t: 'Věže o 4 % levnější' }, { k: 'hp', v: 1.03, t: '+3 % zdraví jednotek' },
   { k: 'build', v: 0.97, t: 'Výroba o 3 % rychlejší' }, { k: 'base', v: 1.05, t: 'Hradby +5 %' }, { k: 'gold', v: 1.04, t: '+4 % zlata za zabití' },
   { k: 'xp', v: 1.05, t: '+5 % XP za zabití' }, { k: 'cost', v: 0.97, t: 'Jednotky o 3 % levnější' }, { k: 'heroD', v: 1.1, t: 'Hrdina +10 % útoku' },
+  // 2. kapitola – těžší území, větší bonusy
+  { k: 'gold', v: 1.05, t: '+5 % zlata za zabití' }, { k: 'hp', v: 1.04, t: '+4 % zdraví jednotek' }, { k: 'base', v: 1.08, t: 'Hradby +8 %' },
+  { k: 'dmg', v: 1.04, t: '+4 % útoku jednotek' }, { k: 'sgold', v: 1.2, t: '+20 % zlata na začátku' }, { k: 'build', v: 0.96, t: 'Výroba o 4 % rychlejší' },
+  { k: 'tur', v: 0.95, t: 'Věže o 5 % levnější' }, { k: 'xp', v: 1.06, t: '+6 % XP za zabití' }, { k: 'cost', v: 0.96, t: 'Jednotky o 4 % levnější' },
+  { k: 'heroD', v: 1.15, t: 'Hrdina +15 % útoku' },
 ];
 const WORLD = load('aow-world', { att: null, n: 0 });                   // att = území pod útokem Rudé hordy
 const terrActive = () => CAMP.map((_, i) => i).filter(i => CAMPS[i] && WORLD.att !== i);

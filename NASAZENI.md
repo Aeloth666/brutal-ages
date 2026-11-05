@@ -1,4 +1,4 @@
-# Brutal Ages – webová verze
+﻿# Brutal Ages – webová verze
 
 🇬🇧 English: [DEPLOYMENT.md](DEPLOYMENT.md)
 

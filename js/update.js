@@ -97,6 +97,13 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.19', d: '2026-11-05', cs: [
+    'Kampaň má 2. kapitolu – Návrat hordy: 10 nových map (mise 16–25) napříč všemi věky. Každá mise je těžší než ta předchozí, poslední je opravdu tvrdý oříšek.',
+    'Mapa kampaně má záložky kapitol; 2. kapitola se odemkne dobytím 15. území. Nová území dávají větší bonusy.',
+    'Nové úspěchy Pán času (dokonči 2. kapitolu) a Mistr času (všech 75 hvězd).'], en: [
+    'The campaign has chapter 2 – Return of the horde: 10 new maps (missions 16–25) across all ages. Each mission is harder than the one before, the last one is a really tough nut.',
+    'The campaign map has chapter tabs; chapter 2 unlocks by conquering territory 15. The new territories give bigger bonuses.',
+    'New achievements Lord of time (finish chapter 2) and Master of time (all 75 stars).'] },
   { v: '2.18.1', d: '2026-11-05', cs: ['Wiki o hře je i v angličtině (aeloth666.github.io/brutal-ages/wiki/en/), doplněné anglické texty ve hře.'], en: ['The game wiki is now in English too (aeloth666.github.io/brutal-ages/wiki/en/), missing English texts in the game added.'] },
   { v: '2.18', d: '2026-11-03', cs: [
     'Mamutí jezdec je silnější: o 30 % víc zdraví a o 15 % silnější úder (pomalý, ale nezastavitelný).',
