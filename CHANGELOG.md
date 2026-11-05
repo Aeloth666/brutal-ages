@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.18.1 – 5. 11. 2026
+
+- Wiki o hře je i v angličtině (aeloth666.github.io/brutal-ages/wiki/en/), doplněné anglické texty ve hře.
+
 ## Verze 2.18 – 3. 11. 2026
 
 - Mamutí jezdec je silnější: o 30 % víc zdraví a o 15 % silnější úder (pomalý, ale nezastavitelný).

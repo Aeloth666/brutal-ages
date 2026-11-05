@@ -2,7 +2,11 @@
 
 🇨🇿 [Česky](CHANGELOG.md) · 🇬🇧 **English**
 
-The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/)
+The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
+
+## Version 2.18.1 – 5. 11. 2026
+
+- The game wiki is now in English too (aeloth666.github.io/brutal-ages/wiki/en/), missing English texts in the game added.
 
 ## Version 2.18 – 3. 11. 2026
 

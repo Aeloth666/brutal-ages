@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.18.1', d: '2026-11-05', cs: ['Wiki o hře je i v angličtině (aeloth666.github.io/brutal-ages/wiki/en/), doplněné anglické texty ve hře.'], en: ['The game wiki is now in English too (aeloth666.github.io/brutal-ages/wiki/en/), missing English texts in the game added.'] },
   { v: '2.18', d: '2026-11-03', cs: [
     'Mamutí jezdec je silnější: o 30 % víc zdraví a o 15 % silnější úder (pomalý, ale nezastavitelný).',
     'V menu pauzy je tlačítko ↻ Začít znovu – kolo (třeba misi v kampani) jde rozehrát od začátku.',
