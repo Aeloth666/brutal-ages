@@ -9,8 +9,7 @@ function drawBase(s, p) {
   curEmb = '';
   for (let k = 0; k < p.slots; k++) {
     const y = -170 + k * 36;
-    rr(38, y + 8, 30, 6, 2); fo(lg('ledge', 0, y, 0, y + 14, [[0, '#6b7280'], [1, '#374151']]), 1.2);
-    c.fillStyle = '#374151'; poly([40, y + 14, 48, y + 14, 40, y + 22]); c.fill();
+    ledge(p.age, y);
     if (p.tur[k]) drawTurret(p.tur[k].a, p.tur[k].i, 54, y + 2);
   }
   c.restore();
@@ -101,47 +100,4 @@ function smoke(x, y, n, col, sp = 0.4) {
 function sandbags(x0, w, rows) {
   for (let r = 0; r < rows; r++) for (let x = x0 + r * 7; x < x0 + w - r * 7; x += 16) { rr(x, -10 - r * 9, 16, 10, 5); fo(r % 2 ? '#c8b98a' : '#b4a474', 1.1); }
 }
-const TUR = [
-  // doba kamenná
-  (i, a) => {
-    rr(-12, -2, 24, 10, 2); fo('#7a5230', 1.3);
-    if (i === 1) { limb([-2, -2, -2, -12], '#8b5a2b', 3); limb([-2, -12, -7, -20], '#8b5a2b', 2.6); limb([-2, -12, 3, -20], '#8b5a2b', 2.6); c.strokeStyle = '#ddd'; c.lineWidth = 0.8; ln(-7, -20, 3, -20); }
-    else if (i === 2) {
-      limb([-6, -2, 8, -10], '#8b5a2b', 3); c.beginPath(); c.ellipse(2, -5, 10, 5, 0, 0, Math.PI); fo('#a0703c', 1.3);
-      c.beginPath(); c.ellipse(2, -10, 6, 7.5, 0, 0, Math.PI * 2); fo('#b98f4e', 1.2);
-      c.strokeStyle = 'rgba(90,60,20,.7)'; c.lineWidth = 1; for (const y of [-14, -10, -6]) { c.beginPath(); c.ellipse(2, y, 5.2, 1.4, 0, 0, Math.PI); c.stroke(); }
-      c.fillStyle = '#2a1a0a'; circ(2, -8, 1.4);
-      c.fillStyle = '#facc15'; for (let k = 0; k < 3; k++) { const a = T * 6 + k * 2.1; circ(2 + Math.cos(a) * 9, -12 + Math.sin(a * 1.3) * 5, 1.1); }
-    }
-    else { limb([-8, -2, 10, -14], '#8b5a2b', 3); c.beginPath(); c.arc(11, -16, 4.5, 0, Math.PI * 2); fo('#8a8a8a', 1.2); }
-  },
-  // středověk
-  (i) => {
-    if (i === 0) { rr(-12, -4, 24, 10, 2); fo('#7a4a24', 1.3); limb([-6, -4, 10, -18], '#8b5a2b', 3); c.beginPath(); c.arc(11, -20, 5, 0, Math.PI * 2); fo('#6b6b6b', 1.2); c.beginPath(); c.arc(-8, 6, 3, 0, Math.PI * 2); fo('#5c3a1e', 1); }
-    else if (i === 1) { rr(-10, -4, 20, 10, 2); fo('#7a4a24', 1.3); c.beginPath(); c.moveTo(4, -14); c.quadraticCurveTo(14, -4, 4, 6); c.strokeStyle = OL; c.lineWidth = 3.6; c.stroke(); c.strokeStyle = '#8b5a2b'; c.lineWidth = 2; c.stroke(); limb([-8, -4, 16, -4], '#6b4423', 1.6); c.fillStyle = '#f97316'; circ(17, -4, 2.4); }
-    else { c.beginPath(); c.moveTo(-12, -10); c.lineTo(12, -10); c.lineTo(9, 6); c.lineTo(-9, 6); c.closePath(); fo('#3c3f46', 1.4); c.fillStyle = '#2b1a0a'; ell(0, -10, 11, 3); const op = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter'; c.fillStyle = 'rgba(255,140,30,.5)'; ell(0, 8, 10, 4); c.globalCompositeOperation = op; }
-  },
-  // renesance
-  (i) => {
-    rr(-12, 0, 22, 8, 2); fo('#6b4423', 1.3);
-    const bars = i === 1 ? [-4, 2] : [0];
-    for (const y of bars) { rr(-8, y - 5 - (i === 2 ? 2 : 0), i === 2 ? 30 : 26, i === 2 ? 10 : 6, 3); fo(lg('tb' + i, 0, y - 6, 0, y + 4, [[0, '#575d66'], [1, '#1f2227']]), 1.3); }
-    c.beginPath(); c.arc(-6, 8, 4, 0, Math.PI * 2); fo('#5c3a1e', 1.2);
-  },
-  // moderní
-  (i) => {
-    rr(-12, -2, 22, 10, 2); fo('#4b5530', 1.4);
-    if (i === 0) { rr(-6, -8, 14, 7, 1.5); fo('#2b2b2b', 1.2); rr(8, -6, 16, 3, 1); fo('#1a1a1a', 1); rr(-4, -16, 4, 10, 1); fo('#55623a', 1); }
-    else if (i === 1) { rr(-8, -14, 22, 12, 2); fo('#55623a', 1.4); c.fillStyle = '#1a1a1a'; for (let r = 0; r < 2; r++) for (let k = 0; k < 3; k++) circ(14, -11 + r * 5 + 0, 1.6); c.fillStyle = '#ef4444'; circ(16, -8, 1); }
-    else { rr(-8, -10, 14, 9, 2); fo('#55623a', 1.4); rr(4, -7, 26, 4, 1.5); fo('#384126', 1.2); rr(28, -8, 5, 6, 1); fo('#384126', 1); }
-  },
-  // budoucnost
-  (i) => {
-    c.beginPath(); c.moveTo(-12, 8); c.lineTo(-8, -8); c.lineTo(8, -8); c.lineTo(12, 8); c.closePath();
-    fo(lg('tf', 0, -8, 0, 8, [[0, '#9aa3b5'], [1, '#3a4152']]), 1.4);
-    if (i === 0) { rr(4, -5, 20, 4, 1.5); fo('#d1d5db', 1.1); glowDot(25, -3, 5, '#38e1ff'); }
-    else if (i === 1) { rr(2, -8, 22, 9, 3); fo('#4b5368', 1.3); glowDot(25, -3.5, 7, '#b388ff'); }
-    else { c.beginPath(); c.arc(4, -10, 8, 0, Math.PI * 2); fo('#2b3040', 1.4); glowDot(4, -10, 12 + Math.sin(T * 6) * 2, '#ff4fd8'); rr(8, -6, 20, 4, 1.5); fo('#9aa3b5', 1.1); }
-  },
-];
-function drawTurret(a, i, x, y) { c.save(); c.translate(x, y); TUR[a](i, a); c.restore(); }
+function drawTurret(a, i, x, y) { c.save(); c.translate(x, y); c.scale(1.12, 1.12); TUR[a](i, a); c.restore(); }   // věže jsou v turrets.js

@@ -58,7 +58,7 @@ Object.assign(BDEF, {
       solid(rectP(24, -206, 38, 206), '#a49c8e', [24, -206, 62, 0], () => texStones(24, -206, 62, 0, '#a49c8e', { sh: 12, sw: 14, seed: 4, moss: 3 }), 1);
       win(35, -186, 16, 24, { arch: true, fr: '#3a2a1a', bars: true });
       solid(polyP([20, -204, 43, -252, 66, -204]), '#2f4a5a', [20, -252, 66, -204], () => texTiles(20, -252, 66, -204, '#3a5a6a', { tw: 7, th: 6, seed: 3 }), 1.1);
-      c.strokeStyle = '#c9a43c'; c.lineWidth = 2; ln(43, -252, 43, -262); circ(43, -264, 2);
+      
       // kamenné přízemí
       solid(rectP(-96, -74, 122, 74), '#9d9586', [-96, -74, 26, 0], () => texStones(-96, -74, 26, 0, '#9d9586', { sh: 15, sw: 26, seed: 6, moss: 6 }), 1.1);
       for (const x of [-74, -2]) { c.beginPath(); c.arc(x, -38, 12, 0, Math.PI * 2); fo('#5d574d', 1.6); c.beginPath(); c.arc(x, -38, 8, 0, Math.PI * 2); c.fillStyle = '#15130f'; c.fill(); rr(x - 3, -42, 14, 8, 3); fo(linG(0, -42, 0, -34, [[0, '#6b7280'], [1, '#2b2f36']]), 1.1); }
@@ -90,7 +90,7 @@ Object.assign(BDEF, {
     an: team => {
       puffs(-68, -236, 4, '120,115,110', 0.35);
       c.save(); c.translate(-34, -200); c.strokeStyle = '#1a1a1a'; c.lineWidth = 1.4; c.rotate(T * 0.1); ln(0, 0, 0, -6); c.rotate(T * 1.1); ln(0, 0, 0, -8); c.restore();
-      flag(43, -262, team, '#4b5563', 0.1);
+      flag(43, -251, team, '#4b5563', 24);
     },
   },
   // ---------- Konkvistadoři: bílá misijní stavba s barokním štítem a zvonicí ----------
@@ -125,7 +125,7 @@ Object.assign(BDEF, {
       c.save(); c.translate(42, -176); c.rotate(a);
       c.beginPath(); c.moveTo(-6, 4); c.quadraticCurveTo(-7, 18, -10, 22); c.lineTo(10, 22); c.quadraticCurveTo(7, 18, 6, 4); c.quadraticCurveTo(0, 0, -6, 4); c.closePath(); fo(linG(-10, 0, 10, 0, [[0, '#f5d76e'], [1, '#a16207']]), 1.4);
       c.fillStyle = '#5c3a0a'; circ(0, 24, 2.2); c.restore();
-      flag(-38, -194, team, '#3a2410', 0.1);
+      flag(-88, -126, team, '#3a2410', 32);
     },
   },
   // ---------- Piráti: loď vytažená na pláž, záďová nástavba, plachta s lebkou ----------
@@ -170,7 +170,7 @@ Object.assign(BDEF, {
       const sail = () => { c.beginPath(); c.moveTo(-66, -232); c.quadraticCurveTo(-30 + w, -224, 6, -232); c.quadraticCurveTo(12 + w, -194, 0, -156); c.quadraticCurveTo(-32 + w, -150, -60, -156); c.quadraticCurveTo(-72 + w, -194, -66, -232); c.closePath(); };
       sail(); c.fillStyle = linG(-66, 0, 6, 0, [[0, '#f1ead6'], [0.6, '#ddd2b4'], [1, '#b9ad8e']]); c.fill(); outl(sail, 1.8);
       c.save(); c.translate(-30 + w * 0.5, -196); skull(0, -4, 1.6); c.strokeStyle = '#1a1a1a'; c.lineWidth = 3; ln(-12, 6, 12, 18); ln(12, 6, -12, 18); c.restore();
-      flag(-30, -262, team, '#7a4f2a', 0.1);
+      flag(-30, -261, team, '#7a4f2a', 14);
       // racek
       const gx = -60 + ((T * 30) % 220), gy = -270 + Math.sin(T * 2) * 6; c.strokeStyle = '#f8fafc'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(gx - 6, gy); c.quadraticCurveTo(gx - 3, gy - 4, gx, gy); c.quadraticCurveTo(gx + 3, gy - 4, gx + 6, gy); c.stroke();
     },
@@ -211,7 +211,7 @@ Object.assign(BDEF, {
       for (const x of [62, 72]) { c.beginPath(); c.ellipse(x, -10, 5, 10, 0, 0, Math.PI * 2); fo(linG(x - 5, 0, x + 5, 0, [[0, '#d07a4a'], [1, '#7a3a1a']]), 1.2); }
       foot(-110, 82, { seed: 28, gcol: '#8a9a4a' });
     },
-    an: team => { flag(-38, -212, team, '#c9a43c', 0.1); },
+    an: team => { flag(-92, -125, team, '#c9a43c', 32); },
   },
 
   // =====================================================================
@@ -285,7 +285,7 @@ Object.assign(BDEF, {
       c.rotate(a); c.fillStyle = linG(0, 0, 160, 0, [[0, 'rgba(255,250,210,.38)'], [1, 'rgba(255,250,210,0)']]); c.beginPath(); c.moveTo(4, -3); c.lineTo(170, -32); c.lineTo(170, 32); c.lineTo(4, 3); c.closePath(); c.fill();
       c.globalCompositeOperation = op;
       rr(-8, -7, 16, 14, 3); fo('#3c4038', 1.4); c.beginPath(); c.arc(7, 0, 5, -Math.PI / 2, Math.PI / 2); fo('#fffbe0', 1); c.restore();
-      flag(-35, -150, team, '#4b5563', 26);
+      flag(-35, -127, team, '#4b5563', 26);
     },
   },
   // ---------- Partyzáni: srub v lese, maskovací síť, pozorovatelna na stromě ----------
@@ -381,7 +381,7 @@ Object.assign(BDEF, {
       c.globalAlpha = p; glowDot(-10, -118, 50, team[0]); c.globalAlpha = 1; glowDot(-10, -118, 16, team[2]);
       for (let k = 0; k < 2; k++) { const y = -250 - k * 12 + Math.sin(T * 2 + k) * 3; c.strokeStyle = k ? team[2] : '#38e1ff'; c.globalAlpha = 0.8; c.lineWidth = 2.2; c.beginPath(); c.ellipse(-10, y, 30 - k * 8, 5 - k, 0, 0, Math.PI * 2); c.stroke(); c.globalAlpha = 1; }
       glowLine(-24, -58, 4, -58, team[0], 1.2); beacon(-10, -272, '#38e1ff', 0.8);
-      flag(-10, -270, team, '#cbd5e1', 0.1);
+      flag(-50, -235, team, '#cbd5e1', 24);
     },
   },
   // ---------- Mimozemšťané: živý úl s žilkami, zárodky a rohem ----------

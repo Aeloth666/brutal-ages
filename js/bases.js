@@ -359,7 +359,7 @@ const BDEF = {
         const sw = Math.sin(T * 1.4 + x) * 3; c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + sw, y + len / 2, x + sw * 1.6, y + len); c.stroke();
         c.fillStyle = '#6aa84f'; for (let k = 8; k < len; k += 9) ell(x + sw * (k / len) * 1.5 + (k % 18 ? 3 : -3), y + k, 3.2, 1.8);
       }
-      flag(-10, -230, team, '#8b5a2b', 40);
+      flag(-10, -223, team, '#8b5a2b', 40);
     },
   },
   // ---------- Kmen Vlka: týpí z malovaných kůží, vlčí totem, sušák s kožešinami ----------
@@ -452,7 +452,7 @@ const BDEF = {
       }, 1);
       const dome = () => { c.beginPath(); c.moveTo(-104, -64); c.bezierCurveTo(-102, -150, -60, -178, -34, -180); c.bezierCurveTo(-8, -178, 34, -150, 34, -64); c.closePath(); };
       solid(dome, '#c7a35e', [-104, -180, 34, -64], () => texThatch(-104, -180, 34, -64, '#c7a35e', { rh: 12, seed: 3 }), 1.1);
-      c.strokeStyle = '#7a5a2a'; c.lineWidth = 3; ln(-34, -180, -34, -196); c.fillStyle = team[0]; poly([-34, -196, -22, -190, -34, -184]); c.fill();
+      
       door(-50, -52, 26, 52, { col: '#6b4a24', iron: false });
       win(-80, -54, 14, 14, { fr: '#4a2c14', sill: false }); win(-4, -54, 14, 14, { fr: '#4a2c14', sill: false });
       // totem: tři vyřezávané tváře
@@ -479,7 +479,7 @@ const BDEF = {
       for (const [x, col] of [[-100, '#b45309'], [-88, '#92400e']]) { c.beginPath(); c.ellipse(x, -9, 6, 9, 0, 0, Math.PI * 2); fo(linG(x - 6, 0, x + 6, 0, [[0, tone(col, 0.3)], [1, tone(col, -0.3)]]), 1.2); c.fillStyle = '#1a1a1a'; ell(x, -17, 3, 1.2); }
       foot(-108, 80, { seed: 4 });
     },
-    an: team => { flag(-34, -196, team, '#7a5a2a', 0.1); fire(78, -6, 0.8); },
+    an: team => { flag(-34, -179, team, '#7a5a2a', 30); fire(78, -6, 0.8); },
   },
 
   // =====================================================================
@@ -600,7 +600,7 @@ const BDEF = {
       foot(-110, 80, { seed: 13 });
     },
     an: team => {
-      flag(-14, -250, team, '#c9a43c', 0.1);
+      flag(-14, -249, team, '#c9a43c', 18);
       // padající okvětní lístky
       for (let i = 0; i < 6; i++) { const t = (T * 0.2 + i / 6) % 1; c.fillStyle = '#f9a8d4'; ell(-110 + i * 9 + Math.sin(T * 2 + i) * 10 + t * 30, -110 + t * 110, 2, 1.2); }
     },
@@ -643,7 +643,7 @@ const BDEF = {
       // koňské žíně vlají
       c.fillStyle = '#2b1a0e';
       for (let k = 0; k < 9; k++) { const a = Math.sin(T * 3 + k) * 4; c.beginPath(); c.moveTo(39 + k * 1.2, -217); c.quadraticCurveTo(36 + k * 1.4 + a, -196, 34 + k * 1.6 + a * 1.4, -176); c.lineTo(36 + k * 1.6 + a * 1.4, -176); c.quadraticCurveTo(38 + k * 1.4 + a, -196, 41 + k * 1.2, -217); c.fill(); }
-      flag(-18, -152, team, '#7a5a2a', 0.1);
+      flag(-18, -153, team, '#7a5a2a', 26);
     },
   },
 };

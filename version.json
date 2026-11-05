@@ -1,6 +1,6 @@
 {
-    "build":  202611052025,
-    "name":  "2.25",
+    "build":  202611052042,
+    "name":  "2.26",
     "apk":  11,
     "apkName":  "2.0",
     "apkUrl":  "https://aeloth666.github.io/brutal-ages/BrutalAges.apk",
@@ -37,6 +37,7 @@
                   "js/replay.js",
                   "js/season.js",
                   "js/surv.js",
+                  "js/turrets.js",
                   "js/ui.js",
                   "js/units.js",
                   "js/update.js",

@@ -4,6 +4,12 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.26 – 5. 11. 2026
+
+- Flags on the bases sit on poles, roofs and towers – none float in the air any more.
+- All 15 towers are redrawn in more detail: a stone thrower with a swinging arm, a spinning sling, a beehive with buzzing bees, a wheeled catapult, a ballista with a flaming arrow, a cauldron of boiling oil, bronze cannons on carriages, a mortar, a sandbagged machine-gun nest, a rocket launcher, a shielded anti-tank gun and sci-fi weapons with glowing coils and plasma.
+- Towers stand on brackets that match the age: a wooden beam, a stone corbel, a steel platform or a hovering pad.
+
 ## Version 2.25 – 5. 11. 2026
 
 - All 20 bases (5 ages × nations) are redrawn in much more detail: stone walls built from individual mossy stones, planks and logs with wood grain, tiled and thatched roofs, plaster, sheet metal and concrete, lit windows, light and shadow, rocks and grass at the foot of each building.

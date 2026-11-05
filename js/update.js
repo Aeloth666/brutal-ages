@@ -97,6 +97,13 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.26', d: '2026-11-05', cs: [
+    'Vlajky na základnách sedí na stožárech, střechách a věžích – žádná už nevisí ve vzduchu.',
+    'Všech 15 věží je nakreslených znovu a podrobněji: kamenomet s kyvadlovým ramenem, prak, který se točí, úl s bzučícími včelami, katapult na kolech, balista s hořícím šípem, kotel vroucího oleje, bronzová děla na lafetách, hmoždíř, kulometné hnízdo z pytlů, raketomet, protitankové dělo se štítem a sci-fi zbraně se zářícími cívkami a plazmou.',
+    'Věže stojí na konzolích podle věku: dřevěný trám, kamenná římsa, ocelová plošina, nebo levitující plošina.'], en: [
+    'Flags on the bases sit on poles, roofs and towers – none float in the air any more.',
+    'All 15 towers are redrawn in more detail: a stone thrower with a swinging arm, a spinning sling, a beehive with buzzing bees, a wheeled catapult, a ballista with a flaming arrow, a cauldron of boiling oil, bronze cannons on carriages, a mortar, a sandbagged machine-gun nest, a rocket launcher, a shielded anti-tank gun and sci-fi weapons with glowing coils and plasma.',
+    'Towers stand on brackets that match the age: a wooden beam, a stone corbel, a steel platform or a hovering pad.'] },
   { v: '2.25', d: '2026-11-05', cs: [
     'Všech 20 základen (5 věků × národy) je nakreslených znovu a mnohem podrobněji: kamenné zdi z jednotlivých kamenů s mechem, prkna a klády s letokruhy, taškové a doškové střechy, omítka, plech a beton, svítící okna, světlo a stín, kameny a tráva u paty stavby.',
     'Živé detaily: hořící ohně a pochodně, kouř z komínů, houpající se zvon, vlající plachta pirátské lodi, padající lístky sakury, otáčející se radary a ozubená kola, reflektor, pulzující zárodky mimozemšťanů. Okna v noci víc září.',
