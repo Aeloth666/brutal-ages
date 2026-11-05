@@ -1,5 +1,6 @@
 // =====================================================================
-//  NEKONEČNÉ PŘEŽITÍ – vlny nepřátel, každá silnější; každá 10. vlna přivede bosse.
+//  NEKONEČNÉ PŘEŽITÍ – vlny nepřátel, každá silnější; každá 10. vlna přivede bosse (od 25. vlny každá 5.).
+//  Po dosažení budoucnosti (vlna 21+) roste síla nepřátel exponenciálně – dřív nebo později padne každý.
 //  Nepřátelská základna je nezničitelná, počítač nestaví – jde jen o to vydržet co nejdéle.
 // =====================================================================
 const SURV = { n: 'Nekonečné přežití', diff: 1, mods: { endless: 1 } };
@@ -17,21 +18,24 @@ function survTick(dt) {
     const w = V2.wave, a = Math.min(4, Math.floor((w - 1) / 5));
     if (a > e.age) { e.age = a; e.hp = e.mhp = AGES[a].baseHp * 3; }
     e.af = e.af || [0, 0, 0, 0, 0];
-    const n = 3 + Math.floor(w * 1.2);
+    const n = Math.min(36, 3 + Math.floor(w * 1.2));
     for (let i = 0; i < n; i++) {
-      const r = Math.random(), heavy = Math.min(0.35, 0.08 + w * 0.012);
-      V2.pend.push(r < heavy ? 2 : r < heavy + 0.06 ? 6 : r < 0.6 ? 0 : 1);
+      const r = Math.random(), heavy = Math.min(0.35, 0.08 + w * 0.012), sup = a === 4 ? Math.min(0.12, (w - 20) * 0.004) : 0;
+      V2.pend.push(r < sup ? 3 : r < sup + heavy ? 2 : r < sup + heavy + 0.06 ? 6 : r < 0.6 ? 0 : 1);
     }
-    if (w % 10 === 0) V2.pend.push(5);
+    // boss jde hned za prvními dvěma vojáky (ne až na konci vlny); později jich chodí víc
+    const nb = w % 10 === 0 ? 1 + Math.floor(Math.max(0, w - 10) / 30) : w >= 25 && w % 5 === 0 ? 1 : 0;
+    for (let b = 0; b < nb; b++) V2.pend.splice(Math.min(2 + b * 3, V2.pend.length), 0, 5);
     S.ev.push([W / 2, 200, 'evt', 'wave', w]);
   }
   if (V2.pend.length && (V2.st = (V2.st || 0) - dt) <= 0) {
     const ty = V2.pend[0], a = e.age;
     if (spawnFree(1, ty === 5 ? 2 : ty)) {
-      V2.pend.shift(); V2.st = ty === 2 ? 1.4 : 0.7;
+      V2.pend.shift(); V2.st = (ty === 2 || ty === 5 ? 1.4 : 0.7) * Math.max(0.5, 1 - V2.wave * 0.006);
       spawn(1, { a, ty, f: (Math.random() * 4) | 0 });
-      const u = S.units[S.units.length - 1], m = 1 + V2.wave * 0.05;   // vlny sílí i uvnitř věku
-      u.mx = u.hp = Math.round(u.hp * m);
+      const u = S.units[S.units.length - 1], w = V2.wave, over = Math.max(0, w - 20);
+      u.mx = u.hp = Math.round(u.hp * (1 + w * 0.05) * Math.pow(1.045, over));   // vlny sílí i uvnitř věku, v budoucnosti rychleji
+      if (over) u.sm = 1 + over * 0.035;                                         // a víc bolí
     }
   }
 }

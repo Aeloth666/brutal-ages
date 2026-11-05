@@ -4,6 +4,11 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.20 – 5. 11. 2026
+
+- Endless survival is harder: from wave 21 enemies get stronger faster each wave (more health, stronger attacks, super soldiers) and waves are released faster.
+- The boss arrives right after the wave is announced, not at its end. From wave 25 a boss comes every fifth wave, later several at once.
+
 ## Version 2.19 – 5. 11. 2026
 
 - The campaign has chapter 2 – Return of the horde: 10 new maps (missions 16–25) across all ages. Each mission is harder than the one before, the last one is a really tough nut.

@@ -392,7 +392,7 @@ function slotPos(s, k) { return { x: BX[s] + (s ? -1 : 1) * 70, y: GY - 172 + k 
 
 function attack(u, d0, tgt, dir) {
   const F = facOf(u.side), WP = u.ty === 1 && F.g && WEAP[F.g], pp = (WP && WP.proj) || d0.p, P = S.pl[u.side], g = GB(P);
-  let k = (u.ty === 4 ? g.heroD * ((g.gear && g.gear[u.a][1]) || 1) : g.dmg) * (P.cryT > 0 ? 1.3 : 1);
+  let k = (u.ty === 4 ? g.heroD * ((g.gear && g.gear[u.a][1]) || 1) : g.dmg) * (P.cryT > 0 ? 1.3 : 1) * (u.sm || 1);
   if (u.ty === 6) {                                    // schopnosti speciálních jednotek
     if (d0.ab === 'charge' && !u.hit) k *= d0.chg || 3;          // nájezd: první úder násobně silnější
     if (d0.ab === 'berserk') k *= 2 - u.hp / u.mx;

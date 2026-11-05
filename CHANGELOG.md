@@ -4,6 +4,11 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.20 – 5. 11. 2026
+
+- Nekonečné přežití je těžší: od 21. vlny nepřátelé sílí každou vlnou rychleji (víc zdraví, silnější útok, supervojáci) a vlny se rychleji vypouštějí.
+- Boss přijde hned po ohlášení vlny, ne až na jejím konci. Od 25. vlny chodí boss každou pátou vlnu, později i víc bossů najednou.
+
 ## Verze 2.19 – 5. 11. 2026
 
 - Kampaň má 2. kapitolu – Návrat hordy: 10 nových map (mise 16–25) napříč všemi věky. Každá mise je těžší než ta předchozí, poslední je opravdu tvrdý oříšek.

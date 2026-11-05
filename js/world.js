@@ -839,7 +839,7 @@ function addFx(e) {
       fx.push({ ring: 1, x, y, l: 0.45, ml: 0.45, r: 130, col: '#fbbf24' }); fx.push({ fire: 1, x, y, r: 40, l: 0.35, ml: 0.35 });
       smoke(8, 16, 1); part(16, '#a16207', 200, 3, 0.7); vib(e[3] === mySide ? 50 : 0); break;
     case 'roar': shake = 1.5; vib([200, 80, 200]); break;
-    case 'evt': evtBanner = { t: (e[3] === 'wave' ? '♾ VLNA ' + e[4] + (e[4] % 10 === 0 ? ' – BOSS!' : '') : e[3] === 'meteors' ? SKYFIRE[e[4] | 0] : e[3] === 'boss' ? '👹 BOSS: ' + BOSSES[e[4] | 0].n.toUpperCase() + '!' : EVENTS[e[3]]) || '', l: e[3] === 'boss' ? 4 : 3 }; if (e[3] === 'quake') { shake = 1.2; vib([80, 40, 120]); } sfx('evt'); break;
+    case 'evt': evtBanner = { t: (e[3] === 'wave' ? '♾ VLNA ' + e[4] + (e[4] % 10 === 0 || (e[4] >= 25 && e[4] % 5 === 0) ? ' – BOSS!' : '') : e[3] === 'meteors' ? SKYFIRE[e[4] | 0] : e[3] === 'boss' ? '👹 BOSS: ' + BOSSES[e[4] | 0].n.toUpperCase() + '!' : EVENTS[e[3]]) || '', l: e[3] === 'boss' ? 4 : 3 }; if (e[3] === 'quake') { shake = 1.2; vib([80, 40, 120]); } sfx('evt'); break;
     case 'chest': if (SEASON && e[3] === mySide) achId(SEASON === 'xmas' ? 'gift' : 'candy');
       fx.push({ txt: '+' + e[4].toLocaleString('cs') + ' zlata', x, y: y - 20, vy: -30, l: 1.6, ml: 1.6 }); part(18, '#facc15', 140, 2.2, 0.8); sfx('buy'); break;
     case 'rhit': bloodBurst(x, y, 16, 220, true); if (Math.random() < 0.2) addPool(x, rnd(4, 8)); shake = Math.max(shake, 0.25); break;

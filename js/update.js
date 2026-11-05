@@ -97,6 +97,11 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.20', d: '2026-11-05', cs: [
+    'Nekonečné přežití je těžší: od 21. vlny nepřátelé sílí každou vlnou rychleji (víc zdraví, silnější útok, supervojáci) a vlny se rychleji vypouštějí.',
+    'Boss přijde hned po ohlášení vlny, ne až na jejím konci. Od 25. vlny chodí boss každou pátou vlnu, později i víc bossů najednou.'], en: [
+    'Endless survival is harder: from wave 21 enemies get stronger faster each wave (more health, stronger attacks, super soldiers) and waves are released faster.',
+    'The boss arrives right after the wave is announced, not at its end. From wave 25 a boss comes every fifth wave, later several at once.'] },
   { v: '2.19', d: '2026-11-05', cs: [
     'Kampaň má 2. kapitolu – Návrat hordy: 10 nových map (mise 16–25) napříč všemi věky. Každá mise je těžší než ta předchozí, poslední je opravdu tvrdý oříšek.',
     'Mapa kampaně má záložky kapitol; 2. kapitola se odemkne dobytím 15. území. Nová území dávají větší bonusy.',
