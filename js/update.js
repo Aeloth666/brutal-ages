@@ -97,6 +97,13 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.25', d: '2026-11-05', cs: [
+    'Všech 20 základen (5 věků × národy) je nakreslených znovu a mnohem podrobněji: kamenné zdi z jednotlivých kamenů s mechem, prkna a klády s letokruhy, taškové a doškové střechy, omítka, plech a beton, svítící okna, světlo a stín, kameny a tráva u paty stavby.',
+    'Živé detaily: hořící ohně a pochodně, kouř z komínů, houpající se zvon, vlající plachta pirátské lodi, padající lístky sakury, otáčející se radary a ozubená kola, reflektor, pulzující zárodky mimozemšťanů. Okna v noci víc září.',
+    'Budovy se kreslí z mezipaměti, takže hra není náročnější na výkon. Ukazatel zdraví základny je výš, aby nepřekrýval věže a střechy.'], en: [
+    'All 20 bases (5 ages × nations) are redrawn in much more detail: stone walls built from individual mossy stones, planks and logs with wood grain, tiled and thatched roofs, plaster, sheet metal and concrete, lit windows, light and shadow, rocks and grass at the foot of each building.',
+    'Living details: burning fires and torches, chimney smoke, a swinging bell, the billowing sail of the pirate ship, falling cherry petals, spinning radars and gears, a searchlight, pulsing alien pods. Windows glow brighter at night.',
+    'Buildings are drawn from a cache, so the game is no heavier on performance. The base health bar sits higher so it does not cover towers and roofs.'] },
   { v: '2.24', d: '2026-11-05', cs: [
     'Výuka nově ukáže i schopnosti armády. Při prvním setkání s novinkami (schopnosti, bonusy v přežití, zrychlení 3×, ligy, záznam bitvy) se ukáže krátký tip.',
     'Nové denní a týdenní úkoly: použij schopnosti armády, poraz bosse, vyhraj misi na hrdinskou obtížnost, vyber bonusy v přežití.',

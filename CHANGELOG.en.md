@@ -4,6 +4,12 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.25 – 5. 11. 2026
+
+- All 20 bases (5 ages × nations) are redrawn in much more detail: stone walls built from individual mossy stones, planks and logs with wood grain, tiled and thatched roofs, plaster, sheet metal and concrete, lit windows, light and shadow, rocks and grass at the foot of each building.
+- Living details: burning fires and torches, chimney smoke, a swinging bell, the billowing sail of the pirate ship, falling cherry petals, spinning radars and gears, a searchlight, pulsing alien pods. Windows glow brighter at night.
+- Buildings are drawn from a cache, so the game is no heavier on performance. The base health bar sits higher so it does not cover towers and roofs.
+
 ## Version 2.24 – 5. 11. 2026
 
 - The tutorial now also shows army abilities. The first time you meet something new (abilities, survival bonuses, 3× speed, leagues, battle recording) a short tip pops up.

@@ -4,6 +4,12 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.25 – 5. 11. 2026
+
+- Všech 20 základen (5 věků × národy) je nakreslených znovu a mnohem podrobněji: kamenné zdi z jednotlivých kamenů s mechem, prkna a klády s letokruhy, taškové a doškové střechy, omítka, plech a beton, svítící okna, světlo a stín, kameny a tráva u paty stavby.
+- Živé detaily: hořící ohně a pochodně, kouř z komínů, houpající se zvon, vlající plachta pirátské lodi, padající lístky sakury, otáčející se radary a ozubená kola, reflektor, pulzující zárodky mimozemšťanů. Okna v noci víc září.
+- Budovy se kreslí z mezipaměti, takže hra není náročnější na výkon. Ukazatel zdraví základny je výš, aby nepřekrýval věže a střechy.
+
 ## Verze 2.24 – 5. 11. 2026
 
 - Výuka nově ukáže i schopnosti armády. Při prvním setkání s novinkami (schopnosti, bonusy v přežití, zrychlení 3×, ligy, záznam bitvy) se ukáže krátký tip.
