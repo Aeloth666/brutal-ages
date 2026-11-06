@@ -94,7 +94,9 @@ function addFx(e) {
       smoke(6, 14, 1.1); part(10, '#fbbf24', 170, 2.4, 0.5); part(6, '#57534e', 120, 2.8, 0.7);
       fx.push({ ring: 1, x, y, l: 0.3, ml: 0.3, r: 40 }); break;
     case 'zap': fx.push({ fire: 1, x, y, r: 26, l: 0.3, ml: 0.3, col: '#38e1ff' }); part(10, '#a5f3fc', 140, 2, 0.4); break;
-    case 'muz': fx.push({ flash: 1, x, y, l: 0.09, ml: 0.09, r: 9 }); fx.push({ smoke: 1, x, y, vx: rnd(-10, 10), vy: -20, r: 5, l: 0.5, ml: 0.5 }); break;
+    case 'muz':
+      if (e[3] != null) { TSHOT.set(e[3] + '|' + e[4], T); const tu = V && V.pl[e[3]] && V.pl[e[3]].tur[e[4]]; if (tu && tu.a < 2) break; }   // vrhací stroje bez záblesku
+      fx.push({ flash: 1, x, y, l: 0.09, ml: 0.09, r: 9 }); fx.push({ smoke: 1, x, y, vx: rnd(-10, 10), vy: -20, r: 5, l: 0.5, ml: 0.5 }); break;
     case 'up': fx.push({ ring: 1, x, y, l: 0.6, ml: 0.6, r: 70, col: '#4ade80' }); part(12, '#86efac', 120, 2, 0.6, -60); break;
     case 'slam':
       fx.push({ ring: 1, x, y, l: 0.45, ml: 0.45, r: 130, col: '#fbbf24' }); fx.push({ fire: 1, x, y, r: 40, l: 0.35, ml: 0.35 });

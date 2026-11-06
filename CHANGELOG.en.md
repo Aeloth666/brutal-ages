@@ -4,6 +4,11 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.27 – 6. 11. 2026
+
+- Towers have firing animations: the stone thrower and catapult swing their arms, the sling spins up, the hive thrower flings a hive and a new one grows, the ballista fires and draws again, the cauldron pours oil, cannons recoil and puff smoke, the machine gun shakes and spits casings, the rocket launcher blasts flame backwards, the laser flashes a beam, the ion cannon sends a shockwave and the plasma orb shrinks and grows back.
+- Towers also move between shots (reloading, aiming, hovering) and throwing machines no longer show a cannon flash.
+
 ## Version 2.26 – 5. 11. 2026
 
 - Flags on the bases sit on poles, roofs and towers – none float in the air any more.

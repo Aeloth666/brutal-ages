@@ -97,6 +97,11 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.27', d: '2026-11-06', cs: [
+    'Věže mají animaci výstřelu: kamenomet a katapult švihnou ramenem, prak se roztočí, úlomet mrští úl a naroste nový, balista vystřelí šíp a znovu se natáhne, kotel vylije olej, děla poskočí zpátky a vyfouknou kouř, kulomet se třese a sype nábojnice, raketomet vyfoukne plamen dozadu, laser zableskne paprskem, iontové dělo vyšle rázovou vlnu a plazmová koule se smrští a znovu naroste.',
+    'I mezi výstřely se věže hýbou (nabíjení, mířidla, levitace) a vrhací stroje už nedělají záblesk jako děla.'], en: [
+    'Towers have firing animations: the stone thrower and catapult swing their arms, the sling spins up, the hive thrower flings a hive and a new one grows, the ballista fires and draws again, the cauldron pours oil, cannons recoil and puff smoke, the machine gun shakes and spits casings, the rocket launcher blasts flame backwards, the laser flashes a beam, the ion cannon sends a shockwave and the plasma orb shrinks and grows back.',
+    'Towers also move between shots (reloading, aiming, hovering) and throwing machines no longer show a cannon flash.'] },
   { v: '2.26', d: '2026-11-05', cs: [
     'Vlajky na základnách sedí na stožárech, střechách a věžích – žádná už nevisí ve vzduchu.',
     'Všech 15 věží je nakreslených znovu a podrobněji: kamenomet s kyvadlovým ramenem, prak, který se točí, úl s bzučícími včelami, katapult na kolech, balista s hořícím šípem, kotel vroucího oleje, bronzová děla na lafetách, hmoždíř, kulometné hnízdo z pytlů, raketomet, protitankové dělo se štítem a sci-fi zbraně se zářícími cívkami a plazmou.',

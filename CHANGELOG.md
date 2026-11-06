@@ -4,6 +4,11 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.27 – 6. 11. 2026
+
+- Věže mají animaci výstřelu: kamenomet a katapult švihnou ramenem, prak se roztočí, úlomet mrští úl a naroste nový, balista vystřelí šíp a znovu se natáhne, kotel vylije olej, děla poskočí zpátky a vyfouknou kouř, kulomet se třese a sype nábojnice, raketomet vyfoukne plamen dozadu, laser zableskne paprskem, iontové dělo vyšle rázovou vlnu a plazmová koule se smrští a znovu naroste.
+- I mezi výstřely se věže hýbou (nabíjení, mířidla, levitace) a vrhací stroje už nedělají záblesk jako děla.
+
 ## Verze 2.26 – 5. 11. 2026
 
 - Vlajky na základnách sedí na stožárech, střechách a věžích – žádná už nevisí ve vzduchu.

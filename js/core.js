@@ -602,7 +602,7 @@ function step(dt) {
         const o = slotPos(s, k);
         S.proj.push({ id: S.nid++, x: o.x, y: o.y, tid: fe.id, tx: fe.x, ty: GY - 22,
           d: d.d * atkMul(s) * (p.sb ? p.sb.tur : 1), side: s, p: d.p, sp: d.sp || 0, v: SPD[d.p], src: 't' });
-        S.ev.push([o.x + (s ? -12 : 12), o.y, 'muz']);
+        S.ev.push([o.x + (s ? -12 : 12), o.y, 'muz', s, k]);       // s, k: která věž střílí (animace výstřelu)
       }
     });
   }

@@ -10,7 +10,7 @@ function drawBase(s, p) {
   for (let k = 0; k < p.slots; k++) {
     const y = -170 + k * 36;
     ledge(p.age, y);
-    if (p.tur[k]) drawTurret(p.tur[k].a, p.tur[k].i, 54, y + 2);
+    if (p.tur[k]) drawTurret(p.tur[k].a, p.tur[k].i, 54, y + 2, T - (TSHOT.get(s + '|' + k) ?? -99));
   }
   c.restore();
   if (p.hp > 0 && p.hp < p.mhp * 0.5) baseDamage(MX(BX[s]), p.hp < p.mhp * 0.2, s);
@@ -100,4 +100,4 @@ function smoke(x, y, n, col, sp = 0.4) {
 function sandbags(x0, w, rows) {
   for (let r = 0; r < rows; r++) for (let x = x0 + r * 7; x < x0 + w - r * 7; x += 16) { rr(x, -10 - r * 9, 16, 10, 5); fo(r % 2 ? '#c8b98a' : '#b4a474', 1.1); }
 }
-function drawTurret(a, i, x, y) { c.save(); c.translate(x, y); c.scale(1.12, 1.12); TUR[a](i, a); c.restore(); }   // věže jsou v turrets.js
+function drawTurret(a, i, x, y, f = 99) { c.save(); c.translate(x, y); c.scale(1.12, 1.12); TUR[a](i, f); c.restore(); }   // f = s od posledního výstřelu   // věže jsou v turrets.js
