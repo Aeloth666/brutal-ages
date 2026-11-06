@@ -31,7 +31,7 @@ const AGES = [
       { n: 'Mamutí jezdec', c: 70,  hp: 200, d: 40, r: 24,  s: 36, cd: 1.3, t: 3.0 }],
     turrets: [
       { n: 'Kamenomet',  c: 100, d: 10, r: 330, cd: 1.1,  p: 'stone' },
-      { n: 'Prakostroj', c: 200, d: 7,  r: 350, cd: 0.55, p: 'stone' },
+      { n: 'Prakostroj', c: 200, d: 6,  r: 350, cd: 0.6,  p: 'stone' },
       { n: 'Úlomet',     c: 500, d: 28, r: 340, cd: 1.5,  p: 'egg', sp: 30 }],
     sp: { n: 'Meteority', d: 50, count: 16, p: 'meteor' } },
   { name: 'Středověk', xp: 14000, baseHp: 1100,

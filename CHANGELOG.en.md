@@ -4,6 +4,10 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.28.4 – 6. 11. 2026
+
+- The sling engine is weaker: damage 7 → 6 and it fires a bit slower (0.55 → 0.6 s). The sling no longer spins frantically – it circles calmly and just flicks when it fires.
+
 ## Version 2.28.3 – 6. 11. 2026
 
 - Stones from the stone thrower, sling and catapult, hives, red-hot oil and mortar bombs now fly in a high arc – up and then down onto the enemy. The further the target, the higher the arc.

@@ -54,10 +54,10 @@ const TUR = [
       rope(-2, -10, -12, 0);
     } else if (i === 1) {    // Prakostroj: prak se roztočí a pustí kámen
       limb([-2, 0, -2, -14], '#8b5a2b', 3.4); limb([-2, -14, -8, -22], '#8b5a2b', 2.8); limb([-2, -14, 4, -22], '#8b5a2b', 2.8);
-      const sp = 7 + (f < 0.5 ? 10 * (1 - f / 0.5) : 0), a = T * sp, sx = -2 + Math.cos(a) * 9, sy = -24 + Math.sin(a) * 4;
+      const a = T * 3.6 + (f < 0.2 ? (1 - f / 0.2) * 0.8 : 0), sx = -2 + Math.cos(a) * 7, sy = -24 + Math.sin(a) * 3;   // klidné kroužení, při výstřelu krátké švihnutí
       c.strokeStyle = '#c9a66b'; c.lineWidth = 1.1; ln(-8, -22, sx, sy); ln(4, -22, sx, sy);
       c.beginPath(); c.ellipse(sx, sy, 3.4, 2.2, a, 0, Math.PI * 2); fo('#8a5a32', 1);
-      if (f > 0.55) stoneBall(sx, sy - 1, 2.9);
+      if (f > 0.3) stoneBall(sx, sy - 1, 2.9);
     } else {                 // Úlomet: rameno mrští úl, nový úl naroste
       const th = throwA(f);
       c.save(); c.translate(-8, 0); c.rotate(-th * 0.9); c.translate(8, 0);

@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.28.4 – 6. 11. 2026
+
+- Prakostroj je slabší: poškození 7 → 6 a střílí o něco pomaleji (0,55 → 0,6 s). Prak se už netočí zběsile – klidně krouží a při výstřelu jen švihne.
+
 ## Verze 2.28.3 – 6. 11. 2026
 
 - Kameny z kamenometu, praku a katapultu, úly, rozžhavený olej i bomby z hmoždíře letí obloukem vrchem – nahoru a pak dolů na nepřítele. Čím je cíl dál, tím je oblouk vyšší.
