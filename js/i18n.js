@@ -122,6 +122,14 @@ const EN = {
   'Použij': 'Use', 'schopnost armády': 'army abilities', 'Poraz': 'Defeat', 'bosse': 'boss', 'bossy': 'bosses',
   'misi na hrdinskou obtížnost': 'mission on heroic difficulty', 'mise na hrdinskou obtížnost': 'missions on heroic difficulty',
   'bonusy v nekonečném přežití': 'bonuses in endless survival', 'bonusů v nekonečném přežití': 'bonuses in endless survival', 'vyhrál minulý týden klanovou válku': 'won the clan war last week',
+  // týdenní přežití
+  'Bez věží': 'No towers', 'Jen pěchota': 'Infantry only', 'Smíš vyrábět jen první jednotku věku.': 'You may only build the first unit of the age.', 'Smíš vyrábět jen druhou jednotku věku': 'You may only build the second unit of the age', 'střelce': 'ranged',
+  'Dvojnásobní bossové': 'Double bosses', 'Na každé bossí vlně přijde o bosse víc.': 'Every boss wave brings one more boss.', 'Rychlá horda': 'Fast horde', 'Nepřátelé běží o': 'Enemies run', 'Bohatý začátek': 'Rich start',
+  'Začínáš s': 'You start with', 'ale za zabití dostaneš o': 'but you get', 'Bez schopností': 'No abilities', 'Schopnosti armády nejdou použít.': 'Army abilities cannot be used.', 'Skleněná armáda': 'Glass army',
+  'Nepřátelé mají poloviční zdraví': 'Enemies have half health', 'ale útočí dvakrát silněji.': 'but hit twice as hard.', 'Početné vlny': 'Big waves', 'Vlny jsou o': 'Waves are', 'početnější': 'bigger',
+  'Týdenní přežití': 'Weekly survival', 'Nekonečné přežití se zvláštními pravidly': 'Endless survival with special rules', 'Každý týden jiná': 'Different every week', 'pro všechny stejná': 'the same for everyone',
+  'a vlastní žebříček od nuly': 'and its own leaderboard from zero', 'Nová pravidla za': 'New rules in', 'Tvůj rekord tohoto týdne': 'Your best this week', 'Žebříček týdne': 'Weekly leaderboard',
+  'Tento týden zatím nikdo nehrál': 'Nobody has played this week yet', 'buď první': 'be the first', 'REKORD TÝDNE': 'WEEKLY RECORD', 'TÝDENNÍ': 'WEEKLY', 'den': 'day', 'dny': 'days', 'dní': 'days',
   // kampaň – 3. kapitola
   'Ztracené údolí': 'Lost valley', 'Ze střepů stroje času se zrodila Stínová horda': 'From the shards of the time machine the Shadow Horde was born', 'Jejich první zvědové se plíží mlhou údolím': 'Their first scouts creep through the mist of the valley', 'kde všechno začalo': 'where it all began',
   'Kopí a praky ti vzala mlha': 'The mist took your spears and slings', 'máš jen jeskyňáky s kyji a z doby kamenné se nedostaneš': 'you only have cavemen with clubs and you cannot leave the stone age',

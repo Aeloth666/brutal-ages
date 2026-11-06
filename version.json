@@ -1,6 +1,6 @@
 {
-    "build":  202611061306,
-    "name":  "2.29.2",
+    "build":  202611061312,
+    "name":  "2.30",
     "apk":  11,
     "apkName":  "2.0",
     "apkUrl":  "https://aeloth666.github.io/brutal-ages/BrutalAges.apk",
@@ -52,6 +52,7 @@
                   "js/update.js",
                   "js/weapons.js",
                   "js/weather.js",
+                  "js/weekly.js",
                   "js/world.js",
                   "lib/peerjs.min.js"
               ]

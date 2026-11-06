@@ -84,7 +84,7 @@ function hud(V) {
   const lim = mm.survive || mm.limit, tl = lim ? ' · ' + fmtTime(Math.max(0, lim - V.time)) : '';
   if (ch) label = 'VÝZVA: ' + ch.n.toUpperCase() + tl;
   if (V.daily) label = DAILY.n.toUpperCase() + tl;
-  if (V.surv || curSurv) label = `♾ PŘEŽITÍ · VLNA ${V.surv} · DALŠÍ ZA ${V.survT} S · REKORD ${SURVB.best}`;
+  if (V.surv || curSurv) label = curWk ? `🗓 TÝDENNÍ · VLNA ${V.surv} · DALŠÍ ZA ${V.survT} S · REKORD ${survwBest()}` : `♾ PŘEŽITÍ · VLNA ${V.surv} · DALŠÍ ZA ${V.survT} S · REKORD ${SURVB.best}`;
   else if (specMode) label = '👁 DIVÁK · ' + (OPP.n || 'hostitel').toUpperCase() + ' vs SOUPEŘ';
   else if (cm) label = (curDef != null ? 'OBRANA ÚZEMÍ: ' : curHero != null ? `🔥 HRDINSKÁ ${V.camp + 1}: ` : `KAMPAŇ ${V.camp + 1}/${CAMP.length}: `) + cm.n.toUpperCase() + tl;
   c.fillText(label, W - 14, 72, 222);
@@ -213,10 +213,10 @@ function drawOrders(p) {
 // schopnosti armády: kamenné desky zapuštěné do hlíny pod bojištěm (klávesy A S D F)
 function drawAbils(p) {
   abilBtns = [];
-  if (!p.abc || (tut && !TUT.slice(0, tut.i + 1).some(s => s.abil != null))) return;
+  if (!p.abc || (tut && !TUT.slice(0, tut.i + 1).some(s => s.abil != null)) || modsOf(V).noAbil) return;
   const w = 128, h = 60, gap = 12, x0 = W / 2 - (ABIL.length * w + (ABIL.length - 1) * gap) / 2, y = GY + 22;
   ABIL.forEach((A, k) => {
-    const b = { x: x0 + k * (w + gap), y, w, h, k }, act = p.ab[k] > 0, cd = p.abc[k], ok = cd <= 0;
+    const b = { x: x0 + k * (w + gap), y, w, h, k }, act = p.ab[k] > 0, cd = Math.max(p.abc[k], act ? 0 : p.abl || 0), ok = cd <= 0;   // abl = krátká pauza po jiné schopnosti
     // zapuštění do země: tmavý okraj a vnitřní stín
     rr(b.x - 3, b.y - 3, w + 6, h + 6, 12); c.fillStyle = 'rgba(20,12,6,.75)'; c.fill();
     rr(b.x, b.y, w, h, 10); c.fillStyle = act ? `rgba(${A.col},.55)` : ok ? '#3a3027' : '#241d17'; c.fill();

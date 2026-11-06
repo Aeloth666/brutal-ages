@@ -320,10 +320,11 @@ function startGame(r, chal = null, camp = null, daily = false) {
   curHero = r === 'solo' && camp != null && curDef == null && heroNext === camp ? camp : null; heroNext = null;   // hrdinská obtížnost
   heroM = curHero != null ? heroMission(camp) : null;
   curSurv = r === 'solo' && survNext && chal == null && camp == null; survNext = false;
+  curWk = curSurv && wkNext; wkNext = false;                                   // týdenní přežití
   lastBst = null;
   if (r === 'solo' || (r === 'host' && coop)) {
     curChal = chal; curCamp = camp; curDaily = daily;
-    const ch = chal != null ? CHAL[chal] : camp != null ? (curDef != null ? defMission(camp) : heroM || CAMP[camp]) : daily ? DAILY : curSurv ? SURV : null, di = ch ? ch.diff : SET.diff, D = DIFF[di];
+    const ch = chal != null ? CHAL[chal] : camp != null ? (curDef != null ? defMission(camp) : heroM || CAMP[camp]) : daily ? DAILY : curSurv ? (curWk ? WSURV() : SURV) : null, di = ch ? ch.diff : SET.diff, D = DIFF[di];
     S.diff = di; Object.assign(S.pl[1], { gm: D.gm, xm: D.xm, gold: D.gold });
     if (ch) {
       const M = S.mods = ch.mods, me = S.pl[0], e = S.pl[1];

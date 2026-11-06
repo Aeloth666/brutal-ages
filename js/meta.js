@@ -61,7 +61,7 @@ function record(won, V) {
   const me = V.pl[mySide];
   ST.games++; ST.kills += me.kills;
   if (role === 'solo' || coop) {
-    if (curSurv) survEnd(V);
+    if (curSurv) curWk ? survwEnd(V) : survEnd(V);
     else if (V.daily) dailyResult(won, V);
     else if (V.camp != null) curDef != null ? defResult(won) : campResult(won, V);
     else if (coop) ST.coop = (ST.coop || 0) + (won ? 1 : 0);

@@ -4,6 +4,13 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.30 – 6. 11. 2026
+
+- Weekly survival (Play solo → 🗓): endless survival with two special rules of the week (no towers, ranged only, double bosses, fast horde, glass army…), the same for everyone. Its own leaderboard starts from zero every week.
+- Units attack with more life: fighters step into their swing and leave a slash trail, gunners recoil, muzzles flash, muskets smoke and machine guns eject casings. Units flinch backwards when hit.
+- Every tower has its own firing sound: the stone thrower thump, sling whoosh, buzzing hives, ballista twang, sizzling oil, booming cannons, machine-gun bursts, rocket launch, laser and plasma.
+- Army abilities: 4 s must pass between two abilities so they cannot all be fired at once.
+
 ## Version 2.29.2 – 6. 11. 2026
 
 - The oil cauldron pours its stream all the way to the ground below the wall – from the top floor the oil falls longer, from the bottom one right away. It splashes and burns on the ground.

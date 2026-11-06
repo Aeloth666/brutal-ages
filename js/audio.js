@@ -108,6 +108,22 @@ function sfx(k, x) {
     case 'win': [0, 4, 7, 12, 7, 12].forEach((n, i) => osc(dest, t + i * 0.14, mtof(67 + n), i === 5 ? 1.2 : 0.3, 'square', 0.12, { lp: 2400, rev: 1, sus: 1 })); break;
     case 'lose': [7, 3, 0, -5].forEach((n, i) => osc(dest, t + i * 0.25, mtof(60 + n), i === 3 ? 1.4 : 0.35, 'sawtooth', 0.1, { lp: 1200, rev: 1, sus: 1 })); break;
     case 'click': osc(dest, t, 660, 0.05, 'triangle', 0.15); break;
+    // ---- věže: každá svůj zvuk výstřelu (tu + věk + druh) ----
+    case 'tu00': osc(dest, t, 120, 0.14, 'triangle', 0.3, { f2: 60 }); noise(dest, t, 0.1, 0.18, 'lowpass', 500); break;                       // kamenomet: dřevěné bouchnutí
+    case 'tu01': noise(dest, t, 0.16, 0.22, 'bandpass', 900, { f2: 2400, q: 2 }); break;                                                     // prak: švih
+    case 'tu02': noise(dest, t, 0.2, 0.2, 'bandpass', 700, { f2: 1600, q: 1.5 }); osc(dest, t + 0.05, 190, 0.45, 'sawtooth', 0.05, { vib: 1, lp: 900 }); break;   // úlomet: švih a bzukot
+    case 'tu10': osc(dest, t, 95, 0.22, 'triangle', 0.38, { f2: 42 }); noise(dest, t, 0.22, 0.25, 'lowpass', 320, { rev: 1 }); noise(dest, t + 0.03, 0.12, 0.08, 'bandpass', 1800); break;   // katapult: těžký úder ramene
+    case 'tu11': osc(dest, t, 240, 0.28, 'triangle', 0.25, { f2: 170 }); noise(dest, t, 0.04, 0.2, 'highpass', 3000); noise(dest, t, 0.3, 0.12, 'bandpass', 600, { f2: 300 }); break;   // balista: drnknutí tětivy a oheň
+    case 'tu12': noise(dest, t, 0.7, 0.2, 'bandpass', 4200, { q: 0.6 }); noise(dest, t, 0.4, 0.12, 'lowpass', 300); break;                    // kotel: syčení oleje
+    case 'tu20': case 'tu21': noise(dest, t, 0.5, 0.6, 'lowpass', 700, { f2: 110, rev: 1 }); osc(dest, t, 75, 0.35, 'sine', 0.45, { f2: 35 }); break;   // dělo
+    case 'tu22': noise(dest, t, 0.7, 0.6, 'lowpass', 400, { f2: 80, rev: 1 }); osc(dest, t, 55, 0.5, 'sine', 0.5, { f2: 28 }); break;           // hmoždíř: hluboké dunění
+    case 'tu30': for (let k = 0; k < 6; k++) { noise(dest, t + k * 0.065, 0.04, 0.32, 'highpass', 1400); osc(dest, t + k * 0.065, 140, 0.03, 'square', 0.08); } break;   // kulomet: dávka
+    case 'tu31': noise(dest, t, 0.7, 0.4, 'bandpass', 380, { f2: 1600, q: 1.2 }); osc(dest, t, 90, 0.4, 'sawtooth', 0.08, { lp: 500 }); break;   // raketomet: syčivý start
+    case 'tu32': noise(dest, t, 0.1, 0.45, 'highpass', 900); noise(dest, t, 0.45, 0.5, 'lowpass', 600, { f2: 100, rev: 1 }); osc(dest, t, 90, 0.25, 'sine', 0.35, { f2: 40 }); break;   // protitankové: ostrá rána
+    case 'tu40': osc(dest, t, 1700, 0.18, 'sawtooth', 0.12, { f2: 420, lp: 4000 }); osc(dest, t, 900, 0.12, 'sine', 0.1, { f2: 300 }); break;   // laser
+    case 'tu41': osc(dest, t, 260, 0.16, 'square', 0.1, { f2: 1300, lp: 3000 }); osc(dest, t + 0.12, 70, 0.35, 'sine', 0.3, { f2: 40 }); break;   // iontové dělo: nabití a ráz
+    case 'tu42': osc(dest, t, 220, 0.38, 'sine', 0.3, { f2: 55, vib: 1 }); noise(dest, t, 0.3, 0.15, 'lowpass', 900, { f2: 200 }); break;     // plazma: hluboké vžum
+    case 'sizzle': noise(dest, t, 0.9, 0.3, 'bandpass', 3800, { q: 0.5 }); noise(dest, t, 0.25, 0.25, 'lowpass', 400); break;                 // dopad rozžhaveného oleje
     // zvířata (hlasy přes formanty – voice()): ozvou se při nástupu do boje
     case 'mammoth': voice(dest, t, 380, 760, 0.25, 'a', 0.12, { vib: 7, vd: 0.03 }); voice(dest, t + 0.22, 760, 560, 0.75, 'a', 0.14, { vib: 9, vd: 0.05 }); noise(dest, t, 0.9, 0.12, 'bandpass', 1300, { q: 2 }); break;
     case 'wolf': voice(dest, t, 330, 560, 0.5, 'u', 0.09, { vib: 5, vd: 0.01 }); voice(dest, t + 0.48, 560, 400, 1.1, 'o', 0.09, { vib: 5, vd: 0.015 }); break;

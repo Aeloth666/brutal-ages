@@ -20,7 +20,7 @@ cv.addEventListener('pointerdown', e => {
       else if (b.k === 'sfx') { SET.sfx = !SET.sfx; saveSet(); }
       else if (b.k === 'vib') { SET.vib = !SET.vib; saveSet(); vib(60); }
       else if (b.k === 'quit') toMenu();
-      else if (b.k === 'restart' && confirm('Začít tohle kolo znovu? Rozehraná bitva se ztratí.')) { defNext = curDef; heroNext = curHero; survNext = curSurv; startGame('solo', curChal, curCamp, curDaily); }
+      else if (b.k === 'restart' && confirm('Začít tohle kolo znovu? Rozehraná bitva se ztratí.')) { defNext = curDef; heroNext = curHero; survNext = curSurv; wkNext = curWk; startGame('solo', curChal, curCamp, curDaily); }
     }
     return;
   }
@@ -32,7 +32,7 @@ cv.addEventListener('pointerdown', e => {
       else if (b.k === 'bst') { renderBst(); openPanel('bstPanel'); }
       else if (b.k === 'camp') { const k = curCamp + (V.over === mySide ? 1 : 0); toMenu(); openCamp(Math.min(k, CAMP.length - 1)); }
       else if (b.k === 'next') startGame('solo', null, curCamp + 1);
-      else if (role === 'solo') { defNext = curDef; heroNext = curHero; survNext = curSurv; startGame('solo', curChal, curCamp, curDaily); }
+      else if (role === 'solo') { defNext = curDef; heroNext = curHero; survNext = curSurv; wkNext = curWk; startGame('solo', curChal, curCamp, curDaily); }
       else if (!rmMe) {
         rmMe = true; send({ t: 'rm' });
         if (role === 'host') hostRmCheck();
@@ -53,7 +53,7 @@ cv.addEventListener('pointerdown', e => {
     else chatOpen = true;
     return;
   }
-  for (const b of abilBtns) if (hit(b)) { const p = V.pl[mySide]; if (p.abc && p.abc[b.k] <= 0) { act({ a: 'abil', k: b.k }); BTN_FLASH.set('ab' + b.k, T); } return; }
+  for (const b of abilBtns) if (hit(b)) { const p = V.pl[mySide]; if (p.abc && p.abc[b.k] <= 0 && !(p.abl > 0)) { act({ a: 'abil', k: b.k }); BTN_FLASH.set('ab' + b.k, T); } return; }
   for (const b of orderBtns) if (hit(b)) { if (b.k === 'rage') act({ a: 'rage' }); else if (V.pl[mySide].ord !== b.k) act({ a: 'ord', o: b.k }); return; }
   for (const b of btns) if (hit(b)) {
     if (b.cmd === 'tmode') { if (b.ok) { uiMode = 'turrets'; sfx('click'); } }
@@ -165,7 +165,7 @@ addEventListener('keydown', e => {
   else if (k === 'u') uiMode = uiMode === 'upgrades' ? 'units' : 'upgrades';
   else if (k === 'q' || k === 'w' || k === 'e') { const o = 'qwe'.indexOf(k); if (V.pl[mySide].ord !== o) act({ a: 'ord', o }); }
   else if (k === 'r') act({ a: 'rage' });
-  else if ('asdf'.includes(k) && k.length === 1) { const i = 'asdf'.indexOf(k), p = V.pl[mySide]; if (p.abc && p.abc[i] <= 0) { act({ a: 'abil', k: i }); BTN_FLASH.set('ab' + i, T); } }
+  else if ('asdf'.includes(k) && k.length === 1) { const i = 'asdf'.indexOf(k), p = V.pl[mySide]; if (p.abc && p.abc[i] <= 0 && !(p.abl > 0)) { act({ a: 'abil', k: i }); BTN_FLASH.set('ab' + i, T); } }
   else if (k === 'tab') { if (role === 'solo' && S) S.speed = S.speed >= 3 ? 1 : (S.speed || 1) + 1; }
   else return;
   e.preventDefault();

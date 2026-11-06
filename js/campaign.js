@@ -104,7 +104,7 @@ const heroMission = i => { const m = CAMP[i], md = { ...m.mods }, a = md.age || 
   if (md.survive) md.survive = Math.round(md.survive * 1.2 / 30) * 30;
   if (md.limit) md.limit = Math.round(md.limit * 0.9 / 30) * 30;
   return { ...m, diff: Math.min(4, m.diff + 1), mods: md, par: m.par && Math.round(m.par * 1.1) }; };
-const modsOf = V => (V.chal != null ? CHAL[V.chal].mods : V.camp != null ? (curHero === V.camp && heroM ? heroM.mods : CAMP[V.camp].mods) : V.daily ? DAILY.mods : null) || {};
+const modsOf = V => (V.chal != null ? CHAL[V.chal].mods : V.camp != null ? (curHero === V.camp && heroM ? heroM.mods : CAMP[V.camp].mods) : curWk && S ? S.mods : V.daily ? DAILY.mods : null) || {};
 
 // hvězdy: 1 za vítězství, 2 za základnu nad polovinou, 3 za rychlost (u obrany za téměř nedotčenou základnu)
 function starRules(m) {

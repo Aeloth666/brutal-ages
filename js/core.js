@@ -19,7 +19,7 @@ const ABIL = [
   { ic: '💨', n: 'Vpřed!', d: 'Armáda běží o 50 % rychleji a útočí o 30 % rychleji.', t: 6, cd: 50, col: '34,197,94' },
   { ic: '❤️', n: 'Lazaret', d: 'Armáda si každou sekundu doplní 4 % zdraví.', t: 8, cd: 75, col: '236,72,153' },
 ];
-const ABIL_START = 20;                                 // na začátku bitvy se schopnosti nejdřív nabíjí
+const ABIL_START = 20, ABIL_GAP = 4;                   // ABIL_GAP: po použití schopnosti jde další až za 4 s (nejdou zapnout všechny naráz)
 const abOn = (s, k) => { const p = S.pl[s]; return p && p.ab && p.ab[k] > 0; };
 function newPlayer() {
   return { gold: START_GOLD, xp: 0, age: 0, hp: AGES[0].baseHp, mhp: AGES[0].baseHp,
@@ -100,8 +100,8 @@ function applyCmd0(s, c) {
     case 'sbon': if (s === 0 && S.surv) survPickBon(c.i); break;
     case 'abil': {
       const k = c.k | 0, A = ABIL[k];
-      if (!A || !p.abc || p.abc[k] > 0) return;
-      p.ab[k] = A.t; p.abc[k] = A.cd;
+      if (!A || !p.abc || p.abc[k] > 0 || p.abl > 0 || (s === 0 && M.noAbil)) return;
+      p.ab[k] = A.t; p.abc[k] = A.cd; p.abl = ABIL_GAP;
       S.ev.push([BX[s] + (s ? -160 : 160), GY - 120, 'abil', s, k]); break;
     }
     case 'rage': {
@@ -333,6 +333,7 @@ function step(dt) {
     if (p.pick > 0) p.pick = Math.max(0, p.pick - dt / (S.speed || 1));   // reálné sekundy i při 2×
     if (p.rgcd > 0) p.rgcd = Math.max(0, p.rgcd - dt);
     if (p.acd > 0) p.acd = Math.max(0, p.acd - dt);
+    if (p.abl > 0) p.abl = Math.max(0, p.abl - dt);
     if (p.ab) for (let k = 0; k < ABIL.length; k++) {
       if (p.ab[k] > 0) p.ab[k] = Math.max(0, p.ab[k] - dt);
       if (p.abc[k] > 0) p.abc[k] = Math.max(0, p.abc[k] - dt * (p.sb ? p.sb.ab : 1));
@@ -402,7 +403,7 @@ function step(dt) {
         u.st = 2;
         if (u.cd <= 0) { u.cd = d.cd * (u.rage ? 0.8 : 1) * (abOn(s, 2) ? 0.77 : 1); u.at = 1; attack(u, d, tgt, dir); }
       } else {
-        let mv = d.s * (facOf(s).spd || 1) * (u.rage ? 1.2 : 1) * (abOn(s, 2) ? 1.5 : 1) * fieldSpd(u) * dt;
+        let mv = d.s * (facOf(s).spd || 1) * (u.rage ? 1.2 : 1) * (abOn(s, 2) ? 1.5 : 1) * (u.vm || 1) * fieldSpd(u) * dt;
         if (ord === 2) mv = 0;
         if (ord === 1) mv = Math.min(mv, (BX[s] + dir * HOLD - u.x) * dir);   // drž linii u věží
         for (let j = i - 1; j >= 0; j--) if (!F[j].dead) {

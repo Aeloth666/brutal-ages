@@ -146,7 +146,13 @@ function stump(x, y, r) {
 }
 
 const THROWN = ['stone', 'axe'];                       // střely, které se házejí rukou (luky a pušky míří)
+// útok: bojovník při seku vykročí dopředu, střelce s puškou trhne zpětný ráz dozadu
 function human(team, age, ty, ph, at, st, o = {}) {
+  const melee = ty !== 1, dx = at > 0 ? (melee ? Math.sin(Math.min(1, (1 - at) / 0.65) * Math.PI) * 2.4 : age >= 2 ? -at * at * 2 : 0) : 0;
+  if (!dx) return humanBody(team, age, ty, ph, at, st, o);
+  c.save(); c.translate(dx, 0); humanBody(team, age, ty, ph, at, st, o); c.restore();
+}
+function humanBody(team, age, ty, ph, at, st, o = {}) {
   const walk = st === 0 && !o.sit;
   const bob = walk ? -Math.abs(Math.cos(ph)) * 1.6 : 0;
   const OF = outfitOf(team, age), G = GORE;
@@ -189,15 +195,40 @@ function human(team, age, ty, ph, at, st, o = {}) {
     ang = at <= 0 ? 3.5 + (walk ? Math.sin(ph) * 0.08 : 0)
       : t < 0.2 ? lerp(1.1, 0.45, t / 0.2) : t < 0.45 ? 0.45 : lerp(0.45, 3.5, (t - 0.45) / 0.55);
   } else ang = Math.PI / 2 + at * 0.3;
+  // švih: bílá stopa za zbraní během seku
+  if (ty !== 1 && at > 0) {
+    const t = 1 - at;
+    if (t > 0.3 && t < 0.7) {
+      const R = 30, a0 = 2.7, a1 = ang, fade = 1 - Math.abs(t - 0.5) / 0.2;
+      c.lineCap = 'round';
+      for (const [w, al] of [[5, 0.16], [2.2, 0.4]]) {
+        c.strokeStyle = `rgba(255,255,255,${al * Math.max(0, fade)})`; c.lineWidth = w; c.beginPath();
+        for (let k = 0; k <= 8; k++) { const a = a0 + (a1 - a0) * k / 8; const x = 2 + Math.sin(a) * R, y = -33 + bob + Math.cos(a) * R; k ? c.lineTo(x, y) : c.moveTo(x, y); }
+        c.stroke();
+      }
+    }
+  }
   c.save(); c.translate(2, -33 + bob); c.rotate(-ang);
   const len = ty === 1 ? 11 - at * 2 : 12;
   limb([0, 0, 0.9, len / 2, 0, len], sleeve || SK[0], 3.8);
   c.translate(0, len);
   if (ty >= 0) weapon(team, age, ty, at);
+  if (ty === 1 && age >= 2 && at > 0.72) muzzleFlash(age, at);
   c.beginPath(); c.arc(0, 0, 2.5, 0, Math.PI * 2); fo(SK[0], 1.2);
   c.restore();
 }
 
+// záblesk z hlavně střelce (v souřadnicích ruky – hlaveň míří po +y)
+function muzzleFlash(age, at) {
+  const tip = [0, 0, 34, 28, 19][age], k = (at - 0.72) / 0.28, op = c.globalCompositeOperation;
+  c.globalCompositeOperation = 'lighter';
+  const col = age === 4 ? '#7ff3ff' : '#ffd27a';
+  c.fillStyle = col; c.beginPath(); c.moveTo(-2.4 * k, tip); c.lineTo(0, tip + 9 * k); c.lineTo(2.4 * k, tip); c.closePath(); c.fill();
+  glowDot(0, tip + 2, 9 * k, age === 4 ? '#38e1ff' : '#ffb347');
+  c.globalCompositeOperation = op;
+  if (age === 2) { c.fillStyle = `rgba(225,225,225,${0.5 * (1 - k)})`; circ(1, tip + 4, 3 + (1 - k) * 4); }        // dým z mušket
+  if (age === 3) { c.fillStyle = '#e5c04a'; c.save(); c.translate(-3 - (1 - k) * 5, 12 - (1 - k) * 4); c.rotate(k * 6); c.fillRect(-1.2, -0.5, 2.4, 1); c.restore(); }   // nábojnice
+}
 function shield(team, bob) {
   c.save(); c.translate(-6, -26 + bob);
   c.beginPath(); c.moveTo(-6, -8); c.lineTo(6, -8); c.lineTo(6, 2); c.quadraticCurveTo(0, 11, -6, 2); c.closePath();

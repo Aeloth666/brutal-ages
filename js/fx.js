@@ -68,7 +68,7 @@ function drawProj(pr) {
 // =====================================================================
 function addFx(e) {
   const [x, y, k] = e;
-  sfx(k, x);
+  if (!(k === 'muz' && e[3] != null)) sfx(k, x);                 // výstřel věže má vlastní zvuk podle druhu věže (níž)
   const part =(n, col, sp, r, l, g = 320) => { n = Math.round(n * GFX_PART[GFXL]); for (let i = 0; i < n; i++) fx.push({ x, y, vx: rnd(-sp, sp), vy: rnd(-sp * 1.4, sp * 0.2), l, ml: l, col, r, g }); };
   const smoke = (n, r, l) => { n = Math.max(1, Math.round(n * GFX_PART[GFXL])); for (let i = 0; i < n; i++) fx.push({ smoke: 1, x: x + rnd(-10, 10), y: y + rnd(-8, 4), vx: rnd(-15, 15), vy: rnd(-40, -15), r: r * rnd(0.6, 1.2), l, ml: l }); };
   switch (k) {
@@ -102,9 +102,14 @@ function addFx(e) {
     case 'zap': fx.push({ fire: 1, x, y, r: 26, l: 0.3, ml: 0.3, col: '#38e1ff' }); part(10, '#a5f3fc', 140, 2, 0.4); break;
     case 'oilsp':                                     // dopad oleje: cákance a hořící louže
       fx.push({ burn: 1, x, y: GY - 2, r: 30, l: 1.6, ml: 1.6 }); fx.push({ fire: 1, x, y: y, r: 26, l: 0.3, ml: 0.3 });
-      part(18, '#f97316', 170, 2.4, 0.7, -160); part(8, '#fde047', 120, 1.6, 0.5, -120); smoke(4, 10, 1.2); sfx('boom', x); break;
+      part(18, '#f97316', 170, 2.4, 0.7, -160); part(8, '#fde047', 120, 1.6, 0.5, -120); smoke(4, 10, 1.2); sfx('sizzle', x); break;
     case 'muz':
-      if (e[3] != null) { TSHOT.set(e[3] + '|' + e[4], T); const tu = V && V.pl[e[3]] && V.pl[e[3]].tur[e[4]]; if (tu && tu.a < 2) break; }   // vrhací stroje bez záblesku
+      if (e[3] != null) {
+        TSHOT.set(e[3] + '|' + e[4], T);
+        const tu = V && V.pl[e[3]] && V.pl[e[3]].tur[e[4]];
+        sfx(tu ? 'tu' + tu.a + tu.i : 'muz', x);
+        if (tu && tu.a < 2) break;                                    // vrhací stroje bez záblesku
+      }
       fx.push({ flash: 1, x, y, l: 0.09, ml: 0.09, r: 9 }); fx.push({ smoke: 1, x, y, vx: rnd(-10, 10), vy: -20, r: 5, l: 0.5, ml: 0.5 }); break;
     case 'up': fx.push({ ring: 1, x, y, l: 0.6, ml: 0.6, r: 70, col: '#4ade80' }); part(12, '#86efac', 120, 2, 0.6, -60); break;
     case 'slam':

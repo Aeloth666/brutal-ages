@@ -4,6 +4,13 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.30 – 6. 11. 2026
+
+- Týdenní přežití (Hrát sám → 🗓): nekonečné přežití se dvěma zvláštními pravidly týdne (bez věží, jen střelci, dvojnásobní bossové, rychlá horda, skleněná armáda…), pro všechny stejnými. Vlastní žebříček, který každý týden začíná od nuly.
+- Jednotky útočí živěji: bojovník při seku vykročí a za zbraní zůstane švih, střelce s puškou trhne zpětný ráz, z hlavně vyletí záblesk, mušketa zakouří a kulomet vyhazuje nábojnice. Zasažená jednotka cukne dozadu.
+- Každá věž má vlastní zvuk výstřelu: bouchnutí kamenometu, švih praku, bzučení úlů, drnknutí balisty, syčení oleje, dunění děl, dávka kulometu, start rakety, laser i plazma.
+- Schopnosti armády: mezi dvěma schopnostmi musí uplynout 4 s, aby nešly zapnout všechny naráz.
+
 ## Verze 2.29.2 – 6. 11. 2026
 
 - Kotel oleje lije proud až na zem pod hradbou – z horního patra padá olej déle, z dolního hned. Na zemi cákne a chvíli hoří.

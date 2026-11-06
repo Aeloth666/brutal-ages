@@ -38,13 +38,14 @@ function survTick(dt) {
     const w = V2.wave, a = Math.min(4, Math.floor((w - 1) / 5));
     if (a > e.age) { e.age = a; e.hp = e.mhp = AGES[a].baseHp * 3; }
     e.af = e.af || [0, 0, 0, 0, 0];
-    const n = Math.min(36, 3 + Math.floor(w * 1.2));
+    const M = S.mods || {}, n = Math.round(Math.min(36, 3 + Math.floor(w * 1.2)) * (M.horde || 1));   // týdenní pravidlo: početné vlny
     for (let i = 0; i < n; i++) {
       const r = Math.random(), heavy = Math.min(0.35, 0.08 + w * 0.012), sup = a === 4 ? Math.min(0.12, (w - 20) * 0.004) : 0;
       V2.pend.push(r < sup ? 3 : r < sup + heavy ? 2 : r < sup + heavy + 0.06 ? 6 : r < 0.6 ? 0 : 1);
     }
     // boss jde hned za prvními dvěma vojáky (ne až na konci vlny); později jich chodí víc
-    const nb = w % 10 === 0 ? 1 + Math.floor(Math.max(0, w - 10) / 30) : w >= 25 && w % 5 === 0 ? 1 : 0;
+    let nb = w % 10 === 0 ? 1 + Math.floor(Math.max(0, w - 10) / 30) : w >= 25 && w % 5 === 0 ? 1 : 0;
+    if (nb && M.boss2) nb++;                                     // týdenní pravidlo: dvojnásobní bossové
     for (let b = 0; b < nb; b++) V2.pend.splice(Math.min(2 + b * 3, V2.pend.length), 0, 5);
     S.ev.push([W / 2, 200, 'evt', 'wave', w]);
     if (w > 1 && (w - 1) % 10 === 0) {                 // po bossovi: výběr bonusu
@@ -61,10 +62,13 @@ function survTick(dt) {
       const u = S.units[S.units.length - 1], w = V2.wave, over = Math.max(0, w - 20);
       u.mx = u.hp = Math.round(u.hp * (1 + w * 0.05) * Math.pow(1.055, over));   // vlny sílí i uvnitř věku, v budoucnosti rychleji
       if (over) u.sm = 1 + over * 0.045;                                         // a víc bolí
+      const M = S.mods || {};                                                    // týdenní pravidla
+      if (M.fast) u.vm = M.fast;
+      if (M.glass) { u.mx = u.hp = Math.max(1, Math.round(u.hp * 0.5)); u.sm = (u.sm || 1) * 2; }
     }
   }
 }
-function survStart() { S.surv = { wave: 0, t: 12, pend: [], pick: null, got: [] }; const e = S.pl[1]; e.hp = e.mhp = AGES[0].baseHp * 3; S.pl[0].gold = 300; }
+function survStart() { S.surv = { wave: 0, t: 12, pend: [], pick: null, got: [] }; const e = S.pl[1]; e.hp = e.mhp = AGES[0].baseHp * 3; S.pl[0].gold = (S.mods && S.mods.sgold) || 300; }
 // konec hry: rekord do telefonu a do online žebříčku
 function survEnd(V) {
   const w = Math.max(0, V.surv - 1);

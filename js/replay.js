@@ -103,7 +103,7 @@ let recLast = null;                      // popis posledního uloženého zázna
 function recLabel() {
   if (tut) return null;
   return curCamp != null ? '🗺 ' + (curDef != null ? 'Obrana: ' : curHero != null ? 'Hrdinská: ' : '') + CAMP[curCamp].n
-    : curSurv ? '♾ Přežití' : curChal != null ? '🎯 ' + CHAL[curChal].n : curDaily ? '📅 Denní výzva'
+    : curSurv ? (curWk ? '🗓 Týdenní přežití' : '♾ Přežití') : curChal != null ? '🎯 ' + CHAL[curChal].n : curDaily ? '📅 Denní výzva'
     : role === 'solo' ? '⚔ Proti počítači' : '🌐 ' + (OPP.n ? 'vs ' + OPP.n : 'Online');
 }
 // volá toMenu – po odehrané bitvě (alespoň 30 s) uloží záznam jako „poslední bitvu“

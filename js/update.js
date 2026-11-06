@@ -97,6 +97,15 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.30', d: '2026-11-06', cs: [
+    'Týdenní přežití (Hrát sám → 🗓): nekonečné přežití se dvěma zvláštními pravidly týdne (bez věží, jen střelci, dvojnásobní bossové, rychlá horda, skleněná armáda…), pro všechny stejnými. Vlastní žebříček, který každý týden začíná od nuly.',
+    'Jednotky útočí živěji: bojovník při seku vykročí a za zbraní zůstane švih, střelce s puškou trhne zpětný ráz, z hlavně vyletí záblesk, mušketa zakouří a kulomet vyhazuje nábojnice. Zasažená jednotka cukne dozadu.',
+    'Každá věž má vlastní zvuk výstřelu: bouchnutí kamenometu, švih praku, bzučení úlů, drnknutí balisty, syčení oleje, dunění děl, dávka kulometu, start rakety, laser i plazma.',
+    'Schopnosti armády: mezi dvěma schopnostmi musí uplynout 4 s, aby nešly zapnout všechny naráz.'], en: [
+    'Weekly survival (Play solo → 🗓): endless survival with two special rules of the week (no towers, ranged only, double bosses, fast horde, glass army…), the same for everyone. Its own leaderboard starts from zero every week.',
+    'Units attack with more life: fighters step into their swing and leave a slash trail, gunners recoil, muzzles flash, muskets smoke and machine guns eject casings. Units flinch backwards when hit.',
+    'Every tower has its own firing sound: the stone thrower thump, sling whoosh, buzzing hives, ballista twang, sizzling oil, booming cannons, machine-gun bursts, rocket launch, laser and plasma.',
+    'Army abilities: 4 s must pass between two abilities so they cannot all be fired at once.'] },
   { v: '2.29.2', d: '2026-11-06', cs: ['Kotel oleje lije proud až na zem pod hradbou – z horního patra padá olej déle, z dolního hned. Na zemi cákne a chvíli hoří.'], en: ['The oil cauldron pours its stream all the way to the ground below the wall – from the top floor the oil falls longer, from the bottom one right away. It splashes and burns on the ground.'] },
   { v: '2.29.1', d: '2026-11-06', cs: ['Kapitola kampaně se odemkne až po dohrání všech předchozích kapitol (3. kapitola po dohrání 1. i 2.) a mapa to tak i píše. Zamčená Šílená obtížnost správně říká, že stačí dohrát první kapitolu.'], en: ['A campaign chapter unlocks only after finishing all previous chapters (chapter 3 after chapters 1 and 2) and the map says so. The locked Insane difficulty correctly says you only need to finish the first chapter.'] },
   { v: '2.29', d: '2026-11-06', cs: [

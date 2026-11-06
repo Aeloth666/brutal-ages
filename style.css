@@ -336,3 +336,7 @@ table.cmp td.win { color: #4ade80; font-weight: 800; } table.cmp { margin-top: 8
 .q-row.league i { opacity: .45; }
 .lg { font-size: 1.05em; }
 .cm .rep { margin: 4px 0 0; display: block; }
+.wk-rules { display: grid; gap: 8px; margin: 10px 0; }
+.wk-rule { display: flex; gap: 10px; align-items: center; background: #1e293b; border: 1px solid #fbbf24; border-radius: 10px; padding: 8px 12px; }
+.wk-rule > span { font-size: 26px; }
+.wk-rule small { display: block; color: #cbd5e1; }

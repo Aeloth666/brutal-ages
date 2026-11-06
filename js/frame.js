@@ -47,10 +47,14 @@ function render(dt) {
   for (const u of order) {
     const r = phMap.get(u.id) || { ph: Math.random() * 6, x: u.x };
     r.ph += Math.abs(u.x - r.x) * 0.11; r.x = u.x; r.seen = T; phMap.set(u.id, r);
+    if (r.hp != null && u.hp < r.hp - 0.5) r.hit = T;                 // zásah: jednotka cukne dozadu
+    r.hp = u.hp;
+    const hk = r.hit ? Math.max(0, 1 - (T - r.hit) / 0.16) : 0;
     const x = MX(u.x);
     if (u.rg) rageAura(x, u);
     const rs = u.rg ? 1.12 : 1;
     c.save(); c.translate(x, GY); c.scale(facing(u.side) * (u.back ? -1 : 1) * US * rs, US * rs);
+    if (hk) c.translate(-hk * (u.ty === 5 ? 1.2 : 2.4), 0);
     drawUnitLocal(teamColM(u.side, u.m), u.a, u.ty, r.ph, u.at, u.st);
     c.restore();
     if (u.rg) { c.font = '16px system-ui'; c.textAlign = 'center'; c.fillText('💢', x + Math.sin(T * 9) * 2, GY - hpBarH(u) - 10); }
