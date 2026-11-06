@@ -51,6 +51,7 @@ function clanMe() { clanRoll(); return { n: (SET.name || 'Hráč').slice(0, 14),
 const prevWeek = () => typeof weekKey === 'function' ? weekKey(new Date(Date.now() - 7 * 864e5)) : '';
 function clanRoll() { const wk = weekKey2(); if (CLAN.pk !== wk) { if (CLAN.pk === prevWeek()) { CLAN.ppk = CLAN.pk; CLAN.ppp = CLAN.pp || 0; } CLAN.pk = wk; CLAN.pp = 0; } }
 function clanPts(n) {
+  if (cheatOn()) return;
   if (!CLAN.tag || !(n > 0)) return;
   clanRoll(); CLAN.pp = (CLAN.pp || 0) + n; store('aow-clan', CLAN);
   toasts.push({ a: { n: '+' + n + ' bodů pro [' + CLAN.tag + ']' }, h: '⚔ KLANOVÁ VÁLKA', l: 2.5 });

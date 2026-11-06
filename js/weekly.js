@@ -29,12 +29,14 @@ const SURVW = load('aow-survw', { wk: '', best: 0, t: 0 });
 const survwBest = () => SURVW.wk === weekKey() ? SURVW.best : 0;
 // konec týdenní hry: rekord týdne do telefonu a do žebříčku
 function survwEnd(V) {
+  if (cheatOn()) return;
   const w = Math.max(0, V.surv - 1), wk = weekKey();
   if (SURVW.wk !== wk) { SURVW.wk = wk; SURVW.best = 0; SURVW.t = 0; }
   if (w > SURVW.best) { SURVW.best = w; SURVW.t = Math.round(V.time); store('aow-survw', SURVW); toasts.push({ a: { n: `${w} ${w === 1 ? 'vlna' : w < 5 ? 'vlny' : 'vln'}` }, h: '🗓 REKORD TÝDNE', l: 4 }); }
   survwPush();
 }
 async function survwPush() {
+  if (cheatOn()) return false;
   const a = await fbAuth().catch(() => null); if (!a || !survwBest()) return false;
   try { return (await fbFetch(`${FB.db}/survw/${weekKey()}/${a.uid}.json?auth=${a.t}`, { method: 'PUT', body: JSON.stringify({ n: (SET.name || 'Hráč').slice(0, 14), w: SURVW.best, t: SURVW.t, e: SET.emb || 0, ...lbClan() }) })).ok; } catch (e) { return false; }
 }

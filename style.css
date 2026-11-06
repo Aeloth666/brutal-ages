@@ -340,3 +340,7 @@ table.cmp td.win { color: #4ade80; font-weight: 800; } table.cmp { margin-top: 8
 .wk-rule { display: flex; gap: 10px; align-items: center; background: #1e293b; border: 1px solid #fbbf24; border-radius: 10px; padding: 8px 12px; }
 .wk-rule > span { font-size: 26px; }
 .wk-rule small { display: block; color: #cbd5e1; }
+.cheat-list { display: grid; gap: 8px; margin: 10px 0; }
+.cheat-list button { text-align: left; display: flex; justify-content: space-between; align-items: center; }
+.cheat-list button.on { background: linear-gradient(#16a34a, #166534); }
+.cheat-list small { opacity: .85; font-weight: 700; }

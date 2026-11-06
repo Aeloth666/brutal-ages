@@ -87,7 +87,7 @@ const CAMP = [
 const CAMPS = load('aow-camp', {});               // index mise → počet hvězd
 let lastStars = 0, campSel = 0, campChap = 0;
 // mise je otevřená po dobytí předchozí; první mise kapitoly až po dohrání VŠECH předchozích kapitol
-const campOpen = i => { if (i === 0) return true; const k = chapOf(i); if (k > 0 && CAMP_CH[k].a === i) { for (let j = 0; j < k; j++) if (!chapDone(j)) return false; return true; } return !!CAMPS[i - 1]; };
+const campOpen = i => { if (i === 0 || CHEAT().open) return true; const k = chapOf(i); if (k > 0 && CAMP_CH[k].a === i) { for (let j = 0; j < k; j++) if (!chapDone(j)) return false; return true; } return !!CAMPS[i - 1]; };
 // kapitoly kampaně (a = první mise, b = za poslední); 2. kapitola se odemkne dobytím posledního území 1. kapitoly
 // col = barvy mapy kapitoly: moře nahoře, moře dole, pláž, pevnina
 const CAMP_CH = [{ n: 'I. Dějiny světa', a: 0, b: 15, col: ['#1e3a5f', '#0f2140', '#c9b27a', '#5f8f3e'] },

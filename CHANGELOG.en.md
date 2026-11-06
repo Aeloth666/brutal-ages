@@ -4,6 +4,10 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.31 – 6. 11. 2026
+
+- Small fixes and hidden testing tools.
+
 ## Version 2.30 – 6. 11. 2026
 
 - Weekly survival (Play solo → 🗓): endless survival with two special rules of the week (no towers, ranged only, double bosses, fast horde, glass army…), the same for everyone. Its own leaderboard starts from zero every week.

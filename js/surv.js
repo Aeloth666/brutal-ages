@@ -71,6 +71,7 @@ function survTick(dt) {
 function survStart() { S.surv = { wave: 0, t: 12, pend: [], pick: null, got: [] }; const e = S.pl[1]; e.hp = e.mhp = AGES[0].baseHp * 3; S.pl[0].gold = (S.mods && S.mods.sgold) || 300; }
 // konec hry: rekord do telefonu a do online žebříčku
 function survEnd(V) {
+  if (cheatOn()) return;                              // s cheaty se rekord neukládá
   const w = Math.max(0, V.surv - 1);
   if (w > SURVB.best) { SURVB.best = w; SURVB.t = Math.round(V.time); store('aow-surv', SURVB); toasts.push({ a: { n: `${w} ${w === 1 ? 'vlna' : w < 5 ? 'vlny' : 'vln'}` }, h: '♾ NOVÝ REKORD', l: 4 }); }
   if (typeof survPush === 'function') survPush();

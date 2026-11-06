@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.31 – 6. 11. 2026
+
+- Drobné opravy a skryté nástroje pro testování.
+
 ## Verze 2.30 – 6. 11. 2026
 
 - Týdenní přežití (Hrát sám → 🗓): nekonečné přežití se dvěma zvláštními pravidly týdne (bez věží, jen střelci, dvojnásobní bossové, rychlá horda, skleněná armáda…), pro všechny stejnými. Vlastní žebříček, který každý týden začíná od nuly.

@@ -193,7 +193,7 @@ function renderAchList() {
 let paused = false, pauseBtns = [];
 function drawPause() {
   c.fillStyle = 'rgba(8,10,16,.75)'; c.fillRect(0, 0, W, H);
-  const w = 360, h = role === 'solo' && !tut ? 442 : 384, x = W / 2 - w / 2, y = 116;
+  const chi = role === 'solo' && !tut && SET.cheatSeen, w = 360, h = (role === 'solo' && !tut ? 442 : 384) + (chi ? 58 : 0), x = W / 2 - w / 2, y = chi ? 92 : 116;
   rr(x, y, w, h, 18); c.fillStyle = '#151c2b'; c.fill(); c.strokeStyle = '#e5c04a'; c.lineWidth = 2; c.stroke();
   c.textAlign = 'center'; c.fillStyle = '#fde68a'; c.font = '900 30px system-ui'; c.fillText(role === 'solo' ? 'PAUZA' : 'MENU', W / 2, y + 46);
   if (role !== 'solo') { c.fillStyle = '#94a3b8'; c.font = '600 13px system-ui'; c.fillText('Online hra mezitím běží dál', W / 2, y + 68); }
@@ -203,6 +203,7 @@ function drawPause() {
     ['Zvuky: ' + (SET.sfx ? 'ZAP' : 'VYP'), 'sfx', '#334155'],
     ['Vibrace: ' + (SET.vib ? 'ZAP' : 'VYP'), 'vib', '#334155'],
     ...(role === 'solo' && !tut ? [['↻ Začít znovu', 'restart', '#b45309']] : []),
+    ...(chi ? [['🧪 Cheaty', 'cheats', '#7c3aed']] : []),
     ['Ukončit hru', 'quit', '#b91c1c'],
   ];
   pauseBtns = items.map(([t, k, col], i) => {
@@ -224,6 +225,7 @@ function overlays(dt) {
     drawChat(dt);
     drawWait();
     if (!paused && V.pl) { drawFacPick(V.pl[mySide]); drawSbonPick(); }
+    if (role === 'solo' && cheatOn() && !replay) { c.font = '800 13px system-ui'; c.textAlign = 'center'; c.fillStyle = 'rgba(250,204,21,.85)'; c.fillText('🧪 CHEATY ZAPNUTÉ – rekordy se neukládají', W / 2, HUD + 22); }
     drawTut();
     if (paused) drawPause();
   }
@@ -240,7 +242,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 function refreshMenu() {
   document.querySelectorAll('.seg button[data-d]').forEach(b => b.classList.toggle('on', +b.dataset.d === SET.diff));
-  const ins = $('bInsane'); if (ins && typeof CAMPS !== 'undefined') { ins.classList.toggle('locked', !CAMPS[CAMP_CH[0].b - 1]); ins.textContent = CAMPS[CAMP_CH[0].b - 1] ? '🔥 Šílená' : '🔒 Šílená'; }
+  const ins = $('bInsane'); if (ins && typeof CAMPS !== 'undefined') { const un = CAMPS[CAMP_CH[0].b - 1] || CHEAT().open; ins.classList.toggle('locked', !un); ins.textContent = un ? '🔥 Šílená' : '🔒 Šílená'; }
   document.querySelectorAll('#netMode button').forEach(b => b.classList.toggle('on', b.dataset.m === (SET.net || 'duel')));
   $('bMusic').textContent = 'Hudba: ' + (SET.music ? 'ZAP' : 'VYP');
   $('bSfx').textContent = 'Zvuky: ' + (SET.sfx ? 'ZAP' : 'VYP');
@@ -287,7 +289,7 @@ function renderChal() {
 }
 
 document.querySelectorAll('.seg button[data-d]').forEach(b => b.onclick = () => {
-  if (+b.dataset.d === 4 && !CAMPS[CAMP_CH[0].b - 1]) { toasts.push({ a: { n: 'Nejdřív dohraj první kapitolu kampaně' }, h: '🔒 ŠÍLENÁ OBTÍŽNOST', l: 3 }); return; }
+  if (+b.dataset.d === 4 && !CAMPS[CAMP_CH[0].b - 1] && !CHEAT().open) { toasts.push({ a: { n: 'Nejdřív dohraj první kapitolu kampaně' }, h: '🔒 ŠÍLENÁ OBTÍŽNOST', l: 3 }); return; }
   SET.diff = +b.dataset.d; saveSet(); sfx('click');
 });
 document.querySelectorAll('#netMode button').forEach(b => b.onclick = () => { SET.net = b.dataset.m; saveSet(); sfx('click'); });

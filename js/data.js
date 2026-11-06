@@ -173,3 +173,7 @@ const mountW = (s, a, m) => { const p = S.pl[s]; return (MOUNT[a === 1 ? 'horse'
 const unitY = u => u.ty === 5 ? BOSSES[u.a].y : u.ty >= 2 ? 34 : 28;          // kam míří střely
 const atkMul = s => 1 + UPS[0].k * S.pl[s].up[0];
 const rnd = (a, b) => a + Math.random() * (b - a);
+
+// cheaty pro testování (menu v cheats.js): zapnuté přepínače v SET.cheat
+const CHEAT = () => (typeof SET !== 'undefined' && SET.cheat) || {};
+const cheatOn = () => Object.values(CHEAT()).some(Boolean);

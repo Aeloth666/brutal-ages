@@ -76,6 +76,7 @@ function lbResult(won) {
 
 // nekonečné přežití: nejlepší počet vln
 async function survPush() {
+  if (cheatOn()) return false;
   const a = await fbAuth(); if (!a || !SURVB.best) return false;
   try { return (await fbFetch(`${FB.db}/surv/${a.uid}.json?auth=${a.t}`, { method: 'PUT', body: JSON.stringify({ n: (SET.name || 'Hráč').slice(0, 14), w: SURVB.best, t: SURVB.t, e: SET.emb || 0, ...lbClan() }) })).ok; } catch (e) { return false; }
 }

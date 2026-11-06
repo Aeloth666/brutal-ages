@@ -20,6 +20,7 @@ cv.addEventListener('pointerdown', e => {
       else if (b.k === 'sfx') { SET.sfx = !SET.sfx; saveSet(); }
       else if (b.k === 'vib') { SET.vib = !SET.vib; saveSet(); vib(60); }
       else if (b.k === 'quit') toMenu();
+      else if (b.k === 'cheats') { renderCheats(); openPanel('cheatPanel'); }
       else if (b.k === 'restart' && confirm('Začít tohle kolo znovu? Rozehraná bitva se ztratí.')) { defNext = curDef; heroNext = curHero; survNext = curSurv; wkNext = curWk; startGame('solo', curChal, curCamp, curDaily); }
     }
     return;
@@ -106,6 +107,7 @@ function loop(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   netTick(now);
   tutTick();
+  applyCheats();                                     // jen hra proti počítači, viz cheats.js
   if ((role === 'solo' || role === 'host') && S) {
     if (S.over < 0 && !((paused || eggScene) && role === 'solo') && !netWait) {
       acc += dt * (role === 'solo' ? S.speed : 1);
