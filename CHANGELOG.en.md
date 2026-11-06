@@ -4,6 +4,13 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.29 – 6. 11. 2026
+
+- The campaign has chapter 3 – Realm of shadows: 10 new maps (missions 26–35). Every mission has its own restriction: only one unit type, no towers, locked evolution, less gold, survival or a time limit. The last mission is the hardest in the game.
+- New achievements Shadow hunter (finish chapter 3) and Legend of history (all 105 stars). Chapter 3 territories give even bigger bonuses.
+- Only towers meant to lob shots fly in an arc (stone thrower, hive thrower, catapult, oil cauldron, explosive cannon) – the sling engine shoots straight again.
+- Under the hood: the game code is split into smaller files and every tower has its own animation.
+
 ## Version 2.28.4 – 6. 11. 2026
 
 - The sling engine is weaker: damage 7 → 6 and it fires a bit slower (0.55 → 0.6 s). The sling no longer spins frantically – it circles calmly and just flicks when it fires.

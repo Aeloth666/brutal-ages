@@ -1,5 +1,5 @@
 // =====================================================================
-//  ZÁKLADNY – renesance, moderní doba, budoucnost (pokračování bases.js)
+//  ZÁKLADNY – renesance, moderní doba, budoucnost (nástroje jsou v base-kit.js)
 // =====================================================================
 function hazard(x, y, w, h) {
   c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip(); c.fillStyle = '#facc15'; c.fillRect(x, y, w, h);

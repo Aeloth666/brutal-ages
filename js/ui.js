@@ -40,6 +40,8 @@ const ACH = [
   { id: 'gold',    n: 'Zlatá liga',        d: 'Postup v online soubojích do Zlaté ligy (1300 bodů).', w: () => typeof LB !== 'undefined' && LB.r >= 1300 },
   { id: 'clanWar', n: 'Válečník klanu',    d: 'Tvůj klan vyhrál týdenní klanovou válku.',     w: () => false },
   { id: 'camp75',  n: 'Mistr času',        d: 'Získej v kampani všech 75 hvězd.',            w: () => chapStars(0) + chapStars(1) >= 75 },
+  { id: 'camp3',   n: 'Lovec stínů',       d: 'Dokonči třetí kapitolu kampaně.',             w: () => chapDone(2) },
+  { id: 'camp105', n: 'Legenda dějin',     d: 'Získej v kampani všech 105 hvězd.',           w: () => CAMP_CH.reduce((n, c, k) => n + chapStars(k), 0) >= 105 },
   { id: 'rematch', n: 'Ještě jednou!',     d: 'Vyhraj odvetu proti kámošovi.',               w: () => role !== 'solo' && !coop && rematchN > 0 },
   // ---- bossové ----
   { id: 'surv10',  n: 'Ještě dýchám',      d: 'Přežij 10 vln v Nekonečném přežití.', t: (m, V) => V.surv > 10 },

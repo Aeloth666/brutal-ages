@@ -28,6 +28,11 @@ const TERR = [
   { k: 'dmg', v: 1.04, t: '+4 % útoku jednotek' }, { k: 'sgold', v: 1.2, t: '+20 % zlata na začátku' }, { k: 'build', v: 0.96, t: 'Výroba o 4 % rychlejší' },
   { k: 'tur', v: 0.95, t: 'Věže o 5 % levnější' }, { k: 'xp', v: 1.06, t: '+6 % XP za zabití' }, { k: 'cost', v: 0.96, t: 'Jednotky o 4 % levnější' },
   { k: 'heroD', v: 1.15, t: 'Hrdina +15 % útoku' },
+  // 3. kapitola
+  { k: 'gold', v: 1.06, t: '+6 % zlata za zabití' }, { k: 'hp', v: 1.05, t: '+5 % zdraví jednotek' }, { k: 'dmg', v: 1.05, t: '+5 % útoku jednotek' },
+  { k: 'base', v: 1.1, t: 'Hradby +10 %' }, { k: 'build', v: 0.95, t: 'Výroba o 5 % rychlejší' }, { k: 'sgold', v: 1.25, t: '+25 % zlata na začátku' },
+  { k: 'cost', v: 0.95, t: 'Jednotky o 5 % levnější' }, { k: 'tur', v: 0.94, t: 'Věže o 6 % levnější' }, { k: 'xp', v: 1.08, t: '+8 % XP za zabití' },
+  { k: 'heroD', v: 1.2, t: 'Hrdina +20 % útoku' },
 ];
 const WORLD = load('aow-world', { att: null, n: 0 });                   // att = území pod útokem Rudé hordy
 const terrActive = () => CAMP.map((_, i) => i).filter(i => CAMPS[i] && WORLD.att !== i);

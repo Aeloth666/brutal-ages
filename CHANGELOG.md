@@ -4,6 +4,13 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.29 – 6. 11. 2026
+
+- Kampaň má 3. kapitolu – Říše stínů: 10 nových map (mise 26–35). Každá mise má vlastní omezení: jen jeden druh jednotek, zákaz věží, zamčená evoluce, méně zlata, přežití nebo časový limit. Poslední mise je nejtěžší ve hře.
+- Nové úspěchy Lovec stínů (dokonči 3. kapitolu) a Legenda dějin (všech 105 hvězd). Území 3. kapitoly dávají ještě větší bonusy.
+- Obloukem letí jen střely věží, které mají házet vrchem (kamenomet, úlomet, katapult, kotel oleje, výbušné dělo) – prakostroj střílí zase rovně.
+- Uvnitř: kód hry je rozdělený do menších souborů a každá věž má vlastní animaci.
+
 ## Verze 2.28.4 – 6. 11. 2026
 
 - Prakostroj je slabší: poškození 7 → 6 a střílí o něco pomaleji (0,55 → 0,6 s). Prak se už netočí zběsile – klidně krouží a při výstřelu jen švihne.

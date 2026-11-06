@@ -97,6 +97,15 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.29', d: '2026-11-06', cs: [
+    'Kampaň má 3. kapitolu – Říše stínů: 10 nových map (mise 26–35). Každá mise má vlastní omezení: jen jeden druh jednotek, zákaz věží, zamčená evoluce, méně zlata, přežití nebo časový limit. Poslední mise je nejtěžší ve hře.',
+    'Nové úspěchy Lovec stínů (dokonči 3. kapitolu) a Legenda dějin (všech 105 hvězd). Území 3. kapitoly dávají ještě větší bonusy.',
+    'Obloukem letí jen střely věží, které mají házet vrchem (kamenomet, úlomet, katapult, kotel oleje, výbušné dělo) – prakostroj střílí zase rovně.',
+    'Uvnitř: kód hry je rozdělený do menších souborů a každá věž má vlastní animaci.'], en: [
+    'The campaign has chapter 3 – Realm of shadows: 10 new maps (missions 26–35). Every mission has its own restriction: only one unit type, no towers, locked evolution, less gold, survival or a time limit. The last mission is the hardest in the game.',
+    'New achievements Shadow hunter (finish chapter 3) and Legend of history (all 105 stars). Chapter 3 territories give even bigger bonuses.',
+    'Only towers meant to lob shots fly in an arc (stone thrower, hive thrower, catapult, oil cauldron, explosive cannon) – the sling engine shoots straight again.',
+    'Under the hood: the game code is split into smaller files and every tower has its own animation.'] },
   { v: '2.28.4', d: '2026-11-06', cs: ['Prakostroj je slabší: poškození 7 → 6 a střílí o něco pomaleji (0,55 → 0,6 s). Prak se už netočí zběsile – klidně krouží a při výstřelu jen švihne.'], en: ['The sling engine is weaker: damage 7 → 6 and it fires a bit slower (0.55 → 0.6 s). The sling no longer spins frantically – it circles calmly and just flicks when it fires.'] },
   { v: '2.28.3', d: '2026-11-06', cs: ['Kameny z kamenometu, praku a katapultu, úly, rozžhavený olej i bomby z hmoždíře letí obloukem vrchem – nahoru a pak dolů na nepřítele. Čím je cíl dál, tím je oblouk vyšší.'], en: ['Stones from the stone thrower, sling and catapult, hives, red-hot oil and mortar bombs now fly in a high arc – up and then down onto the enemy. The further the target, the higher the arc.'] },
   { v: '2.28.1', d: '2026-11-06', cs: ['Kamenomet má zase rameno – vak s protizávažím a lžíce s kamenem už nelevitují ve vzduchu.', 'Katapult a kamenomet hází správně dopředu: rameno švihne zezadu přes vrchol k nepříteli a stejnou cestou se vrátí.'], en: ['The stone thrower has its arm back – the counterweight sack and the stone cup no longer float in the air.', 'The catapult and stone thrower now throw forward: the arm swings from the back over the top towards the enemy and returns the same way.'] },

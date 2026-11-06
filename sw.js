@@ -1,10 +1,10 @@
 // Service worker: hra jde hrát offline v prohlížeči (online hra a počasí potřebují síť).
 // VERSION přepisuje build-web.ps1 při každém sestavení webové verze.
-const VERSION = 'brutal-ages-web-202611060820';
+const VERSION = 'brutal-ages-web-202611060902';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'lib/peerjs.min.js',
-  'js/i18n.js', 'js/build.js', 'js/errlog.js', 'js/core.js', 'js/net.js', 'js/render.js', 'js/units.js', 'js/animals.js', 'js/bossart.js', 'js/world.js', 'js/bases.js', 'js/bases2.js', 'js/turrets.js', 'js/fx.js', 'js/gore.js', 'js/hud.js',
-  'js/meta.js', 'js/audio.js', 'js/ui.js', 'js/modes.js', 'js/extras.js', 'js/gen.js', 'js/lb.js', 'js/surv.js', 'js/season.js', 'js/cloud.js', 'js/friends.js', 'js/replay.js', 'js/main.js', 'js/update.js',
+  'js/i18n.js', 'js/build.js', 'js/errlog.js', 'js/data.js', 'js/core.js', 'js/ai.js', 'js/snapshot.js', 'js/net.js', 'js/render.js', 'js/units.js', 'js/weapons.js', 'js/animals.js', 'js/heavy.js', 'js/bossart.js', 'js/world.js', 'js/base-kit.js', 'js/bases-early.js', 'js/bases-late.js', 'js/turrets.js', 'js/turret-art.js', 'js/fx.js', 'js/gore.js', 'js/hud.js',
+  'js/meta.js', 'js/audio.js', 'js/ui.js', 'js/weather.js', 'js/campaign.js', 'js/modes.js', 'js/extras.js', 'js/gen.js', 'js/lb.js', 'js/surv.js', 'js/season.js', 'js/cloud.js', 'js/friends.js', 'js/replay.js', 'js/main.js', 'js/update.js',
   'icons/icon-192.png', 'icons/icon-512.png',
 ];
 
