@@ -7,6 +7,7 @@ The app updates itself – new versions are downloaded at startup. [Play in the 
 ## Version 2.28.1 – 6. 11. 2026
 
 - The stone thrower has its arm back – the counterweight sack and the stone cup no longer float in the air.
+- The catapult and stone thrower now throw forward: the arm swings from the back over the top towards the enemy and returns the same way.
 
 ## Version 2.28 – 6. 11. 2026
 

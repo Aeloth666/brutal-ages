@@ -47,7 +47,7 @@ const TUR = [
       // nabito: lžíce vzadu dole, výstřel: švih dopředu nahoru
       const th = throwA(f), sw = Math.sin(T * 1.6) * 0.04 * (1 - th);
       limb([-6, 0, -2, -10], '#7a4f2a', 3.4); limb([4, 0, -2, -10], '#7a4f2a', 3.4);
-      c.save(); c.translate(-2, -10); c.rotate(2.45 + sw - th * 3.15); rr(-12, -2, 26, 4, 2); fo(woodG(1), 1.2);
+      c.save(); c.translate(-2, -10); c.rotate(2.45 + sw + th * 3.03);    rr(-12, -2, 26, 4, 2); fo(woodG(1), 1.2);
       c.beginPath(); c.ellipse(14, -2, 5, 3, 0, 0, Math.PI); fo('#7a5230', 1.1);
       if (f > 0.8) stoneBall(14, -3.8, 2.9);
       rr(-16, -2.5, 8, 7, 2.5); fo('#8a5a32', 1.1); rope(-12, -2.5, -12, 4.5); c.restore();
@@ -82,7 +82,7 @@ const TUR = [
       rr(-14, -6, 28, 6, 2); fo(woodG(2), 1.3); wheel(-9, 1, 5); wheel(9, 1, 5);
       limb([-4, -6, 0, -16], '#7a4f2a', 3); limb([4, -6, 0, -16], '#7a4f2a', 3);
       rr(2, -22, 3, 8, 1); fo(woodG(7), 1);                              // příčka, o kterou rameno udeří
-      c.save(); c.translate(0, -15); c.rotate(2.5 + Math.sin(T * 1.3) * 0.03 * (1 - th) - th * 3.3); rr(-14, -1.8, 30, 3.6, 1.8); fo(woodG(3), 1.2);
+      c.save(); c.translate(0, -15); c.rotate(2.5 + Math.sin(T * 1.3) * 0.03 * (1 - th) + th * 2.95); rr(-14, -1.8, 30, 3.6, 1.8); fo(woodG(3), 1.2);
       c.beginPath(); c.ellipse(16, -2, 6.5, 3.8, 0, 0, Math.PI); fo('#6b4423', 1.1);
       if (f > 0.85) stoneBall(16, -5.6, 5.4); c.restore();
       rope(0, -15, -12, -6); rope(-2, -6, -12, -6);

@@ -7,6 +7,7 @@ Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát
 ## Verze 2.28.1 – 6. 11. 2026
 
 - Kamenomet má zase rameno – vak s protizávažím a lžíce s kamenem už nelevitují ve vzduchu.
+- Katapult a kamenomet hází správně dopředu: rameno švihne zezadu přes vrchol k nepříteli a stejnou cestou se vrátí.
 
 ## Verze 2.28 – 6. 11. 2026
 
