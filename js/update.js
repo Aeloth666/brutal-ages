@@ -97,6 +97,11 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.28', d: '2026-11-06', cs: [
+    'Kotel oleje je rozžhavený: olej žhne a bublá, z kotle létají jiskry a tetelí se horký vzduch. Při výstřelu se kotel nakloní a vyleje žhnoucí proud, kapka v letu hoří a kouří a po dopadu vznikne hořící louže.',
+    'Kameny v katapultu, kamenometu a praku mají stejnou velikost jako ty, které vyletí, a po nabití se objeví celé. Protizávaží kamenometu je svázaný vak.'], en: [
+    'The oil cauldron is red-hot: the oil glows and bubbles, sparks fly and the hot air shimmers. When it fires, the cauldron tips over and pours a glowing stream, the drop burns and smokes in flight and leaves a burning puddle where it lands.',
+    'Stones in the catapult, stone thrower and sling are the same size as the ones that fly, and appear whole after reloading. The stone thrower counterweight is a tied sack.'] },
   { v: '2.27', d: '2026-11-06', cs: [
     'Věže mají animaci výstřelu: kamenomet a katapult švihnou ramenem, prak se roztočí, úlomet mrští úl a naroste nový, balista vystřelí šíp a znovu se natáhne, kotel vylije olej, děla poskočí zpátky a vyfouknou kouř, kulomet se třese a sype nábojnice, raketomet vyfoukne plamen dozadu, laser zableskne paprskem, iontové dělo vyšle rázovou vlnu a plazmová koule se smrští a znovu naroste.',
     'I mezi výstřely se věže hýbou (nabíjení, mířidla, levitace) a vrhací stroje už nedělají záblesk jako děla.'], en: [

@@ -629,7 +629,7 @@ function step(dt) {
     if (pr.sp) {
       splash(pr.tx, pr.sp, pr.d, pr.side);
       if (pr.tid === -1) hitBase(1 - pr.side, pr.d, pr.side);
-      S.ev.push([pr.tx, pr.ty, 'boom']);
+      S.ev.push([pr.tx, pr.ty, pr.p === 'oil' ? 'oilsp' : 'boom']);
     } else {
       if (pr.tid === -1) hitBase(1 - pr.side, pr.d, pr.side);
       else if (!pr.lost) hurt(byId.get(pr.tid), pr.d, pr.side);

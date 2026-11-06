@@ -7,14 +7,20 @@ function drawProj(pr) {
   const L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L;
   c.lineCap = 'round';
   switch (pr.p) {
-    case 'stone': c.beginPath(); c.arc(x, y, 3.2, 0, Math.PI * 2); fo('#8a8a8a', 1); break;
-    case 'rock': c.beginPath(); c.arc(x, y, 6, 0, Math.PI * 2); fo('#77736d', 1.3); c.fillStyle = '#a3a09a'; circ(x - 2, y - 2, 2); break;
+    case 'stone': stoneBall(x, y, 3.2); break;               // stejné kameny jako v lžíci věže
+    case 'rock': stoneBall(x, y, 6); break;
     case 'egg':                                       // vosí hnízdo s rojem vos
       c.beginPath(); c.ellipse(x, y, 5, 6.2, 0, 0, Math.PI * 2); fo('#b98f4e', 1.1);
       c.strokeStyle = 'rgba(90,60,20,.7)'; c.lineWidth = 0.8; for (const k of [-3, 0, 3]) { c.beginPath(); c.ellipse(x, y + k, 4.4, 1.1, 0, 0, Math.PI); c.stroke(); }
       c.fillStyle = '#facc15'; for (let k = 0; k < 4; k++) { const a = T * 9 + k * 1.6; circ(x + Math.cos(a) * 8, y + Math.sin(a) * 6, 0.9); }
       break;
-    case 'oil': c.beginPath(); c.arc(x, y, 6, 0, Math.PI * 2); fo('#2b1a0a', 1.2); glowDot(x, y, 8, '#f97316'); break;
+    case 'oil': {                                       // žhnoucí kapka rozžhaveného oleje s ocasem a kouřem
+      glowDot(x, y, 16, '#ff7a1a');
+      for (let k = 1; k <= 4; k++) { c.fillStyle = k % 2 ? '#f97316' : '#fbbf24'; circ(x - dx * k * 5, y - dy * k * 5 + Math.sin(T * 20 + k) * 0.8, 4.2 - k * 0.8); }
+      c.beginPath(); c.ellipse(x, y, 6.5, 5.5, Math.atan2(dy, dx), 0, Math.PI * 2); c.fillStyle = c.createRadialGradient(x - 1, y - 1, 0, x, y, 6.5); c.fillStyle.addColorStop(0, '#fff7c2'); c.fillStyle.addColorStop(0.45, '#fbbf24'); c.fillStyle.addColorStop(0.8, '#ea580c'); c.fillStyle.addColorStop(1, '#7c2d12'); c.fill();
+      if (Math.random() < 0.4) fx.push({ smoke: 1, x: pr.x - pr.dx * 0.02, y, vx: rnd(-8, 8), vy: -25, r: 3, l: 0.5, ml: 0.5, col: 'rgba(60,50,45,.8)', col2: 'rgba(110,100,95,.5)' });
+      break;
+    }
     case 'arrow': case 'fire':
       c.strokeStyle = OL; c.lineWidth = 3; ln(x - dx * 16, y - dy * 16, x, y);
       c.strokeStyle = '#a0703c'; c.lineWidth = 1.6; ln(x - dx * 16, y - dy * 16, x, y);
@@ -94,6 +100,9 @@ function addFx(e) {
       smoke(6, 14, 1.1); part(10, '#fbbf24', 170, 2.4, 0.5); part(6, '#57534e', 120, 2.8, 0.7);
       fx.push({ ring: 1, x, y, l: 0.3, ml: 0.3, r: 40 }); break;
     case 'zap': fx.push({ fire: 1, x, y, r: 26, l: 0.3, ml: 0.3, col: '#38e1ff' }); part(10, '#a5f3fc', 140, 2, 0.4); break;
+    case 'oilsp':                                     // dopad oleje: cákance a hořící louže
+      fx.push({ burn: 1, x, y: GY - 2, r: 30, l: 1.6, ml: 1.6 }); fx.push({ fire: 1, x, y: y, r: 26, l: 0.3, ml: 0.3 });
+      part(18, '#f97316', 170, 2.4, 0.7, -160); part(8, '#fde047', 120, 1.6, 0.5, -120); smoke(4, 10, 1.2); sfx('boom', x); break;
     case 'muz':
       if (e[3] != null) { TSHOT.set(e[3] + '|' + e[4], T); const tu = V && V.pl[e[3]] && V.pl[e[3]].tur[e[4]]; if (tu && tu.a < 2) break; }   // vrhací stroje bez záblesku
       fx.push({ flash: 1, x, y, l: 0.09, ml: 0.09, r: 9 }); fx.push({ smoke: 1, x, y, vx: rnd(-10, 10), vy: -20, r: 5, l: 0.5, ml: 0.5 }); break;
@@ -172,6 +181,12 @@ function drawFx(dt) {
         const v = rnd(140, 280) * a;
         fx.push({ blood: 1, np: 1, x: sx, y: sy, vx: m * ux * v + rnd(-40, 40), vy: uy * v - rnd(40, 120), l: 0.9, ml: 0.9, col: k ? '#b91c1c' : '#7f1010', r: rnd(1.4, 2.6), g: 700 });
       }
+    } else if (f.burn) {                              // hořící louže oleje
+      const r = f.r * Math.min(1, (f.ml - f.l) * 6 + 0.3);
+      c.fillStyle = `rgba(30,15,5,${0.7 * a})`; ell(x, f.y, r, r * 0.22);
+      c.fillStyle = `rgba(255,120,30,${0.8 * a})`; ell(x, f.y - 1, r * 0.8, r * 0.14);
+      const op = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter'; c.fillStyle = `rgba(255,150,40,${0.3 * a})`; ell(x, f.y - 4, r * 1.1, r * 0.5); c.globalCompositeOperation = op;
+      for (let k = -2; k <= 2; k++) { const h = (8 + Math.sin(T * 13 + k * 2 + x) * 4) * a, xx = x + k * r * 0.35; c.fillStyle = k % 2 ? '#fbbf24' : '#f97316'; c.beginPath(); c.moveTo(xx - 3, f.y); c.quadraticCurveTo(xx - 2, f.y - h * 0.6, xx + Math.sin(T * 9 + k) * 2, f.y - h); c.quadraticCurveTo(xx + 3, f.y - h * 0.5, xx + 3, f.y); c.fill(); }
     } else if (f.fire) {
       const r = f.r * (1.2 - a * 0.6), op = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter';
       const g = c.createRadialGradient(x, f.y, 0, x, f.y, r);

@@ -4,6 +4,11 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.28 – 6. 11. 2026
+
+- The oil cauldron is red-hot: the oil glows and bubbles, sparks fly and the hot air shimmers. When it fires, the cauldron tips over and pours a glowing stream, the drop burns and smokes in flight and leaves a burning puddle where it lands.
+- Stones in the catapult, stone thrower and sling are the same size as the ones that fly, and appear whole after reloading. The stone thrower counterweight is a tied sack.
+
 ## Version 2.27 – 6. 11. 2026
 
 - Towers have firing animations: the stone thrower and catapult swing their arms, the sling spins up, the hive thrower flings a hive and a new one grows, the ballista fires and draws again, the cauldron pours oil, cannons recoil and puff smoke, the machine gun shakes and spits casings, the rocket launcher blasts flame backwards, the laser flashes a beam, the ion cannon sends a shockwave and the plasma orb shrinks and grows back.

@@ -48,15 +48,15 @@ const TUR = [
       limb([-6, 0, -2, -10], '#7a4f2a', 3.4); limb([4, 0, -2, -10], '#7a4f2a', 3.4);
       c.save(); c.translate(-2, -10); c.rotate(2.45 + sw - th * 3.15);   // nabito: lžíce vzadu dole, výstřel: švih dopředu nahoru rr(-12, -2, 26, 4, 2); fo(woodG(1), 1.2);
       c.beginPath(); c.ellipse(14, -2, 5, 3, 0, 0, Math.PI); fo('#7a5230', 1.1);
-      if (f > 0.75) stoneBall(14, -4, 4 * reload(f, 0.75, 1));
-      stoneBall(-11, 2, 3.4); c.restore();
+      if (f > 0.8) stoneBall(14, -3.8, 2.9);
+      rr(-16, -2.5, 8, 7, 2.5); fo('#8a5a32', 1.1); rope(-12, -2.5, -12, 4.5); c.restore();
       rope(-2, -10, -12, 0);
     } else if (i === 1) {    // Prakostroj: prak se roztočí a pustí kámen
       limb([-2, 0, -2, -14], '#8b5a2b', 3.4); limb([-2, -14, -8, -22], '#8b5a2b', 2.8); limb([-2, -14, 4, -22], '#8b5a2b', 2.8);
       const sp = 7 + (f < 0.5 ? 10 * (1 - f / 0.5) : 0), a = T * sp, sx = -2 + Math.cos(a) * 9, sy = -24 + Math.sin(a) * 4;
       c.strokeStyle = '#c9a66b'; c.lineWidth = 1.1; ln(-8, -22, sx, sy); ln(4, -22, sx, sy);
       c.beginPath(); c.ellipse(sx, sy, 3.4, 2.2, a, 0, Math.PI * 2); fo('#8a5a32', 1);
-      if (f > 0.5) stoneBall(sx, sy - 1, 2 * reload(f, 0.5, 0.8));
+      if (f > 0.55) stoneBall(sx, sy - 1, 2.9);
     } else {                 // Úlomet: rameno mrští úl, nový úl naroste
       const th = throwA(f);
       c.save(); c.translate(-8, 0); c.rotate(-th * 0.9); c.translate(8, 0);
@@ -82,8 +82,8 @@ const TUR = [
       limb([-4, -6, 0, -16], '#7a4f2a', 3); limb([4, -6, 0, -16], '#7a4f2a', 3);
       rr(2, -22, 3, 8, 1); fo(woodG(7), 1);                              // příčka, o kterou rameno udeří
       c.save(); c.translate(0, -15); c.rotate(2.5 + Math.sin(T * 1.3) * 0.03 * (1 - th) - th * 3.3); rr(-14, -1.8, 30, 3.6, 1.8); fo(woodG(3), 1.2);
-      c.beginPath(); c.ellipse(16, -2, 5.5, 3.4, 0, 0, Math.PI); fo('#6b4423', 1.1);
-      if (f > 0.75) stoneBall(16, -4.5, 4.3 * reload(f, 0.75, 1)); c.restore();
+      c.beginPath(); c.ellipse(16, -2, 6.5, 3.8, 0, 0, Math.PI); fo('#6b4423', 1.1);
+      if (f > 0.85) stoneBall(16, -5.6, 5.4); c.restore();
       rope(0, -15, -12, -6); rope(-2, -6, -12, -6);
       c.restore();
     } else if (i === 1) {    // Balista: tětiva vystřelí šíp, pak se znovu natáhne a vloží hořící šíp
@@ -97,18 +97,54 @@ const TUR = [
       c.strokeStyle = '#e5e5e5'; c.lineWidth = 0.8; ln(8, -12, sx, 0); ln(sx, 0, 8, 12);
       if (f > 0.5) { const ax = sx; c.strokeStyle = '#6b4423'; c.lineWidth = 1.6; ln(ax, 0, ax + 24, 0); c.fillStyle = '#9ca3af'; poly([ax + 24, -2, ax + 28, 0, ax + 24, 2]); c.fill(); c.restore(); fire(sx + 20, -9 + 1, 0.32 * reload(f, 0.5, 0.9)); }
       else c.restore();
-    } else {                 // Kotel oleje: nakloní se a vylije olej, pak se vrátí
-      c.strokeStyle = OL; c.lineWidth = 3; ln(-10, 6, -6, -6); ln(10, 6, 6, -6); c.strokeStyle = '#3c3f46'; c.lineWidth = 1.8; ln(-10, 6, -6, -6); ln(10, 6, 6, -6);
-      fire(0, 6, 0.38);
-      const tilt = throwA(f) * 0.7;
+    } else {                 // Kotel rozžhaveného oleje: bublá a žhne, při výstřelu se nakloní a vyleje žhnoucí proud
+      // trojnožka a pořádný oheň s uhlíky
+      c.strokeStyle = OL; c.lineWidth = 3.4; ln(-12, 6, -7, -6); ln(12, 6, 7, -6); ln(0, 6, 0, -4);
+      c.strokeStyle = '#3c3f46'; c.lineWidth = 2; ln(-12, 6, -7, -6); ln(12, 6, 7, -6); ln(0, 6, 0, -4);
+      c.fillStyle = '#2a1a10'; ell(0, 5, 9, 2.2); c.fillStyle = `rgba(255,${120 + Math.sin(T * 9) * 30 | 0},40,.9)`; for (const x of [-5, -1, 3, 6]) ell(x, 4.6, 1.8, 1);
+      fire(-3, 5, 0.42); fire(4, 5, 0.34);
+      const tilt = throwA(f) * 0.75, hot = 0.85 + Math.sin(T * 5) * 0.15;
       c.save(); c.translate(0, -8); c.rotate(tilt); c.translate(0, 8);
-      c.beginPath(); c.moveTo(-13, -12); c.lineTo(13, -12); c.quadraticCurveTo(12, 2, 0, 3); c.quadraticCurveTo(-12, 2, -13, -12); c.closePath(); fo(ironG(1), 1.4);
-      c.fillStyle = '#1a1208'; ell(0, -12, 12, 3); c.fillStyle = TG('oil', 0, -14, 0, -10, [[0, '#4a3410'], [1, '#2a1a05']]); ell(0, -12, 10, 2.2);
-      c.strokeStyle = '#2b2f36'; c.lineWidth = 1.6; c.beginPath(); c.arc(0, -12, 10, Math.PI * 1.1, Math.PI * 1.9); c.stroke();
-      c.beginPath(); c.moveTo(12, -12); c.lineTo(17, -10); c.lineTo(13, -8); c.closePath(); fo(ironG(2), 1);
+      // kotel: kované železo, nýty, rozžhavené dno
+      const pot = () => { c.beginPath(); c.moveTo(-14, -13); c.lineTo(14, -13); c.bezierCurveTo(14, -2, 9, 3, 0, 3.5); c.bezierCurveTo(-9, 3, -14, -2, -14, -13); c.closePath(); };
+      pot(); c.fillStyle = TG('pot', -14, 0, 14, 0, [[0, '#6b7280'], [0.35, '#3c4048'], [1, '#15171c']]); c.fill();
+      c.save(); pot(); c.clip(); c.fillStyle = TG('potHot', 0, -6, 0, 4, [[0, 'rgba(255,90,20,0)'], [1, 'rgba(255,90,20,.55)']]); c.fillRect(-15, -6, 30, 10); c.restore();
+      outl(pot, 1.5);
+      c.fillStyle = 'rgba(255,255,255,.35)'; for (const x of [-10, -4, 2, 8]) circ(x, -9, 0.8);
+      c.strokeStyle = 'rgba(255,255,255,.25)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-12, -10); c.bezierCurveTo(-12, -3, -8, 1, -3, 2); c.stroke();
+      // ucha
+      c.strokeStyle = OL; c.lineWidth = 2.8; for (const m of [-1, 1]) { c.beginPath(); c.arc(m * 15, -9, 3, m < 0 ? Math.PI * 0.5 : -Math.PI * 0.5, m < 0 ? Math.PI * 1.5 : Math.PI * 0.5); c.stroke(); }
+      // okraj a výlevka
+      c.beginPath(); c.ellipse(0, -13, 14, 3.4, 0, 0, Math.PI * 2); fo('#4b5160', 1.4);
+      c.beginPath(); c.moveTo(12, -14.5); c.lineTo(20, -12); c.lineTo(13, -10.5); c.closePath(); fo('#4b5160', 1.2);
+      // hladina rozžhaveného oleje
+      c.beginPath(); c.ellipse(0, -13, 11.6, 2.4, 0, 0, Math.PI * 2); c.fillStyle = TG('molten', -11, 0, 11, 0, [[0, '#b91c1c'], [0.3, '#f97316'], [0.55, '#fde047'], [0.8, '#f97316'], [1, '#b91c1c']]); c.fill();
+      const op = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter';
+      c.fillStyle = `rgba(255,200,80,${0.35 * hot})`; ell(0, -14, 12, 4);
+      // bubliny, které praskají
+      for (let k = 0; k < 4; k++) { const t = (T * 1.3 + k * 0.27) % 1, x = -7 + k * 4.6 + Math.sin(k * 3) * 1.5; c.strokeStyle = `rgba(255,240,170,${0.9 * (1 - t)})`; c.lineWidth = 0.9; c.beginPath(); c.arc(x, -13.2, 0.6 + t * 1.8, Math.PI, 0); c.stroke(); }
+      c.globalCompositeOperation = op;
       c.restore();
-      if (f < 0.6) { const t = f / 0.6; c.fillStyle = `rgba(60,40,10,${0.9 - t * 0.5})`; for (let k = 0; k < 4; k++) { const d = t * 22 + k * 4; circ(17 + d * 0.5, -8 + d * 0.9 + k, 2.4 - k * 0.3); } }
-      for (let k = 0; k < 3; k++) { const t = (T * 0.8 + k / 3) % 1; c.fillStyle = `rgba(220,220,220,${0.35 * (1 - t)})`; circ(-5 + k * 5 + Math.sin(T * 2 + k) * 2, -14 - t * 14, 2 + t * 3); }
+      { const op3 = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(0, -15, 0, 0, -15, 18); g.addColorStop(0, `rgba(255,150,50,${0.32 * hot})`); g.addColorStop(1, 'rgba(255,120,30,0)'); c.fillStyle = g; c.beginPath(); c.ellipse(0, -15, 18, 11, 0, 0, Math.PI * 2); c.fill(); c.globalCompositeOperation = op3; }
+      // jiskry a tetelící se horký vzduch nad kotlem
+      for (let k = 0; k < 5; k++) { const t = (T * 0.9 + k / 5) % 1, x = -8 + k * 4 + Math.sin(T * 3 + k * 2) * 3; c.fillStyle = `rgba(255,${180 + k * 10},60,${1 - t})`; circ(x, -16 - t * 22, 0.8 + (1 - t) * 0.5); }
+      c.strokeStyle = 'rgba(255,230,200,.18)'; c.lineWidth = 1.4;
+      for (let k = 0; k < 3; k++) { c.beginPath(); for (let y = 0; y < 20; y += 2) { const xx = -6 + k * 6 + Math.sin(y * 0.5 + T * 6 + k) * 1.6; y ? c.lineTo(xx, -18 - y) : c.moveTo(xx, -18); } c.stroke(); }
+      // výlev: žhnoucí proud z výlevky dopředu a dolů, na konci odkapávají kapky
+      const sx = Math.cos(tilt) * 20 - Math.sin(tilt) * (-4), sy = -8 + Math.sin(tilt) * 20 + Math.cos(tilt) * (-4);
+      if (f > 0.04 && f < 0.75) {
+        const t = Math.min(1, (f - 0.04) / 0.25), end = f > 0.5 ? (f - 0.5) / 0.25 : 0, L = 34 * t;
+        const pt = u => [sx + u * 10, sy + u * u * L];
+        const op2 = c.globalCompositeOperation;
+        c.lineCap = 'round';
+        for (const [w, col, add] of [[7, 'rgba(255,90,20,.35)', 1], [4.4, '#ea580c', 0], [2.6, '#fbbf24', 0], [1.1, '#fff7c2', 0]]) {
+          c.globalCompositeOperation = add ? 'lighter' : op2; c.strokeStyle = col; c.lineWidth = w * (1 - end * 0.7);
+          c.beginPath(); for (let u = end; u <= 1.001; u += 0.1) { const [x, y] = pt(u); u === end ? c.moveTo(x, y) : c.lineTo(x, y); } c.stroke();
+        }
+        c.globalCompositeOperation = op2;
+        const [ex, ey] = pt(1); glowDot(ex, ey, 10, '#ff7a1a');
+        for (let k = 0; k < 3; k++) { const q = (T * 3 + k / 3) % 1; c.fillStyle = q < 0.5 ? '#fde047' : '#f97316'; circ(ex + (k - 1) * 2, ey + q * 10, 1.4 * (1 - q * 0.5)); }
+      } else if (f > 1.2 && Math.sin(T * 1.7) > 0.93) { glowDot(sx + 1, sy + 3, 4, '#ff7a1a'); c.fillStyle = '#fbbf24'; circ(sx + 1, sy + 3, 1); }   // občas ukápne
     }
   },
   // ---------- renesance ----------
