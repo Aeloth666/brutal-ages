@@ -78,7 +78,8 @@ function turBalista(f) {
   if (arrow) fire(sx + 20, -8, 0.32 * reload(f, 0.5, 0.9));
 }
 // Kotel oleje: rozžhavený olej bublá a žhne; při výstřelu se kotel nakloní a vyleje žhnoucí proud
-function turKotel(f) {
+// gy = výška věže nad zemí (v souřadnicích věže) – proud oleje dopadne až na zem
+function turKotel(f, gy = 40) {
   // trojnožka a oheň s uhlíky
   c.strokeStyle = OL; c.lineWidth = 3.4; ln(-12, 6, -7, -6); ln(12, 6, 7, -6); ln(0, 6, 0, -4);
   c.strokeStyle = '#3c3f46'; c.lineWidth = 2; ln(-12, 6, -7, -6); ln(12, 6, 7, -6); ln(0, 6, 0, -4);
@@ -112,9 +113,10 @@ function turKotel(f) {
   for (let k = 0; k < 3; k++) { c.beginPath(); for (let y = 0; y < 20; y += 2) { const xx = -6 + k * 6 + Math.sin(y * 0.5 + T * 6 + k) * 1.6; y ? c.lineTo(xx, -18 - y) : c.moveTo(xx, -18); } c.stroke(); }
   // výlev: žhnoucí proud z výlevky dopředu a dolů, na konci odkapávají kapky
   const sx = Math.cos(tilt) * 20 + Math.sin(tilt) * 4, sy = -8 + Math.sin(tilt) * 20 - Math.cos(tilt) * 4;
-  if (f > 0.04 && f < 0.75) {
-    const t = Math.min(1, (f - 0.04) / 0.25), end = f > 0.5 ? (f - 0.5) / 0.25 : 0, L = 34 * t;
-    const pt = u => [sx + u * 10, sy + u * u * L];
+  if (f > 0.04 && f < 0.9) {
+    // proud padá jako volný pád: čím je věž výš, tím déle trvá, než dopadne
+    const H = gy - sy, fall = 0.12 + Math.sqrt(H) * 0.022, t = Math.min(1, (f - 0.04) / fall), end = f > 0.62 ? Math.min(1, (f - 0.62) / 0.26) : 0, L = H * t * t;
+    const pt = u => [sx + u * (8 + H * 0.12), sy + u * u * L];
     c.lineCap = 'round';
     for (const [w, col, add] of [[7, 'rgba(255,90,20,.35)', 1], [4.4, '#ea580c', 0], [2.6, '#fbbf24', 0], [1.1, '#fff7c2', 0]]) {
       c.globalCompositeOperation = add ? 'lighter' : op; c.strokeStyle = col; c.lineWidth = w * (1 - end * 0.7);
@@ -122,7 +124,13 @@ function turKotel(f) {
     }
     c.globalCompositeOperation = op;
     const [ex, ey] = pt(1); glowDot(ex, ey, 10, '#ff7a1a');
-    for (let k = 0; k < 3; k++) { const q = (T * 3 + k / 3) % 1; c.fillStyle = q < 0.5 ? '#fde047' : '#f97316'; circ(ex + (k - 1) * 2, ey + q * 10, 1.4 * (1 - q * 0.5)); }
+    if (t < 1) for (let k = 0; k < 3; k++) { const q = (T * 3 + k / 3) % 1; c.fillStyle = q < 0.5 ? '#fde047' : '#f97316'; circ(ex + (k - 1) * 2, ey + q * 10, 1.4 * (1 - q * 0.5)); }
+    else {                            // dopad na zem: cákance a hořící loužička pod hradbou
+      const p = Math.min(1, (f - 0.04 - fall) / 0.3 + 0.2);
+      c.fillStyle = 'rgba(40,20,5,.7)'; ell(ex, gy, 9 * p, 1.8 * p); c.fillStyle = '#ea580c'; ell(ex, gy - 0.5, 7 * p, 1.3 * p);
+      for (let k = 0; k < 5; k++) { const q = (T * 4 + k / 5) % 1, a = -Math.PI * (0.15 + k * 0.17); c.fillStyle = q < 0.5 ? '#fde047' : '#f97316'; circ(ex + Math.cos(a) * q * 9, gy + Math.sin(a) * q * 8 + q * q * 6, 1.2 * (1 - q)); }
+      fire(ex, gy, 0.35 * p);
+    }
   } else if (f > 1.2 && Math.sin(T * 1.7) > 0.93) { glowDot(sx + 1, sy + 3, 4, '#ff7a1a'); c.fillStyle = '#fbbf24'; circ(sx + 1, sy + 3, 1); }   // občas ukápne
 }
 

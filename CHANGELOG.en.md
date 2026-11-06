@@ -4,6 +4,10 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.29.2 – 6. 11. 2026
+
+- The oil cauldron pours its stream all the way to the ground below the wall – from the top floor the oil falls longer, from the bottom one right away. It splashes and burns on the ground.
+
 ## Version 2.29.1 – 6. 11. 2026
 
 - A campaign chapter unlocks only after finishing all previous chapters (chapter 3 after chapters 1 and 2) and the map says so. The locked Insane difficulty correctly says you only need to finish the first chapter.

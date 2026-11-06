@@ -100,4 +100,4 @@ function smoke(x, y, n, col, sp = 0.4) {
 function sandbags(x0, w, rows) {
   for (let r = 0; r < rows; r++) for (let x = x0 + r * 7; x < x0 + w - r * 7; x += 16) { rr(x, -10 - r * 9, 16, 10, 5); fo(r % 2 ? '#c8b98a' : '#b4a474', 1.1); }
 }
-function drawTurret(a, i, x, y, f = 99) { c.save(); c.translate(x, y); c.scale(1.12, 1.12); TUR[a][i](f); c.restore(); }   // f = s od posledního výstřelu; kresba věží je v turret-art.js
+function drawTurret(a, i, x, y, f = 99) { c.save(); c.translate(x, y); c.scale(1.12, 1.12); TUR[a][i](f, -y / 1.12); c.restore(); }   // 2. parametr: výška nad zemí   // f = s od posledního výstřelu; kresba věží je v turret-art.js

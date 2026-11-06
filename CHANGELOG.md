@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.29.2 – 6. 11. 2026
+
+- Kotel oleje lije proud až na zem pod hradbou – z horního patra padá olej déle, z dolního hned. Na zemi cákne a chvíli hoří.
+
 ## Verze 2.29.1 – 6. 11. 2026
 
 - Kapitola kampaně se odemkne až po dohrání všech předchozích kapitol (3. kapitola po dohrání 1. i 2.) a mapa to tak i píše. Zamčená Šílená obtížnost správně říká, že stačí dohrát první kapitolu.

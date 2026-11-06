@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.29.2', d: '2026-11-06', cs: ['Kotel oleje lije proud až na zem pod hradbou – z horního patra padá olej déle, z dolního hned. Na zemi cákne a chvíli hoří.'], en: ['The oil cauldron pours its stream all the way to the ground below the wall – from the top floor the oil falls longer, from the bottom one right away. It splashes and burns on the ground.'] },
   { v: '2.29.1', d: '2026-11-06', cs: ['Kapitola kampaně se odemkne až po dohrání všech předchozích kapitol (3. kapitola po dohrání 1. i 2.) a mapa to tak i píše. Zamčená Šílená obtížnost správně říká, že stačí dohrát první kapitolu.'], en: ['A campaign chapter unlocks only after finishing all previous chapters (chapter 3 after chapters 1 and 2) and the map says so. The locked Insane difficulty correctly says you only need to finish the first chapter.'] },
   { v: '2.29', d: '2026-11-06', cs: [
     'Kampaň má 3. kapitolu – Říše stínů: 10 nových map (mise 26–35). Každá mise má vlastní omezení: jen jeden druh jednotek, zákaz věží, zamčená evoluce, méně zlata, přežití nebo časový limit. Poslední mise je nejtěžší ve hře.',
