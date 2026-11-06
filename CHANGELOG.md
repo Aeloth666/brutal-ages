@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.28.1 – 6. 11. 2026
+
+- Kamenomet má zase rameno – vak s protizávažím a lžíce s kamenem už nelevitují ve vzduchu.
+
 ## Verze 2.28 – 6. 11. 2026
 
 - Kotel oleje je rozžhavený: olej žhne a bublá, z kotle létají jiskry a tetelí se horký vzduch. Při výstřelu se kotel nakloní a vyleje žhnoucí proud, kapka v letu hoří a kouří a po dopadu vznikne hořící louže.

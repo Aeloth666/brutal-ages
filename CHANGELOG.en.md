@@ -4,6 +4,10 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.28.1 – 6. 11. 2026
+
+- The stone thrower has its arm back – the counterweight sack and the stone cup no longer float in the air.
+
 ## Version 2.28 – 6. 11. 2026
 
 - The oil cauldron is red-hot: the oil glows and bubbles, sparks fly and the hot air shimmers. When it fires, the cauldron tips over and pours a glowing stream, the drop burns and smokes in flight and leaves a burning puddle where it lands.
