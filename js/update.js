@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.28.3', d: '2026-11-06', cs: ['Kameny z kamenometu, praku a katapultu, úly, rozžhavený olej i bomby z hmoždíře letí obloukem vrchem – nahoru a pak dolů na nepřítele. Čím je cíl dál, tím je oblouk vyšší.'], en: ['Stones from the stone thrower, sling and catapult, hives, red-hot oil and mortar bombs now fly in a high arc – up and then down onto the enemy. The further the target, the higher the arc.'] },
   { v: '2.28.1', d: '2026-11-06', cs: ['Kamenomet má zase rameno – vak s protizávažím a lžíce s kamenem už nelevitují ve vzduchu.', 'Katapult a kamenomet hází správně dopředu: rameno švihne zezadu přes vrchol k nepříteli a stejnou cestou se vrátí.'], en: ['The stone thrower has its arm back – the counterweight sack and the stone cup no longer float in the air.', 'The catapult and stone thrower now throw forward: the arm swings from the back over the top towards the enemy and returns the same way.'] },
   { v: '2.28', d: '2026-11-06', cs: [
     'Kotel oleje je rozžhavený: olej žhne a bublá, z kotle létají jiskry a tetelí se horký vzduch. Při výstřelu se kotel nakloní a vyleje žhnoucí proud, kapka v letu hoří a kouří a po dopadu vznikne hořící louže.',

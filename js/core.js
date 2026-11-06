@@ -18,6 +18,7 @@ const KILL_GOLD = 1.3, KILL_XP = 4;
 const SP_CD = 50;
 const PREFIX = 'aowmp-kamosi-';
 
+const ARC_P = ['stone', 'rock', 'egg', 'oil'];           // střely věží, které letí obloukem
 const SPD = { stone: 450, rock: 420, egg: 420, arrow: 650, fire: 600, oil: 400, bullet: 1300,
   shell: 800, rocket: 700, laser: 1600, ion: 900, axe: 480, plasma: 750, rlaser: 1600 };
 
@@ -601,7 +602,8 @@ function step(dt) {
         t.cd = d.cd;
         const o = slotPos(s, k);
         S.proj.push({ id: S.nid++, x: o.x, y: o.y, tid: fe.id, tx: fe.x, ty: GY - 22,
-          d: d.d * atkMul(s) * (p.sb ? p.sb.tur : 1), side: s, p: d.p, sp: d.sp || 0, v: SPD[d.p], src: 't' });
+          d: d.d * atkMul(s) * (p.sb ? p.sb.tur : 1), side: s, p: d.p, sp: d.sp || 0, v: SPD[d.p], src: 't',
+          arc: ARC_P.includes(d.p) || (d.p === 'shell' && d.sp) ? Math.min(130, Math.abs(fe.x - o.x) * 0.38) : 0 });
         S.ev.push([o.x + (s ? -12 : 12), o.y, 'muz', s, k]);       // s, k: která věž střílí (animace výstřelu)
       }
     });
@@ -624,7 +626,15 @@ function step(dt) {
     }
     const dx = pr.tx - pr.x, dy = pr.ty - pr.y, L = Math.hypot(dx, dy), st = pr.v * dt;
     pr.dx = dx; pr.dy = dy;
-    if (L > st) { pr.x += dx / L * st; pr.y += dy / L * st; continue; }
+    if (L > st) {
+      const vx0 = pr.x, vy0 = pr.y - (pr.h || 0);
+      pr.x += dx / L * st; pr.y += dy / L * st;
+      if (pr.arc) {                                   // vrhací stroje a hmoždíř: střela letí obloukem (jen vzhled, zásah se počítá stejně)
+        pr.tr = (pr.tr || 0) + st; const t = pr.tr / (pr.tr + L - st); pr.h = 4 * pr.arc * t * (1 - t);
+        pr.dx = pr.x - vx0; pr.dy = pr.y - pr.h - vy0;
+      }
+      continue;
+    }
     pr.dead = 1;
     if (pr.sp) {
       splash(pr.tx, pr.sp, pr.d, pr.side);
@@ -747,7 +757,7 @@ function snap(ev) {
     Tm: Math.floor(S.time), D: S.diff, X: S.chal, K: S.camp, Dy: S.daily, Dk: Math.ceil(S.dark), Ch: S.chest ? Math.round(S.chest.x) : 0, Tx: S.trex ? [Math.round(S.trex.x), S.trex.dir] : 0, Rg: S.rage ? 1 : 0, Sp: S.speed, Wt: netWait ? 1 : 0, Sm: S.storm > 0 ? 1 : 0, Sv: S.surv ? [S.surv.wave, Math.ceil(S.surv.t), S.surv.pick ? [...S.surv.pick, Math.ceil(S.surv.pt)] : 0, S.surv.got] : 0,
     U: S.units.map(u => [u.id, u.side, u.a, u.ty, Math.round(u.x * 10) / 10, Math.ceil(u.hp), u.mx, u.st,
       Math.round(u.at * 100) / 100, u.back ? 1 : 0, u.rage ? 1 : 0, u.m | 0]),
-    R: S.proj.map(p => [p.id, Math.round(p.x), Math.round(p.y), p.p, Math.round(p.dx || 0), Math.round(p.dy || 0)]),
+    R: S.proj.map(p => [p.id, Math.round(p.x), Math.round(p.y - (p.h || 0)), p.p, Math.round(p.dx || 0), Math.round(p.dy || 0)]),
     E: ev, O: S.over,
   };
 }

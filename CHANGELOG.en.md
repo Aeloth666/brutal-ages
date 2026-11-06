@@ -4,6 +4,10 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.28.3 – 6. 11. 2026
+
+- Stones from the stone thrower, sling and catapult, hives, red-hot oil and mortar bombs now fly in a high arc – up and then down onto the enemy. The further the target, the higher the arc.
+
 ## Version 2.28.1 – 6. 11. 2026
 
 - The stone thrower has its arm back – the counterweight sack and the stone cup no longer float in the air.

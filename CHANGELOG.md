@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.28.3 – 6. 11. 2026
+
+- Kameny z kamenometu, praku a katapultu, úly, rozžhavený olej i bomby z hmoždíře letí obloukem vrchem – nahoru a pak dolů na nepřítele. Čím je cíl dál, tím je oblouk vyšší.
+
 ## Verze 2.28.1 – 6. 11. 2026
 
 - Kamenomet má zase rameno – vak s protizávažím a lžíce s kamenem už nelevitují ve vzduchu.
