@@ -287,7 +287,7 @@ function renderChal() {
 }
 
 document.querySelectorAll('.seg button[data-d]').forEach(b => b.onclick = () => {
-  if (+b.dataset.d === 4 && !CAMPS[CAMP_CH[0].b - 1]) { toasts.push({ a: { n: 'Nejdřív dohraj celou kampaň' }, h: '🔒 ŠÍLENÁ OBTÍŽNOST', l: 3 }); return; }
+  if (+b.dataset.d === 4 && !CAMPS[CAMP_CH[0].b - 1]) { toasts.push({ a: { n: 'Nejdřív dohraj první kapitolu kampaně' }, h: '🔒 ŠÍLENÁ OBTÍŽNOST', l: 3 }); return; }
   SET.diff = +b.dataset.d; saveSet(); sfx('click');
 });
 document.querySelectorAll('#netMode button').forEach(b => b.onclick = () => { SET.net = b.dataset.m; saveSet(); sfx('click'); });

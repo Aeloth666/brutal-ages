@@ -4,6 +4,10 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.29.1 – 6. 11. 2026
+
+- A campaign chapter unlocks only after finishing all previous chapters (chapter 3 after chapters 1 and 2) and the map says so. The locked Insane difficulty correctly says you only need to finish the first chapter.
+
 ## Version 2.29 – 6. 11. 2026
 
 - The campaign has chapter 3 – Realm of shadows: 10 new maps (missions 26–35). Every mission has its own restriction: only one unit type, no towers, locked evolution, less gold, survival or a time limit. The last mission is the hardest in the game.

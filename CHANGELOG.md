@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.29.1 – 6. 11. 2026
+
+- Kapitola kampaně se odemkne až po dohrání všech předchozích kapitol (3. kapitola po dohrání 1. i 2.) a mapa to tak i píše. Zamčená Šílená obtížnost správně říká, že stačí dohrát první kapitolu.
+
 ## Verze 2.29 – 6. 11. 2026
 
 - Kampaň má 3. kapitolu – Říše stínů: 10 nových map (mise 26–35). Každá mise má vlastní omezení: jen jeden druh jednotek, zákaz věží, zamčená evoluce, méně zlata, přežití nebo časový limit. Poslední mise je nejtěžší ve hře.

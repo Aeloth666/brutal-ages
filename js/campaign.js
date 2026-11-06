@@ -86,7 +86,8 @@ const CAMP = [
   .forEach((f, i) => { CAMP[i].field = f; });
 const CAMPS = load('aow-camp', {});               // index mise → počet hvězd
 let lastStars = 0, campSel = 0, campChap = 0;
-const campOpen = i => i === 0 || !!CAMPS[i - 1];
+// mise je otevřená po dobytí předchozí; první mise kapitoly až po dohrání VŠECH předchozích kapitol
+const campOpen = i => { if (i === 0) return true; const k = chapOf(i); if (k > 0 && CAMP_CH[k].a === i) { for (let j = 0; j < k; j++) if (!chapDone(j)) return false; return true; } return !!CAMPS[i - 1]; };
 // kapitoly kampaně (a = první mise, b = za poslední); 2. kapitola se odemkne dobytím posledního území 1. kapitoly
 // col = barvy mapy kapitoly: moře nahoře, moře dole, pláž, pevnina
 const CAMP_CH = [{ n: 'I. Dějiny světa', a: 0, b: 15, col: ['#1e3a5f', '#0f2140', '#c9b27a', '#5f8f3e'] },
@@ -163,7 +164,7 @@ function renderCampMap() {
     <g fill="${C.col[2]}">${beach}</g><g fill="${C.col[3]}">${land}</g>
     <path d="${path}" fill="none" stroke="#f5e6c4" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round" opacity=".7"/>
     ${ages}${cells}
-    ${lockCh ? `<rect x="200" y="188" width="600" height="52" rx="14" fill="#0b0614" opacity=".85"/><text x="500" y="223" class="age lockmsg">🔒 Odemkne se po dobytí území ${CAMP_CH[campChap - 1].b}</text>` : ''}</svg>`;
+    ${lockCh ? `<rect x="200" y="188" width="600" height="52" rx="14" fill="#0b0614" opacity=".85"/><text x="500" y="223" class="age lockmsg">🔒 Odemkne se po dohrání ${CAMP_CH.slice(0, campChap).map(c => c.n.split(' ')[0]).join(' a ')} kapitoly</text>` : ''}</svg>`;
   $('campMap').querySelectorAll('.cell.open').forEach(g => g.onclick = () => { campSel = +g.dataset.i; sfx('click'); renderCamp(); });
   $('campMap').querySelectorAll('.camp-tabs button').forEach(b => b.onclick = () => {
     campChap = +b.dataset.c; sfx('click');
