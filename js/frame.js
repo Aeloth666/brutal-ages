@@ -7,17 +7,16 @@ function render(dt) {
   c.fillStyle = '#10151f'; c.fillRect(0, 0, cv.width, cv.height);
   c.setTransform(scl, 0, 0, scl, ox, oy);
   // na širokém displeji bojiště pokračuje pod horní lištou do bočních pruhů, aby byly základny vidět celé
-  EXW = Math.max(0, Math.min(90, ox / scl));
+  EXL = Math.max(0, Math.min(90, ox / scl)); EXR = Math.max(0, Math.min(90, (cv.width - ox) / scl - W)); EXW = Math.max(EXL, EXR);
   c.save(); c.beginPath(); c.rect(0, 0, W, H);
-  if (EXW > 0) { c.rect(-EXW, HUD, EXW, H - HUD); c.rect(W, HUD, EXW, H - HUD); }
+  if (EXL > 0) c.rect(-EXL, HUD, EXL, H - HUD);
+  if (EXR > 0) c.rect(W, HUD, EXR, H - HUD);
   c.clip();
   if (bgC.width && bgC.height) {                                  // při minimalizovaném okně může mít pozadí nulovou velikost
     c.drawImage(bgC, 0, 0, W, H);
-    if (EXW > 0) {                                                // pruhy = zrcadlený okraj pozadí
-      const sw = EXW * bgC.width / W;
-      c.save(); c.scale(-1, 1); c.drawImage(bgC, 0, 0, sw, bgC.height, 0, 0, EXW, H); c.restore();
-      c.save(); c.translate(2 * W, 0); c.scale(-1, 1); c.drawImage(bgC, bgC.width - sw, 0, sw, bgC.height, W - EXW, 0, EXW, H); c.restore();
-    }
+    const k = bgC.width / W;                                      // pruhy = zrcadlený okraj pozadí
+    if (EXL > 0) { c.save(); c.scale(-1, 1); c.drawImage(bgC, 0, 0, EXL * k, bgC.height, 0, 0, EXL, H); c.restore(); }
+    if (EXR > 0) { c.save(); c.translate(2 * W, 0); c.scale(-1, 1); c.drawImage(bgC, bgC.width - EXR * k, 0, EXR * k, bgC.height, W - EXR, 0, EXR, H); c.restore(); }
   }
   drawClouds();
   wxBack(dt);

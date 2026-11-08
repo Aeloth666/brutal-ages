@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.35', d: '2026-11-09', cs: ['Obě základny jsou vidět celé i na úzkých displejích – bojiště se v případě potřeby o kousek zmenší a pokračuje do okrajů obrazovky.'], en: ['Both bases are fully visible even on narrow screens – the battlefield shrinks slightly when needed and continues into the screen edges.'] },
   { v: '2.34', d: '2026-11-09', cs: ['Padlí mamuti, vlci, medvědi, pratuři a koně už jen nezmizí – podlomí se v nohou, sesunou k zemi a zvednou prach.'], en: ['Fallen mammoths, wolves, bears, aurochs and horses no longer just vanish – their legs buckle, they slump to the ground and kick up dust.'] },
   { v: '2.33', d: '2026-11-08', cs: ['Na širokých displejích je teď vidět celá základna – bojiště pokračuje i do bočních okrajů obrazovky.', 'Opraven vzácný pád při vykreslování pozadí.'], en: ['On wide screens you now see the whole base – the battlefield continues into the side margins of the screen.', 'Fixed a rare crash when drawing the background.'] },
   { v: '2.32', d: '2026-11-08', cs: ['Drobné opravy.'], en: ['Small fixes.'] },

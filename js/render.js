@@ -20,8 +20,11 @@ function resize() {
   cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
   cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
   const aw = (innerWidth - il - ir) * dpr, ah = (innerHeight - it - ib) * dpr;
-  scl = Math.min(aw / W, ah / H);
-  ox = il * dpr + (aw - W * scl) / 2; oy = it * dpr + (ah - H * scl) / 2;
+  // základny přesahují za okraj světa až o B_OV bodů: když po stranách není místo, bojiště se zmenší (nejvýš o 8 %)
+  const fit = Math.min(aw / W, ah / H);
+  scl = Math.max(fit * 0.92, Math.min(fit, cv.width / (W + 2 * B_OV)));
+  // na střed celé obrazovky (pruhy na obou stranách), ale svět vždy uvnitř bezpečné oblasti (výřez kamery)
+  ox = Math.max(il * dpr, Math.min(il * dpr + aw - W * scl, (cv.width - W * scl) / 2)); oy = it * dpr + (ah - H * scl) / 2;
   buildBg();
 }
 

@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.35 – 9. 11. 2026
+
+- Obě základny jsou vidět celé i na úzkých displejích – bojiště se v případě potřeby o kousek zmenší a pokračuje do okrajů obrazovky.
+
 ## Verze 2.34 – 9. 11. 2026
 
 - Padlí mamuti, vlci, medvědi, pratuři a koně už jen nezmizí – podlomí se v nohou, sesunou k zemi a zvednou prach.

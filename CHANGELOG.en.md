@@ -4,6 +4,10 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.35 – 9. 11. 2026
+
+- Both bases are fully visible even on narrow screens – the battlefield shrinks slightly when needed and continues into the screen edges.
+
 ## Version 2.34 – 9. 11. 2026
 
 - Fallen mammoths, wolves, bears, aurochs and horses no longer just vanish – their legs buckle, they slump to the ground and kick up dust.
