@@ -4,6 +4,10 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.32 – 8. 11. 2026
+
+- Small fixes.
+
 ## Version 2.31 – 6. 11. 2026
 
 - Small fixes and hidden testing tools.

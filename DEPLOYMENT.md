@@ -1,4 +1,4 @@
-﻿# Brutal Ages – web version
+# Brutal Ages – web version
 
 🇨🇿 Česky: [NASAZENI.md](NASAZENI.md)
 

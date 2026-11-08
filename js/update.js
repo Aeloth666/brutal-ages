@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.32', d: '2026-11-08', cs: ['Drobné opravy.'], en: ['Small fixes.'] },
   { v: '2.31', d: '2026-11-06', cs: ['Drobné opravy a skryté nástroje pro testování.'], en: ['Small fixes and hidden testing tools.'] },
   { v: '2.30', d: '2026-11-06', cs: [
     'Týdenní přežití (Hrát sám → 🗓): nekonečné přežití se dvěma zvláštními pravidly týdne (bez věží, jen střelci, dvojnásobní bossové, rychlá horda, skleněná armáda…), pro všechny stejnými. Vlastní žebříček, který každý týden začíná od nuly.',

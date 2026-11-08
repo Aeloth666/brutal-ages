@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.32 – 8. 11. 2026
+
+- Drobné opravy.
+
 ## Verze 2.31 – 6. 11. 2026
 
 - Drobné opravy a skryté nástroje pro testování.

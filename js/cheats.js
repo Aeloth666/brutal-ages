@@ -26,13 +26,14 @@ function renderCheats() {
     <div class="cheat-list">${CHEATS.map(x => `<button data-k="${x.k}" class="${c0[x.k] ? 'on' : ''}">${x.ic} ${x.n}<small>${c0[x.k] ? 'ZAPNUTO' : 'vypnuto'}</small></button>`).join('')}</div>
     <h3>Rychlé akce ve hře</h3>
     <div class="cb-btns"><button id="chWin" ${inGame && !S.surv ? '' : 'disabled'}>💥 Zničit nepřátelskou základnu</button><button id="chWave" ${inGame && S.surv ? '' : 'disabled'}>♾ +10 vln (přežití)</button></div>
-    <div class="cb-btns"><button id="chOff" class="ghost">Vypnout všechny cheaty</button></div>`;
+    <div class="cb-btns"><button id="chOff" class="ghost">Vypnout všechny cheaty</button><button id="chLock" class="ghost">🔒 Zamknout a skrýt cheaty</button></div>`;
   b.querySelectorAll('.cheat-list button').forEach(x => x.onclick = () => {
     SET.cheat = { ...CHEAT(), [x.dataset.k]: !CHEAT()[x.dataset.k] }; saveSet(); sfx('click');
     if (x.dataset.k === 'open') { try { refreshMenu(); } catch (e) {} }
     renderCheats();
   });
   $('chOff').onclick = () => { SET.cheat = {}; saveSet(); sfx('click'); try { refreshMenu(); } catch (e) {} renderCheats(); };
+  $('chLock').onclick = () => { SET.cheat = {}; delete SET.cheatSeen; saveSet(); sfx('click'); try { refreshMenu(); } catch (e) {} $('cheatPanel').classList.add('hidden'); toasts.push({ a: { n: 'Znovu je otevřeš 10 klepnutími na nadpis Co je nového' }, h: '🔒 CHEATY ZAMČENÉ', l: 4 }); };
   if (inGame) {
     $('chWin').onclick = () => { hitBase(1, S.pl[1].hp + 1, 0); sfx('click'); $('cheatPanel').classList.add('hidden'); };
     if (S.surv) $('chWave').onclick = () => { S.surv.wave += 10; S.surv.t = 0.1; sfx('click'); $('cheatPanel').classList.add('hidden'); };
