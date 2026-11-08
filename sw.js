@@ -1,6 +1,6 @@
 // Service worker: hra jde hrát offline v prohlížeči (online hra a počasí potřebují síť).
 // VERSION přepisuje build-web.ps1 při každém sestavení webové verze.
-const VERSION = 'brutal-ages-web-202611090000';
+const VERSION = 'brutal-ages-web-202611090007';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'lib/peerjs.min.js',
   'js/i18n.js', 'js/build.js', 'js/errlog.js', 'js/data.js', 'js/core.js', 'js/ai.js', 'js/snapshot.js', 'js/net.js', 'js/render.js', 'js/units.js', 'js/weapons.js', 'js/animals.js', 'js/heavy.js', 'js/bossart.js', 'js/world.js', 'js/base-kit.js', 'js/bases-early.js', 'js/bases-late.js', 'js/turrets.js', 'js/turret-art.js', 'js/fx.js', 'js/gore.js', 'js/hud.js',

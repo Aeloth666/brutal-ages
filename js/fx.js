@@ -80,7 +80,8 @@ function addFx(e) {
       if (BRUT() && !SET.egg && !bloodCode && !bloodCodeUsed && V && V.time > 90 && Math.random() < 0.05) bloodCode = { x: Math.max(160, Math.min(W - 160, MX(x))), l: 14, ml: 14 };
       if (SET.chicken) { part(10, '#f8fafc', 110, 2.2, 1, 120); sfx('cluck', x); }
       seasonDie(x);
-      const cp = { corpse: 1, x, side: e[3], a: e[4], ty: e[5], m: e[6] | 0, l: e[5] === 5 ? 3 : 1.3, ml: e[5] === 5 ? 3 : 1.3 };
+      const beast = e[5] === 2 && e[4] <= 1, cl = e[5] === 5 ? 3 : beast ? 2.2 : 1.3;      // zvíře padá déle
+      const cp = { corpse: 1, x, side: e[3], a: e[4], ty: e[5], m: e[6] | 0, l: cl, ml: cl };
       if (e[5] === 5) {                                   // padlý boss: série výbuchů a velký nápis
         if (e[3] !== mySide) achBoss(e[4]);
         shake = 2; vib([150, 60, 250]);
@@ -166,7 +167,17 @@ function drawFx(dt) {
     f.l -= dt;
     const a = Math.max(0, f.l / f.ml), x = MX(f.x);
     c.globalAlpha = a;
-    if (f.corpse) {
+    if (f.corpse && f.ty === 2 && f.a <= 1) {
+      // padlé zvíře (mamut, vlk, medvěd, pratur, kůň): podlomí se v nohou a sesune k zemi předkem napřed
+      const B = BEAST_M[f.a === 0 ? mountKind(teamColM(f.side, f.m)) : 'horse'];
+      const t = Math.min(1, (f.ml - f.l) / 0.7), q = t * t * (3 - 2 * t), drop = -B.c[1] * 0.55 * US;
+      if (t >= 1 && !f.dust) { f.dust = 1; for (let k = 0; k < 6; k++) fx.push({ smoke: 1, x: f.x + rnd(-40, 40) * US, y: GY - 4, vx: rnd(-40, 40), vy: rnd(-30, -10), r: rnd(5, 9), l: 0.8, ml: 0.8, col: 'rgba(150,120,90,.7)', col2: 'rgba(200,175,140,.5)' }); }
+      c.globalAlpha = Math.min(1, f.l / 0.6);
+      c.save(); c.beginPath(); c.rect(x - 200, 0, 400, GY + 3); c.clip();         // nohy „zajedou“ pod zem
+      c.translate(x, GY + q * drop); c.scale(facing(f.side) * US, US); c.rotate(q * 0.16);
+      drawUnitLocal(teamColM(f.side, f.m), f.a, f.ty, 0, 0, 1);
+      c.restore();
+    } else if (f.corpse) {
       const p = Math.min(1, (f.ml - f.l) / 0.35);
       c.globalAlpha = Math.min(1, f.l / 0.6);
       c.save(); c.translate(x, GY + (f.ty === 2 ? p * 8 : f.ty === 5 ? p * 14 : 0)); c.scale(facing(f.side) * US, US);
