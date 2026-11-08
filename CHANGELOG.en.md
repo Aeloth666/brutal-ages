@@ -4,6 +4,11 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.33 – 8. 11. 2026
+
+- On wide screens you now see the whole base – the battlefield continues into the side margins of the screen.
+- Fixed a rare crash when drawing the background.
+
 ## Version 2.32 – 8. 11. 2026
 
 - Small fixes.

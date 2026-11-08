@@ -145,7 +145,7 @@ function drawWait() {
   waitBtn = null;
   if (!netWait || !V || V.over >= 0) return;
   const left = Math.max(0, WAIT_MAX - Math.floor((performance.now() - waitSince) / 1000));
-  c.fillStyle = 'rgba(8,10,16,.6)'; c.fillRect(0, HUD, W, H - HUD);
+  c.fillStyle = 'rgba(8,10,16,.6)'; c.fillRect(-EXW, HUD, W + 2 * EXW, H - HUD);
   const w = 520, h = 190, x = W / 2 - w / 2, y = 200;
   rr(x, y, w, h, 18); c.fillStyle = '#151c2b'; c.fill(); c.strokeStyle = '#e5c04a'; c.lineWidth = 2; c.stroke();
   const away = oppAway ? 'Soupeř odešel z aplikace' : role === 'guest' ? 'Spojení s hostitelem vypadlo' : 'Spojení se soupeřem vypadlo';

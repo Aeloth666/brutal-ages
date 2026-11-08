@@ -6,8 +6,19 @@ function render(dt) {
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.fillStyle = '#10151f'; c.fillRect(0, 0, cv.width, cv.height);
   c.setTransform(scl, 0, 0, scl, ox, oy);
-  c.save(); c.beginPath(); c.rect(0, 0, W, H); c.clip();
-  c.drawImage(bgC, 0, 0, W, H);
+  // na širokém displeji bojiště pokračuje pod horní lištou do bočních pruhů, aby byly základny vidět celé
+  EXW = Math.max(0, Math.min(90, ox / scl));
+  c.save(); c.beginPath(); c.rect(0, 0, W, H);
+  if (EXW > 0) { c.rect(-EXW, HUD, EXW, H - HUD); c.rect(W, HUD, EXW, H - HUD); }
+  c.clip();
+  if (bgC.width && bgC.height) {                                  // při minimalizovaném okně může mít pozadí nulovou velikost
+    c.drawImage(bgC, 0, 0, W, H);
+    if (EXW > 0) {                                                // pruhy = zrcadlený okraj pozadí
+      const sw = EXW * bgC.width / W;
+      c.save(); c.scale(-1, 1); c.drawImage(bgC, 0, 0, sw, bgC.height, 0, 0, EXW, H); c.restore();
+      c.save(); c.translate(2 * W, 0); c.scale(-1, 1); c.drawImage(bgC, bgC.width - sw, 0, sw, bgC.height, W - EXW, 0, EXW, H); c.restore();
+    }
+  }
   drawClouds();
   wxBack(dt);
   if (GFXL >= 3) ultraBack();
@@ -43,7 +54,7 @@ function render(dt) {
       fx.push({ smoke: 1, x: u.x - (u.side ? -1 : 1) * 6, y: GY - 2, vx: rnd(-10, 10), vy: rnd(-14, -6), r: rnd(2, 4), l: 0.7, ml: 0.7, col: 'rgba(150,120,90,.8)', col2: 'rgba(200,175,140,.6)' });
   }
   const order = [...V.units].sort((a, b) => (b.ty === 2) - (a.ty === 2));
-  if (V.pl[mySide].cry) { c.fillStyle = 'rgba(255,200,60,.12)'; c.fillRect(0, HUD, W, H - HUD); }
+  if (V.pl[mySide].cry) { c.fillStyle = 'rgba(255,200,60,.12)'; c.fillRect(-EXW, HUD, W + 2 * EXW, H - HUD); }
   for (const u of order) {
     const r = phMap.get(u.id) || { ph: Math.random() * 6, x: u.x };
     r.ph += Math.abs(u.x - r.x) * 0.11; r.x = u.x; r.seen = T; phMap.set(u.id, r);
@@ -74,7 +85,7 @@ function render(dt) {
   drawFx(dt);
   if (GFXL >= 3) ultraFront();
   wxFront(dt);
-  if (V.dark > 0) { c.fillStyle = `rgba(6,8,24,${Math.min(0.62, V.dark * 0.12)})`; c.fillRect(0, 0, W, H); }
+  if (V.dark > 0) { c.fillStyle = `rgba(6,8,24,${Math.min(0.62, V.dark * 0.12)})`; c.fillRect(-EXW, 0, W + 2 * EXW, H); }
   drawStorm(); seasonFx(dt); drawNight(); drawEmotes(dt);
   if (evtBanner) drawEvtBanner(dt);
   if (GFXL >= 3) ultraGrade();

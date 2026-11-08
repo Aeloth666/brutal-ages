@@ -8,6 +8,7 @@
 // ---------- Konstanty světa ----------
 const W = 1300, H = 600, GY = 505, HUD = 112;   // GY = úroveň země (pod ní je hlína se zakopanými kostmi)
 const BX = [62, W - 62];          // středy základen
+let EXW = 0;                      // o kolik bojiště pokračuje do bočních pruhů širokých displejů (kvůli celým základnám), nastavuje render()
 const BF = [120, W - 120];        // přední hrana základen
 const SPAWN = [110, W - 110];
 const DT = 1 / 30;

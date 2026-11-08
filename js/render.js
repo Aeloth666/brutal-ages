@@ -123,7 +123,7 @@ function buildBg() {
   // obloha
   const g = c.createLinearGradient(0, 0, 0, GY);
   g.addColorStop(0, F.sky[0]); g.addColorStop(0.55, F.sky[1]); g.addColorStop(1, F.sky[2]);
-  c.fillStyle = g; c.fillRect(0, 0, W, GY);
+  c.fillStyle = g; c.fillRect(-EXW, 0, W + 2 * EXW, GY);
   if (F.sun) {
     const sg = c.createRadialGradient(980, 200, 10, 980, 200, 160 * F.sun);
     sg.addColorStop(0, 'rgba(255,250,220,1)'); sg.addColorStop(0.15, 'rgba(255,240,180,.9)'); sg.addColorStop(1, 'rgba(255,240,180,0)');

@@ -161,9 +161,9 @@ function ultraFront() {
 function ultraGrade() {
   // jemné teplé ladění a vinětace
   const op = c.globalCompositeOperation;
-  c.globalCompositeOperation = 'soft-light'; c.fillStyle = WX.night ? 'rgba(80,110,200,.18)' : 'rgba(255,190,120,.16)'; c.fillRect(0, 0, W, H);
+  c.globalCompositeOperation = 'soft-light'; c.fillStyle = WX.night ? 'rgba(80,110,200,.18)' : 'rgba(255,190,120,.16)'; c.fillRect(-EXW, 0, W + 2 * EXW, H);
   c.globalCompositeOperation = op;
-  c.fillStyle = rg('vign', W / 2, H / 2, 260, 820, [[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,.38)']]); c.fillRect(0, 0, W, H);
+  c.fillStyle = rg('vign', W / 2, H / 2, 260, 820, [[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,.38)']]); c.fillRect(-EXW, 0, W + 2 * EXW, H);
 }
 
 // =====================================================================

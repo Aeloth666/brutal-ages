@@ -4,6 +4,11 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.33 – 8. 11. 2026
+
+- Na širokých displejích je teď vidět celá základna – bojiště pokračuje i do bočních okrajů obrazovky.
+- Opraven vzácný pád při vykreslování pozadí.
+
 ## Verze 2.32 – 8. 11. 2026
 
 - Drobné opravy.

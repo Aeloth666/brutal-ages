@@ -79,7 +79,7 @@ function drawBtn(b) {
 function drawOver(V) {
   const win = V.over === mySide, cm = V.camp != null ? CAMP[V.camp] : null;
   const title = V.surv ? 'PADL JSI VE VLNĚ ' + V.surv : cm && curDef != null ? (win ? 'ÚZEMÍ UBRÁNĚNO!' : 'ÚZEMÍ PADLO') : cm ? (win ? 'ÚZEMÍ DOBYTO!' : 'ÚTOK SELHAL') : win ? 'VÍTĚZSTVÍ!' : 'PROHRA';
-  c.fillStyle = 'rgba(8,10,16,.72)'; c.fillRect(0, 0, W, H);
+  c.fillStyle = 'rgba(8,10,16,.72)'; c.fillRect(-EXW, 0, W + 2 * EXW, H);
   c.textAlign = 'center'; c.font = '900 72px system-ui';
   c.lineWidth = 10; c.strokeStyle = win ? '#7c2d12' : '#450a0a'; c.strokeText(title, W / 2, 250);
   c.fillStyle = win ? '#fde047' : '#f87171'; c.fillText(title, W / 2, 250);

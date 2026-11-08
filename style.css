@@ -341,6 +341,6 @@ table.cmp td.win { color: #4ade80; font-weight: 800; } table.cmp { margin-top: 8
 .wk-rule > span { font-size: 26px; }
 .wk-rule small { display: block; color: #cbd5e1; }
 .cheat-list { display: grid; gap: 8px; margin: 10px 0; }
-.cheat-list button { text-align: left; display: flex; justify-content: space-between; align-items: center; }
+.cheat-list button { text-align: left; display: flex; justify-content: space-between; align-items: center; background: #1e293b; box-shadow: 0 4px 0 #0f172a; }
 .cheat-list button.on { background: linear-gradient(#16a34a, #166534); }
 .cheat-list small { opacity: .85; font-weight: 700; }

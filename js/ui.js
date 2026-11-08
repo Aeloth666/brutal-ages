@@ -192,7 +192,7 @@ function renderAchList() {
 // =====================================================================
 let paused = false, pauseBtns = [];
 function drawPause() {
-  c.fillStyle = 'rgba(8,10,16,.75)'; c.fillRect(0, 0, W, H);
+  c.fillStyle = 'rgba(8,10,16,.75)'; c.fillRect(-EXW, 0, W + 2 * EXW, H);
   const chi = role === 'solo' && !tut && SET.cheatSeen, w = 360, h = (role === 'solo' && !tut ? 442 : 384) + (chi ? 58 : 0), x = W / 2 - w / 2, y = chi ? 92 : 116;
   rr(x, y, w, h, 18); c.fillStyle = '#151c2b'; c.fill(); c.strokeStyle = '#e5c04a'; c.lineWidth = 2; c.stroke();
   c.textAlign = 'center'; c.fillStyle = '#fde68a'; c.font = '900 30px system-ui'; c.fillText(role === 'solo' ? 'PAUZA' : 'MENU', W / 2, y + 46);

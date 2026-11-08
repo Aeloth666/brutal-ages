@@ -47,7 +47,7 @@ function seasonDie(x) { if (SEASON === 'halloween' && Math.random() < 0.35 && gh
 function seasonFx(dt) {
   if (!SEASON || !V) return;
   if (SEASON === 'halloween') {
-    c.fillStyle = 'rgba(80,30,120,.12)'; c.fillRect(0, HUD, W, H - HUD);
+    c.fillStyle = 'rgba(80,30,120,.12)'; c.fillRect(-EXW, HUD, W + 2 * EXW, H - HUD);
     c.fillStyle = '#140a1f';
     for (let i = 0; i < 6; i++) {
       const x = ((T * (40 + i * 9) + i * 230) % (W + 160)) - 80, y = HUD + 60 + (i % 3) * 45 + Math.sin(T * 3 + i) * 14, f = Math.sin(T * 14 + i) * 5;
