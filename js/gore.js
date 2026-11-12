@@ -60,7 +60,7 @@ function eggPath(open) {
 function drawEggScene() {
   const E = eggScene, t = eggT(), [x, y, s] = eggPos(), done = E.done ? t - E.done : -1;
   c.save();
-  c.globalAlpha = Math.min(0.9, t * 1.3); c.fillStyle = '#05030a'; c.fillRect(-EXW, 0, W + 2 * EXW, H);
+  c.globalAlpha = Math.min(0.9, t * 1.3); c.fillStyle = '#05030a'; c.fillRect(-EXW, -EXT, W + 2 * EXW, H + EXT + EXB);
   c.globalAlpha = Math.min(1, t * 1.6);
   const R = 60 + 50 * s, g = c.createRadialGradient(x, y, 6, x, y, R);
   g.addColorStop(0, `rgba(255,214,110,${done >= 0 ? 0.75 : 0.32})`); g.addColorStop(1, 'rgba(255,214,110,0)'); c.fillStyle = g; circ(x, y, R);

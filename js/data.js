@@ -8,8 +8,9 @@
 // ---------- Konstanty světa ----------
 const W = 1300, H = 600, GY = 505, HUD = 112;   // GY = úroveň země (pod ní je hlína se zakopanými kostmi)
 const BX = [62, W - 62];          // středy základen
-let EXW = 0, EXL = 0, EXR = 0;    // o kolik bojiště pokračuje do bočních pruhů (vlevo, vpravo, větší z nich) kvůli celým základnám, nastavuje render()
+let EXW = 0, EXL = 0, EXR = 0, EXT = 0, EXB = 0;   // o kolik bojiště pokračuje do okrajů obrazovky (vlevo, vpravo, větší z bočních, nahoře, dole), nastavuje render()
 const B_OV = 70;                  // o kolik základny přesahují dozadu za okraj světa
+let camX = 0, camMin = 0, camMax = 0;   // posun bojiště (kamera) – jen vykreslení, simulace o něm neví
 const BF = [120, W - 120];        // přední hrana základen
 const SPAWN = [110, W - 110];
 const DT = 1 / 30;

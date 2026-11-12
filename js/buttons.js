@@ -38,12 +38,17 @@ function drawBtn(b) {
   c.fillStyle = b.ok ? lg('btnOn', 0, 7, 0, 103, [[0, '#33507a'], [1, '#1c2b44']]) : '#1a2130'; c.fill();
   c.strokeStyle = b.ok ? '#5b7fb3' : '#2a3344'; c.lineWidth = 1.5; c.stroke();
   c.fillStyle = 'rgba(255,255,255,.08)'; rr(b.x + 3, b.y + 3, b.w - 6, 26, 8); c.fill();
-  // evoluce je dostupná → tlačítko pulzuje zlatou září
-  if (b.ok && b.icon && b.icon[0] === 'e') {
-    const p = 0.5 + 0.5 * Math.sin(T * 5);
-    c.save(); c.shadowColor = '#fde047'; c.shadowBlur = 10 + p * 16; rr(b.x, b.y, b.w, b.h, 11);
-    c.strokeStyle = `rgba(253,224,71,${0.55 + 0.45 * p})`; c.lineWidth = 3; c.stroke();
-    c.fillStyle = `rgba(253,224,71,${0.06 + 0.1 * p})`; c.fill(); c.restore();
+  // evoluce je dostupná → tlačítko výrazně bliká zlatě a vysílá vlny, aby si toho hráč všiml
+  const evo = b.ok && b.icon && b.icon[0] === 'e';
+  if (evo) {
+    const p = 0.5 + 0.5 * Math.sin(T * 8);
+    c.save(); c.shadowColor = '#fde047'; c.shadowBlur = 18 + p * 26; rr(b.x, b.y, b.w, b.h, 11);
+    c.fillStyle = `rgba(250,204,21,${0.18 + 0.42 * p})`; c.fill();
+    c.strokeStyle = `rgba(254,240,138,${0.7 + 0.3 * p})`; c.lineWidth = 4; c.stroke(); c.restore();
+    for (let k = 0; k < 2; k++) {                        // vlny rozbíhající se od tlačítka
+      const f = (T * 1.2 + k * 0.5) % 1, e = f * 16;
+      c.save(); rr(b.x - e, b.y - e, b.w + 2 * e, b.h + 2 * e, 11 + e); c.strokeStyle = `rgba(253,224,71,${0.8 * (1 - f)})`; c.lineWidth = 3 * (1 - f) + 1; c.stroke(); c.restore();
+    }
   }
   // právě stisknuté tlačítko krátce blikne
   const fl = BTN_FLASH.get(btnKey(b));
@@ -53,7 +58,8 @@ function drawBtn(b) {
   if (k === 'u') drawIcon(unitIcon(teamCol(mySide), a, i), cx0, b.y + 63, b.w - 12, 58);
   else if (k === 't') { c.translate(cx0 - 6, b.y + 42); c.scale(1.7, 1.7); TUR[a][i](99); }
   else if (k === 's') { const pr = AGES[a].sp.p; drawProj({ x: mirror ? W - cx0 : cx0, y: b.y + 36, p: pr === 'beam' ? 'laser' : pr, dx: mirror ? -1 : 1, dy: 1.2 }); }
-  else if (k === 'e') { poly([cx0, b.y + 12, cx0 + 19, b.y + 34, cx0 + 8, b.y + 34, cx0 + 8, b.y + 58, cx0 - 8, b.y + 58, cx0 - 8, b.y + 34, cx0 - 19, b.y + 34]); fo(lg('evo', 0, b.y + 12, 0, b.y + 58, [[0, '#fef08a'], [1, '#ca8a04']]), 1.6); }
+  else if (k === 'e') { if (evo) c.translate(0, -Math.abs(Math.sin(T * 6)) * 6);   // šipka poskakuje
+    poly([cx0, b.y + 12, cx0 + 19, b.y + 34, cx0 + 8, b.y + 34, cx0 + 8, b.y + 58, cx0 - 8, b.y + 58, cx0 - 8, b.y + 34, cx0 - 19, b.y + 34]); fo(lg('evo', 0, b.y + 12, 0, b.y + 58, [[0, '#fef08a'], [1, '#ca8a04']]), 1.6); }
   else if (k === 'plus') { rr(cx0 - 5, b.y + 16, 10, 36, 3); fo('#4ade80', 1.4); rr(cx0 - 18, b.y + 29, 36, 10, 3); fo('#4ade80', 1.4); }
   else if (k === 'sell') { c.beginPath(); c.arc(cx0, b.y + 34, 16, 0, Math.PI * 2); fo('#facc15', 1.6); c.fillStyle = '#854d0e'; c.font = '900 20px system-ui'; c.textAlign = 'center'; c.fillText('$', cx0, b.y + 41); }
   else if (k === 'g') {                                // vylepšení: meč / srdce / hradba
@@ -79,7 +85,7 @@ function drawBtn(b) {
 function drawOver(V) {
   const win = V.over === mySide, cm = V.camp != null ? CAMP[V.camp] : null;
   const title = V.surv ? 'PADL JSI VE VLNĚ ' + V.surv : cm && curDef != null ? (win ? 'ÚZEMÍ UBRÁNĚNO!' : 'ÚZEMÍ PADLO') : cm ? (win ? 'ÚZEMÍ DOBYTO!' : 'ÚTOK SELHAL') : win ? 'VÍTĚZSTVÍ!' : 'PROHRA';
-  c.fillStyle = 'rgba(8,10,16,.72)'; c.fillRect(-EXW, 0, W + 2 * EXW, H);
+  c.fillStyle = 'rgba(8,10,16,.72)'; c.fillRect(-EXW, -EXT, W + 2 * EXW, H + EXT + EXB);
   c.textAlign = 'center'; c.font = '900 72px system-ui';
   c.lineWidth = 10; c.strokeStyle = win ? '#7c2d12' : '#450a0a'; c.strokeText(title, W / 2, 250);
   c.fillStyle = win ? '#fde047' : '#f87171'; c.fillText(title, W / 2, 250);

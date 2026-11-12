@@ -7,7 +7,7 @@ cv.addEventListener('pointerdown', e => {
   const x = (e.clientX * dpr - ox) / scl, y = (e.clientY * dpr - oy) / scl;
   const hit = b => b && x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
   if (eggScene) { eggClick(x, y); return; }                              // tajemství: scéna se zlatým vejcem
-  if (!replay && !paused && bloodCodeHit(x, y)) { eggStart(); return; }
+  if (!replay && !paused && bloodCodeHit(x + camX, y)) { eggStart(); return; }   // krvavý kód leží ve světě (posun kamery)
   if (replay) { replayClick(hit, x); return; }
   if (tut && hit(tutBtn)) { tutNext(); return; }
   for (const b of sbonBtns) if (hit(b) && V.over < 0) { act({ a: 'sbon', i: b.i }); sbonBtns = []; return; }
@@ -64,6 +64,21 @@ cv.addEventListener('pointerdown', e => {
     else if (b.ok) { act(b.cmd); BTN_FLASH.set(btnKey(b), T); }
     return;
   }
+  // klepnutí mimo tlačítka: tažením do strany se posouvá bojiště (když se celé nevejde na obrazovku)
+  if (camMax > camMin && y > HUD) camDrag = { x: e.clientX, cam: camX, id: e.pointerId };
+});
+// posun bojiště tažením (myš i prst) a šipkami
+let camDrag = null;
+cv.addEventListener('pointermove', e => {
+  if (!camDrag || e.pointerId !== camDrag.id) return;
+  const dpr = cv.width / innerWidth;
+  camX = Math.max(camMin, Math.min(camMax, camDrag.cam - (e.clientX - camDrag.x) * dpr / scl));
+});
+const camEnd = () => { camDrag = null; };
+cv.addEventListener('pointerup', camEnd); cv.addEventListener('pointercancel', camEnd); cv.addEventListener('pointerleave', camEnd);
+addEventListener('keydown', e => {
+  if (!V || !role || e.target.tagName === 'INPUT' || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+  camX = Math.max(camMin, Math.min(camMax, camX + (e.key === 'ArrowLeft' ? -25 : 25))); e.preventDefault();
 });
 
 $('bSolo').onclick = () => { cleanupNet(); startGame('solo'); };

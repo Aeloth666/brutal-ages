@@ -20,11 +20,13 @@ function resize() {
   cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
   cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
   const aw = (innerWidth - il - ir) * dpr, ah = (innerHeight - it - ib) * dpr;
-  // základny přesahují za okraj světa až o B_OV bodů: když po stranách není místo, bojiště se zmenší (nejvýš o 8 %)
-  const fit = Math.min(aw / W, ah / H);
-  scl = Math.max(fit * 0.92, Math.min(fit, cv.width / (W + 2 * B_OV)));
-  // na střed celé obrazovky (pruhy na obou stranách), ale svět vždy uvnitř bezpečné oblasti (výřez kamery)
-  ox = Math.max(il * dpr, Math.min(il * dpr + aw - W * scl, (cv.width - W * scl) / 2)); oy = it * dpr + (ah - H * scl) / 2;
+  scl = Math.min(aw / W, ah / H);
+  ox = il * dpr + (aw - W * scl) / 2; oy = it * dpr + (ah - H * scl) / 2;
+  // okraje obrazovky kolem bojiště (stejný výpočet jako v render()) – pozadí se kreslí i do nich
+  EXL = Math.max(0, ox / scl); EXR = Math.max(0, (cv.width - ox) / scl - W); EXW = Math.max(EXL, EXR);
+  EXT = Math.max(0, oy / scl); EXB = Math.max(0, (cv.height - oy) / scl - H);
+  // kamera: základny přesahují za okraj světa až o B_OV bodů – co se nevejde na obrazovku, jde dosunout (camMin..camMax)
+  camMin = Math.min(0, EXL - B_OV); camMax = Math.max(0, B_OV - EXR); camX = Math.max(camMin, Math.min(camMax, camX));
   buildBg();
 }
 
@@ -117,16 +119,25 @@ let FIELD = 'meadow';
 function setField(f) { f = FIELDS[f] ? f : 'meadow'; if (f !== FIELD) { FIELD = f; buildBg(); } }
 const pickField = () => SET.field === 'random' ? Object.keys(FIELDS)[(Math.random() * Object.keys(FIELDS).length) | 0] : FIELDS[SET.field] ? SET.field : 'meadow';
 
+// pozadí se kreslí i do okrajů obrazovky kolem bojiště (BGL/BGR/BGT/BGB = o kolik vlevo/vpravo/nahoře/dole)
+let BGL = 0, BGR = 0, BGT = 0, BGB = 0;
+// okraje mimo bojiště mají vlastní náhodu – bojiště samotné vypadá vždy stejně, ať je obrazovka jakákoli
+function bgSide(k, fn) { const s0 = seed; seed = 9001 + k * 7919; fn(); seed = s0; }
+// rozházení předmětů v obdélníku s danou hustotou (na plochu)
+function scatter(x0, x1, y0, y1, dens, fn) { const n = Math.round((x1 - x0) * (y1 - y0) * dens); if (x1 > x0 && y1 > y0) for (let i = 0; i < n; i++) fn(x0 + srnd() * (x1 - x0), y0 + srnd() * (y1 - y0)); }
 function buildBg() {
   const F = FIELDS[FIELD];
+  // do stran aspoň o přesah základen (kam se dá dosunout kamerou), jinak kam sahá obrazovka
+  BGL = Math.ceil(Math.max(EXL, B_OV)) + 2; BGR = Math.ceil(Math.max(EXR, B_OV)) + 2; BGT = Math.ceil(EXT) + 2; BGB = Math.ceil(EXB) + 2;
+  const X0 = -BGL, X1 = W + BGR, Y1 = H + BGB;
   bgC = document.createElement('canvas');
-  bgC.width = Math.ceil(W * scl); bgC.height = Math.ceil(H * scl);
-  const main = c; c = bgC.getContext('2d'); c.scale(scl, scl);
+  bgC.width = Math.ceil((W + BGL + BGR) * scl); bgC.height = Math.ceil((H + BGT + BGB) * scl);
+  const main = c; c = bgC.getContext('2d'); c.scale(scl, scl); c.translate(BGL, BGT);
   seed = 11;
-  // obloha
+  // obloha (nad horní okraj pokračuje barvou z vrcholu)
   const g = c.createLinearGradient(0, 0, 0, GY);
   g.addColorStop(0, F.sky[0]); g.addColorStop(0.55, F.sky[1]); g.addColorStop(1, F.sky[2]);
-  c.fillStyle = g; c.fillRect(-EXW, 0, W + 2 * EXW, GY);
+  c.fillStyle = g; c.fillRect(X0, -BGT, X1 - X0, GY + BGT);
   if (F.sun) {
     const sg = c.createRadialGradient(980, 200, 10, 980, 200, 160 * F.sun);
     sg.addColorStop(0, 'rgba(255,250,220,1)'); sg.addColorStop(0.15, 'rgba(255,240,180,.9)'); sg.addColorStop(1, 'rgba(255,240,180,0)');
@@ -145,10 +156,10 @@ function buildBg() {
     for (let i = 0; i < 6; i++) circ(760 + i * 14 - i * i * 3, 130 - i * 22, 22 + i * 6);
   }
   const L = GY - 540;                                  // krajina se posouvá se zemí
-  mountains(330 + L, 150, F.m1[0], F.m1[1], 9);
-  mountains(380 + L, 110, F.m2[0], F.m2[1], 13);
-  hills(430 + L, 34, F.h1[0], F.h1[1], 0.9);
-  for (let x = 20; x < W; x += 38 + srnd() * 50) {
+  mountains(330 + L, 150, F.m1[0], F.m1[1], 9, X0, X1);
+  mountains(380 + L, 110, F.m2[0], F.m2[1], 13, X0, X1);
+  hills(430 + L, 34, F.h1[0], F.h1[1], 0.9, X0, X1);
+  const tree1 = x => {
     const y = hillY(430 + L, 34, 0.9, x) + 7, s = 0.7 + srnd() * 0.3;
     if (F.deco === 'trees') roundTree(x, y, s, '#5c9a48', '#4a8239');
     else if (F.deco === 'cacti') { if (srnd() < 0.5) cactus(x, y, s * 0.8); }
@@ -156,9 +167,11 @@ function buildBg() {
     else if (F.deco === 'forest') { pine(x, y, s * 1.1); pine(x + 18, y + 4, s * 0.9); }
     else if (F.deco === 'swamp') { if (srnd() < 0.5) deadTree(x, y, s * 0.9); else reeds(x, y, s); }
     else if (srnd() < 0.5) deadTree(x, y, s);
-  }
-  hills(480 + L, 26, F.h2[0], F.h2[1], 1.6);
-  for (let x = 10; x < W; x += 60 + srnd() * 90) {
+  };
+  for (let x = 20; x < W; x += 38 + srnd() * 50) tree1(x);
+  bgSide(1, () => { for (let x = -20; x > X0 - 30; x -= 38 + srnd() * 50) tree1(x); for (let x = W + 20; x < X1 + 30; x += 38 + srnd() * 50) tree1(x); });
+  hills(480 + L, 26, F.h2[0], F.h2[1], 1.6, X0, X1);
+  const tree2 = x => {
     const y = hillY(480 + L, 26, 1.6, x) + 7, s = 0.8 + srnd() * 0.5;
     if (F.deco === 'trees') pine(x, y, s);
     else if (F.deco === 'cacti') srnd() < 0.35 ? palm(x, y, s) : cactus(x, y, s);
@@ -166,45 +179,56 @@ function buildBg() {
     else if (F.deco === 'forest') { pine(x, y, s * 1.3); if (srnd() < 0.6) roundTree(x + 26, y + 2, s, '#2f6a2c', '#245a22'); }
     else if (F.deco === 'swamp') { reeds(x, y, s * 1.2); if (srnd() < 0.4) deadTree(x + 20, y, s); }
     else deadTree(x, y, s);
-  }
+  };
+  for (let x = 10; x < W; x += 60 + srnd() * 90) tree2(x);
+  bgSide(2, () => { for (let x = -40; x > X0 - 40; x -= 60 + srnd() * 90) tree2(x); for (let x = W + 40; x < X1 + 40; x += 60 + srnd() * 90) tree2(x); });
   if (FIELD === 'swamp') {                             // kaluže bahnité vody na povrchu
     for (let i = 0; i < 9; i++) { const x = 140 + srnd() * (W - 280); c.fillStyle = 'rgba(70,90,70,.75)'; ell(x, GY + 1, 30 + srnd() * 40, 4); c.fillStyle = 'rgba(190,210,190,.35)'; ell(x - 8, GY, 12, 1.2); }
   }
-  // zem
+  // zem (pod spodní okraj pokračuje nejtmavší barvou hlíny)
   const gg = c.createLinearGradient(0, GY - 10, 0, H);
   gg.addColorStop(0, F.gnd[0]); gg.addColorStop(0.4, F.gnd[1]); gg.addColorStop(1, F.gnd[2]);
-  c.fillStyle = gg; c.fillRect(0, GY - 4, W, H - GY + 4);
+  c.fillStyle = gg; c.fillRect(X0, GY - 4, X1 - X0, Y1 - GY + 4);
+  // okraje: boky v pásu hlíny a celá šíře pod bojištěm
+  const sides = (k, y0, y1, dens, fn) => bgSide(k, () => { scatter(X0, 0, y0, y1, dens, fn); scatter(W, X1, y0, y1, dens, fn); scatter(X0, X1, Math.max(y0, H), Math.max(y1, Y1), dens, fn); });
+  const spotD = (x, y) => ell(x, y, 3 + srnd() * 6, 1.5 + srnd() * 2), spotL = (x, y) => ell(x, y, 2 + srnd() * 3, 1.5 + srnd() * 1.5);
   c.fillStyle = 'rgba(0,0,0,.12)';
-  for (let i = 0; i < 70; i++) { const x = srnd() * W, y = GY + 14 + srnd() * 50; ell(x, y, 3 + srnd() * 6, 1.5 + srnd() * 2); }
+  for (let i = 0; i < 70; i++) { const x = srnd() * W, y = GY + 14 + srnd() * 50; spotD(x, y); }
+  sides(3, GY + 14, Y1, 70 / (W * (H - GY - 14)), spotD);
   c.fillStyle = 'rgba(255,255,255,.14)';
-  for (let i = 0; i < 40; i++) { const x = srnd() * W, y = GY + 10 + srnd() * 50; ell(x, y, 2 + srnd() * 3, 1.5 + srnd() * 1.5); }
-  buried(F);
+  for (let i = 0; i < 40; i++) { const x = srnd() * W, y = GY + 10 + srnd() * 50; spotL(x, y); }
+  sides(4, GY + 10, Y1, 40 / (W * (H - GY - 10)), spotL);
+  buried(F, 20, W - 20, GY + 16, H - 8, 26);
+  bgSide(5, () => {
+    const d = 26 / ((W - 40) * (H - GY - 24));
+    for (const [x0, x1, y0, y1, k] of [[X0, 0, GY + 16, Y1 - 8, 1], [W, X1, GY + 16, Y1 - 8, 1], [0, W, H, Y1 - 8, 0.45]])   // hlouběji řidčeji
+      if (x1 > x0 && y1 > y0) buried(F, x0, x1, y0, y1, Math.round((x1 - x0) * (y1 - y0) * d * k));
+  });
   // povrch (tráva / písek / sníh / sopečný štěrk)
   const tg = c.createLinearGradient(0, GY - 14, 0, GY + 8);
   tg.addColorStop(0, F.grass[0]); tg.addColorStop(1, F.grass[1]);
-  c.fillStyle = tg; c.beginPath(); c.moveTo(0, GY + 8);
-  for (let x = 0; x <= W; x += 10) c.lineTo(x, GY - 4 + Math.sin(x * 0.07) * 2);
-  c.lineTo(W, GY + 8); c.fill();
+  c.fillStyle = tg; c.beginPath(); c.moveTo(X0, GY + 8);
+  for (let x = Math.floor(X0 / 10) * 10; x <= X1 + 10; x += 10) c.lineTo(x, GY - 4 + Math.sin(x * 0.07) * 2);
+  c.lineTo(X1 + 10, GY + 8); c.fill();
   c.fillStyle = F.grass[2];
   const blades = FIELD === 'meadow' || FIELD === 'forest' ? 260 : FIELD === 'swamp' ? 120 : FIELD === 'desert' ? 40 : FIELD === 'volcano' ? 30 : 0;
-  for (let i = 0; i < blades; i++) {
-    const x = srnd() * W, h = 4 + srnd() * 7;
-    c.beginPath(); c.moveTo(x - 2, GY); c.lineTo(x + srnd() * 3 - 1, GY - 4 - h); c.lineTo(x + 2, GY); c.fill();
-  }
+  const blade = x => { const h = 4 + srnd() * 7; c.beginPath(); c.moveTo(x - 2, GY); c.lineTo(x + srnd() * 3 - 1, GY - 4 - h); c.lineTo(x + 2, GY); c.fill(); };
+  for (let i = 0; i < blades; i++) blade(srnd() * W);
+  bgSide(6, () => { const n = x => Math.round(blades * x / W); for (let i = 0; i < n(BGL); i++) blade(X0 + srnd() * BGL); for (let i = 0; i < n(BGR); i++) blade(W + srnd() * BGR); });
   if (FIELD === 'volcano') {                           // žhnoucí praskliny
     c.strokeStyle = F.grass[3]; c.lineWidth = 2;
-    for (let i = 0; i < 14; i++) { const x = srnd() * W, y = GY + 8 + srnd() * 40; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 10 + srnd() * 14, y + srnd() * 6 - 3); c.lineTo(x + 22 + srnd() * 16, y + srnd() * 8 - 4); c.stroke(); }
-  } else { c.fillStyle = F.grass[3]; c.fillRect(0, GY + 6, W, 3); }
+    const crack = (x, y) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + 10 + srnd() * 14, y + srnd() * 6 - 3); c.lineTo(x + 22 + srnd() * 16, y + srnd() * 8 - 4); c.stroke(); };
+    for (let i = 0; i < 14; i++) { const x = srnd() * W, y = GY + 8 + srnd() * 40; crack(x, y); }
+    bgSide(7, () => { scatter(X0, 0, GY + 8, GY + 48, 14 / (W * 40), crack); scatter(W, X1, GY + 8, GY + 48, 14 / (W * 40), crack); });
+  } else { c.fillStyle = F.grass[3]; c.fillRect(X0, GY + 6, X1 - X0, 3); }
   c = main;
 }
 // kosti, kostry a staré zbraně zakopané v hlíně (předkreslené, jen v pozadí)
-function buried(F) {
+function buried(F, x0, x1, top, bot, items) {
   const dark = FIELD === 'winter' ? 'rgba(80,90,110,.55)' : 'rgba(30,20,12,.45)', bone = FIELD === 'volcano' ? '#8c8178' : '#d9cfb8';
-  const top = GY + 16, bot = H - 8;
   c.save(); c.globalAlpha = FIELD === 'winter' ? 0.75 : 0.85;
-  const items = 26;
   for (let i = 0; i < items; i++) {
-    const x = 20 + srnd() * (W - 40), y = top + srnd() * (bot - top), a = srnd() * Math.PI, k = srnd(), s = 0.8 + srnd() * 0.5;
+    const x = x0 + srnd() * (x1 - x0), y = top + srnd() * (bot - top), a = srnd() * Math.PI, k = srnd(), s = 0.8 + srnd() * 0.5;
     c.save(); c.translate(x, y); c.rotate(a - Math.PI / 2); c.scale(s, s);
     c.fillStyle = dark; ell(0, 1.5, 14, 5);                    // tmavý obrys v hlíně
     if (k < 0.3) {                                             // kost
@@ -259,25 +283,35 @@ function deadTree(x, y, s) {
   c.beginPath(); c.moveTo(x + 1 * s, y - 20 * s); c.lineTo(x - 10 * s, y - 30 * s); c.moveTo(x + 2 * s, y - 28 * s); c.lineTo(x + 12 * s, y - 38 * s); c.moveTo(x + 2 * s, y - 34 * s); c.lineTo(x - 4 * s, y - 44 * s); c.stroke();
 }
 
-function mountains(base, amp, col, snow, n) {
-  const pts = [];
-  for (let i = 0; i <= n; i++) pts.push([i * W / n + (srnd() - 0.5) * 60, base - amp * (0.4 + srnd() * 0.6)]);
-  c.fillStyle = col; c.beginPath(); c.moveTo(0, GY);
+// hřeben hor; X0/X1 = kreslit i za okraje bojiště (vrcholy navíc mají vlastní náhodu, hory nad bojištěm se nemění)
+function mountains(base, amp, col, snow, n, X0 = 0, X1 = W) {
+  const st = W / n, peak = i => [i * st + (srnd() - 0.5) * 60, base - amp * (0.4 + srnd() * 0.6)];
+  let pts = [];
+  for (let i = 0; i <= n; i++) pts.push(peak(i));
+  let dv = []; for (let i = 0; i < n; i++) dv.push(40 + srnd() * 30);   // hloubka sedel (stejné pořadí náhody jako dřív)
+  bgSide(n + base, () => {
+    const lp = [], lv = [], rp = [], rv = [];
+    for (let i = -1; (i + 1) * st > X0 - st; i--) { lp.unshift(peak(i)); lv.unshift(40 + srnd() * 30); }
+    for (let i = n + 1; (i - 1) * st < X1 + st; i++) { rp.push(peak(i)); rv.push(40 + srnd() * 30); }
+    pts = [...lp, ...pts, ...rp]; dv = [...lv, ...dv, ...rv];
+  });
+  c.fillStyle = col; c.beginPath(); c.moveTo(Math.min(X0, pts[0][0]), GY);
   for (let i = 0; i < pts.length; i++) {
     const [x, y] = pts[i]; c.lineTo(x, y);
-    if (i < pts.length - 1) c.lineTo((x + pts[i + 1][0]) / 2, Math.max(y, pts[i + 1][1]) + 40 + srnd() * 30);
+    if (i < pts.length - 1) c.lineTo((x + pts[i + 1][0]) / 2, Math.max(y, pts[i + 1][1]) + dv[i]);
   }
-  c.lineTo(W, GY); c.fill();
+  c.lineTo(Math.max(X1, pts[pts.length - 1][0]), GY); c.fill();
   c.fillStyle = snow;
   for (const [x, y] of pts) { if (y > base - amp * 0.6) continue; c.beginPath(); c.moveTo(x, y); c.lineTo(x - 18, y + 22); c.lineTo(x - 6, y + 18); c.lineTo(x + 2, y + 26); c.lineTo(x + 18, y + 22); c.fill(); }
 }
 const hillY = (base, amp, f, x) => base + Math.sin(x * 0.006 * f + base) * amp + Math.sin(x * 0.017 * f) * amp * 0.35;
-function hills(base, amp, col, col2, f) {
+function hills(base, amp, col, col2, f, X0 = 0, X1 = W) {
   const g = c.createLinearGradient(0, base - amp, 0, GY);
   g.addColorStop(0, col); g.addColorStop(1, col2);
-  c.fillStyle = g; c.beginPath(); c.moveTo(0, GY);
-  for (let x = 0; x <= W; x += 20) c.lineTo(x, hillY(base, amp, f, x));
-  c.lineTo(W, GY); c.fill();
+  const a = Math.floor(X0 / 20) * 20, b = Math.ceil(X1 / 20) * 20;
+  c.fillStyle = g; c.beginPath(); c.moveTo(a, GY);
+  for (let x = a; x <= b; x += 20) c.lineTo(x, hillY(base, amp, f, x));
+  c.lineTo(b, GY); c.fill();
 }
 function roundTree(x, y, s, col, col2) {
   c.fillStyle = '#6b4a2e'; c.fillRect(x - 2 * s, y - 14 * s, 4 * s, 16 * s);

@@ -47,8 +47,8 @@ function replayTick(dt) {
 let replayBtns = [];
 function drawReplay() {
   const R = replay, end = R.src.length - 1, y = 26;
-  c.fillStyle = '#0e121c'; c.fillRect(0, 0, W, HUD);
-  c.fillStyle = '#e5c04a'; c.fillRect(0, HUD - 3, W, 2);
+  c.fillStyle = '#0e121c'; c.fillRect(-EXL, -EXT, W + EXL + EXR, HUD + EXT);
+  c.fillStyle = '#e5c04a'; c.fillRect(-EXL, HUD - 3, W + EXL + EXR, 2);
   c.textAlign = 'left'; c.fillStyle = '#fde68a'; c.font = '900 20px system-ui'; c.fillText(R.full ? '🎬 CELÁ BITVA' : '🎬 ZÁZNAM', 20, y + 22);
   if (recView && recView.lbl) { c.font = '700 12px system-ui'; c.fillStyle = '#cbd5e1'; c.fillText(recView.lbl, 20, y + 42, 150); }
   // časová osa (klepnutím se dá přeskočit)

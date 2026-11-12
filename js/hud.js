@@ -1,12 +1,12 @@
 // =====================================================================
 //  HUD
 // =====================================================================
-let btns = [], menuBtn = null, overBtns = [];
+let btns = [], menuBtn = null, overBtns = [], evoSeen = false;
 function hud(V) {
   const p = V.pl[mySide], e = V.pl[1 - mySide], A = AGES[p.age];
   c.fillStyle = lg('hud', 0, 0, 0, HUD, [[0, 'rgba(30,36,50,.95)'], [1, 'rgba(14,18,28,.95)']]);
-  c.fillRect(0, 0, W, HUD);
-  c.fillStyle = '#e5c04a'; c.fillRect(0, HUD - 3, W, 2); c.fillStyle = '#0a0d14'; c.fillRect(0, HUD - 1, W, 2);
+  c.fillRect(-EXL, -EXT, W + EXL + EXR, HUD + EXT);
+  c.fillStyle = '#e5c04a'; c.fillRect(-EXL, HUD - 3, W + EXL + EXR, 2); c.fillStyle = '#0a0d14'; c.fillRect(-EXL, HUD - 1, W + EXL + EXR, 2);
   // zlato
   c.beginPath(); c.arc(24, 24, 11, 0, Math.PI * 2); fo(rg('coin', 21, 21, 1, 12, [[0, '#fff3b0'], [0.5, '#facc15'], [1, '#a16207']]), 1.5);
   c.fillStyle = '#854d0e'; c.font = '900 13px system-ui'; c.textAlign = 'center'; c.fillText('$', 24, 29);
@@ -33,6 +33,10 @@ function hud(V) {
   let bx = 246;
   const add = (label, sub, cmd, ok, icon) => { btns.push({ x: bx, y: 7, w: 88, h: 96, label, sub, cmd, ok, icon }); bx += 93; };
   const M = modsOf(V);
+  // evoluce se právě zpřístupnila → jednou upozornit zvukem, vibrací a nápisem (tlačítko pak bliká, dokud se nevyvineš)
+  const evoOk = p.age < 4 && !M.noEvo && p.xp >= A.xp;
+  if (evoOk && !evoSeen && !replay && V.over < 0) { evoSeen = true; sfx('ach'); vib([60, 40, 60]); toasts.push({ a: { n: (LANG === 'en' ? 'Tap Evolve' : 'Klepni na Evoluci') + ' ⬆' }, h: LANG === 'en' ? '⬆ EVOLUTION READY' : '⬆ EVOLUCE PŘIPRAVENA', l: 3.5 }); }
+  if (!evoOk) evoSeen = false;
   const okU = i => M.only == null || M.only === i;
   if (uiMode === 'units') {
     const FN = facAt(p, p.age);

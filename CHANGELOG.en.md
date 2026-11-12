@@ -4,6 +4,12 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.36 – 12. 11. 2026
+
+- The battlefield is full size again and can be panned by dragging (arrow keys ← → on PC) – so you can see your whole base and the enemy's.
+- The background in the menu and in game fills the whole screen, no dark bars.
+- When you can advance to the next age, the game tells you and the Evolve button flashes brightly.
+
 ## Version 2.35 – 9. 11. 2026
 
 - Both bases are fully visible even on narrow screens – the battlefield shrinks slightly when needed and continues into the screen edges.

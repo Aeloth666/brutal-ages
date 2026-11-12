@@ -72,7 +72,7 @@ let flash = 0, boltT = 4, bolt = null;
 function wxBack(dt) {
   const k = WX.kind;
   if (WX.night) {
-    c.fillStyle = 'rgba(8,14,42,.58)'; c.fillRect(-EXW, 0, W + 2 * EXW, H);
+    c.fillStyle = 'rgba(8,14,42,.58)'; c.fillRect(-EXW, -EXT, W + 2 * EXW, H + EXT + EXB);
     if (k === 'clear') {
       for (const s of STARS) { c.globalAlpha = 0.5 + Math.sin(T * 2 + s.p) * 0.35; c.fillStyle = '#fff'; circ(s.x, s.y, s.r); }
       c.globalAlpha = 1;
@@ -84,11 +84,11 @@ function wxBack(dt) {
     // mlha schová hory i slunce, dál od bojiště hustší
     const g = c.createLinearGradient(0, 0, 0, GY);
     g.addColorStop(0, `rgba(205,212,222,${0.55 * WX.amt})`); g.addColorStop(0.75, `rgba(215,221,230,${0.75 * WX.amt})`); g.addColorStop(1, `rgba(215,221,230,${0.35 * WX.amt})`);
-    c.fillStyle = g; c.fillRect(-EXW, 0, W + 2 * EXW, GY + 10);
+    c.fillStyle = g; c.fillRect(-EXW, -EXT, W + 2 * EXW, GY + 10 + EXT);
   }
   const dark = k === 'storm' ? 0.5 : k === 'rain' ? 0.36 : k === 'cloudy' ? 0.24 * WX.amt : k === 'snow' ? 0.18 : 0;
   if (dark) {
-    c.fillStyle = `rgba(52,62,78,${dark})`; c.fillRect(-EXW, 0, W + 2 * EXW, H);
+    c.fillStyle = `rgba(52,62,78,${dark})`; c.fillRect(-EXW, -EXT, W + 2 * EXW, H + EXT + EXB);
     // nízká oblačnost
     c.fillStyle = k === 'snow' ? 'rgba(210,218,230,.55)' : `rgba(${k === 'storm' ? '58,64,78' : '110,118,132'},.75)`;
     for (let i = 0; i < 9; i++) {
@@ -155,7 +155,7 @@ function wxFront(dt) {
       if (SET.vib) vib([0, 120, 60, 60]);
     }
     if (flash > 0) {
-      c.fillStyle = `rgba(235,240,255,${flash * 0.45})`; c.fillRect(-EXW, 0, W + 2 * EXW, H);
+      c.fillStyle = `rgba(235,240,255,${flash * 0.45})`; c.fillRect(-EXW, -EXT, W + 2 * EXW, H + EXT + EXB);
       if (bolt && flash > 0.5) {
         c.strokeStyle = '#fff'; c.lineWidth = 3; c.shadowColor = '#bcd4ff'; c.shadowBlur = 18;
         c.beginPath(); c.moveTo(bolt[0], bolt[1]); for (let i = 2; i < bolt.length; i += 2) c.lineTo(bolt[i], bolt[i + 1]); c.stroke();

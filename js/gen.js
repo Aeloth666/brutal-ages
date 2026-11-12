@@ -254,7 +254,7 @@ function nightK(t) {
 function drawNight() {
   tipTick();
   const k = nightK(V.time) * 0.55; if (k <= 0.01) return;
-  c.fillStyle = `rgba(8,12,40,${k})`; c.fillRect(-EXW, 0, W + 2 * EXW, H);
+  c.fillStyle = `rgba(8,12,40,${k})`; c.fillRect(-EXW, -EXT, W + 2 * EXW, H + EXT + EXB);
   if (GFXL === 0) return;
   const op = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter';
   for (const u of V.units) {
@@ -275,7 +275,7 @@ function drawNight() {
 // písečná bouře na poušti
 function drawStorm() {
   if (!V.storm) return;
-  c.fillStyle = 'rgba(214,170,100,.32)'; c.fillRect(-EXW, HUD, W + 2 * EXW, H - HUD);
+  c.fillStyle = 'rgba(214,170,100,.32)'; c.fillRect(-EXW, HUD, W + 2 * EXW, H - HUD + EXB);
   c.strokeStyle = 'rgba(240,210,150,.5)'; c.lineWidth = 1.5;
   for (let i = 0; i < 60; i++) { const y = HUD + ((i * 97) % (H - HUD)), x = ((T * 600 + i * 173) % (W + 200)) - 100; c.beginPath(); c.moveTo(x, y); c.lineTo(x - 40, y + 4); c.stroke(); }
 }

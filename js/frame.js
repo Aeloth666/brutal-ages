@@ -6,22 +6,20 @@ function render(dt) {
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.fillStyle = '#10151f'; c.fillRect(0, 0, cv.width, cv.height);
   c.setTransform(scl, 0, 0, scl, ox, oy);
-  // na širokém displeji bojiště pokračuje pod horní lištou do bočních pruhů, aby byly základny vidět celé
-  EXL = Math.max(0, Math.min(90, ox / scl)); EXR = Math.max(0, Math.min(90, (cv.width - ox) / scl - W)); EXW = Math.max(EXL, EXR);
-  c.save(); c.beginPath(); c.rect(0, 0, W, H);
-  if (EXL > 0) c.rect(-EXL, HUD, EXL, H - HUD);
-  if (EXR > 0) c.rect(W, HUD, EXR, H - HUD);
-  c.clip();
-  if (bgC.width && bgC.height) {                                  // při minimalizovaném okně může mít pozadí nulovou velikost
-    c.drawImage(bgC, 0, 0, W, H);
-    const k = bgC.width / W;                                      // pruhy = zrcadlený okraj pozadí
-    if (EXL > 0) { c.save(); c.scale(-1, 1); c.drawImage(bgC, 0, 0, EXL * k, bgC.height, 0, 0, EXL, H); c.restore(); }
-    if (EXR > 0) { c.save(); c.translate(2 * W, 0); c.scale(-1, 1); c.drawImage(bgC, bgC.width - EXR * k, 0, EXR * k, bgC.height, W - EXR, 0, EXR, H); c.restore(); }
-  }
+  // bojiště pokračuje do všech okrajů obrazovky (krajina je dokreslená i tam) – žádné tmavé pruhy
+  EXL = Math.max(0, ox / scl); EXR = Math.max(0, (cv.width - ox) / scl - W); EXW = Math.max(EXL, EXR);
+  EXT = Math.max(0, oy / scl); EXB = Math.max(0, (cv.height - oy) / scl - H);
+  c.save(); c.beginPath(); c.rect(-EXL, -EXT, W + EXL + EXR, H + EXT + EXB); c.clip();
+  if (!V) camX = 0;                                               // v menu bez posunu
+  // svět (pozadí, základny, jednotky, efekty) se posouvá s kamerou; lišty, nápisy a ztmavení stojí
+  c.save(); c.translate(-camX, 0);
+  // pozadí je předkreslené i s okraji (BGL/BGT – viz buildBg); při minimalizovaném okně může mít nulovou velikost
+  if (bgC.width && bgC.height) c.drawImage(bgC, -BGL, -BGT, bgC.width / scl, bgC.height / scl);
   drawClouds();
   wxBack(dt);
   if (GFXL >= 3) ultraBack();
   if (!V) {
+    c.restore();
     if (role === 'guest') { c.fillStyle = '#0f172a'; c.font = '700 24px system-ui'; c.textAlign = 'center'; c.fillText('Čekám na data od hostitele…', W / 2, 300); }
     c.restore(); return;
   }
@@ -53,7 +51,7 @@ function render(dt) {
       fx.push({ smoke: 1, x: u.x - (u.side ? -1 : 1) * 6, y: GY - 2, vx: rnd(-10, 10), vy: rnd(-14, -6), r: rnd(2, 4), l: 0.7, ml: 0.7, col: 'rgba(150,120,90,.8)', col2: 'rgba(200,175,140,.6)' });
   }
   const order = [...V.units].sort((a, b) => (b.ty === 2) - (a.ty === 2));
-  if (V.pl[mySide].cry) { c.fillStyle = 'rgba(255,200,60,.12)'; c.fillRect(-EXW, HUD, W + 2 * EXW, H - HUD); }
+  if (V.pl[mySide].cry) { c.fillStyle = 'rgba(255,200,60,.12)'; c.fillRect(-EXW, HUD, W + 2 * EXW, H - HUD + EXB); }
   for (const u of order) {
     const r = phMap.get(u.id) || { ph: Math.random() * 6, x: u.x };
     r.ph += Math.abs(u.x - r.x) * 0.11; r.x = u.x; r.seen = T; phMap.set(u.id, r);
@@ -74,7 +72,7 @@ function render(dt) {
       rr(x - bw / 2, by, bw * Math.max(0, u.hp / u.mx), 3, 1.5); c.fillStyle = u.side === mySide ? '#4ade80' : '#f87171'; c.fill();
     }
   }
-  bossBar();
+  c.save(); c.translate(camX, 0); bossBar(); c.restore();        // ukazatel bosse stojí s lištou
   if (phMap.size > 300) for (const [id, r] of phMap) if (T - r.seen > 2) phMap.delete(id);
   for (const pr of V.proj) {
     drawProj(pr);
@@ -84,8 +82,10 @@ function render(dt) {
   drawFx(dt);
   if (GFXL >= 3) ultraFront();
   wxFront(dt);
-  if (V.dark > 0) { c.fillStyle = `rgba(6,8,24,${Math.min(0.62, V.dark * 0.12)})`; c.fillRect(-EXW, 0, W + 2 * EXW, H); }
-  drawStorm(); seasonFx(dt); drawNight(); drawEmotes(dt);
+  c.restore();                                                    // konec posunutého světa
+  if (V.dark > 0) { c.fillStyle = `rgba(6,8,24,${Math.min(0.62, V.dark * 0.12)})`; c.fillRect(-EXW, -EXT, W + 2 * EXW, H + EXT + EXB); }
+  drawStorm(); seasonFx(dt); drawNight();
+  c.save(); c.translate(-camX, 0); drawEmotes(dt); c.restore();   // emotikony nad základnami jedou se světem
   if (evtBanner) drawEvtBanner(dt);
   if (GFXL >= 3) ultraGrade();
   hud(V);
