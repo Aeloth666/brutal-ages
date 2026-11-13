@@ -159,7 +159,9 @@ function drawToasts(dt) {
   if (!toasts.length) return;
   const tt = toasts[0];
   tt.L = tt.L || tt.l; tt.l -= dt;
-  const k = Math.min(1, (tt.L - tt.l) * 4, tt.l * 3), y = HUD + 10 - (1 - k) * 80;
+  // při výběru národa je pod lištou panel s národy – upozornění jede pod něj, aby ho nezakrylo
+  const y0 = typeof facBtns !== 'undefined' && facBtns.length ? HUD + 142 : HUD + 10;
+  const k = Math.min(1, (tt.L - tt.l) * 4, tt.l * 3), y = y0 - (1 - k) * 80;
   c.globalAlpha = Math.max(0, k);
   const w = tt.tip ? 660 : 380, h = tt.tip ? 74 : 62, x = W / 2 - w / 2;
   rr(x, y + 3, w, h, 14); c.fillStyle = 'rgba(0,0,0,.45)'; c.fill();

@@ -4,6 +4,10 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.37.1 – 13. 11. 2026
+
+- Achievement notifications no longer cover the nation choice at the start of a battle.
+
 ## Version 2.37 – 13. 11. 2026
 
 - Campaign: chapter IV “War of the gods” – 10 new missions with new restrictions (e.g. no army abilities). In the finale “Twilight of the gods” every boss comes, one after another. Unlocks after finishing the first three chapters.

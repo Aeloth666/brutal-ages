@@ -97,6 +97,7 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.37.1', d: '2026-11-13', cs: ['Oznámení o úspěchu už nezakrývá výběr národa na začátku bitvy.'], en: ['Achievement notifications no longer cover the nation choice at the start of a battle.'] },
   { v: '2.37', d: '2026-11-13', cs: [
     'Kampaň: IV. kapitola „Válka bohů“ – 10 nových misí s novými omezeními (třeba bez schopností armády). Ve finále „Soumrak bohů“ přijdou jeden po druhém všichni bossové. Odemkne se po dohrání prvních tří kapitol.',
     'Výzva kamaráda odkazem: když založíš souboj, tlačítkem 📨 Poslat odkaz pošleš kamarádovi odkaz – kdo ho otevře, rovnou se připojí.',

@@ -4,6 +4,10 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.37.1 – 13. 11. 2026
+
+- Oznámení o úspěchu už nezakrývá výběr národa na začátku bitvy.
+
 ## Verze 2.37 – 13. 11. 2026
 
 - Kampaň: IV. kapitola „Válka bohů“ – 10 nových misí s novými omezeními (třeba bez schopností armády). Ve finále „Soumrak bohů“ přijdou jeden po druhém všichni bossové. Odemkne se po dohrání prvních tří kapitol.
