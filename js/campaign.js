@@ -79,10 +79,33 @@ const CAMP = [
   { n: 'Trůn stínů', ic: '👹', diff: 4, wx: 'storm', par: 1500, mods: { age: 4, eHp: 3, eGold: 120000, gm: 0.8, boss: 4, limit: 1800 },
     t: 'Vládce Stínové hordy sedí na trůnu z obsidiánu na druhé straně brány. Má hradby třikrát silnější než ty, plnou pokladnici a Titána. Máš 30 minut.',
     end: 'Trůn stínů se rozpadl na prach a brána světů se navždy zavřela. Od jeskyně až po hvězdy – a ještě dál. Jsi legenda všech dějin! 👑🏆' },
+  // ---- 4. kapitola: Válka bohů – staří bohové války se probudili; ve finále přijdou všichni bossové ----
+  { n: 'Posvátný háj', ic: '🌳', diff: 4, wx: 'fog', par: 780, mods: { eHp: 2.4, eGold: 900, gm: 0.8 },
+    t: 'Pád Trůnu stínů probudil staré bohy války. V posvátném háji se k nim modlí kmen, který nikdy neprohrál – a bohové mu dali sílu deseti armád.' },
+  { n: 'Bažiny zapomnění', ic: '🐸', diff: 4, wx: 'rain', mods: { survive: 540, noTower: 1, gm: 0.75, boss: 0 },
+    t: 'V bahně se věže boří, než je postavíš. Bohové posílají vlnu za vlnou a s nimi šavlozubého tygra. Vydrž 9 minut.' },
+  { n: 'Hrom nad horami', ic: '⚡', diff: 4, wx: 'storm', par: 960, mods: { age: 1, eHp: 2.4, noAbil: 1, boss: 1 },
+    t: 'Bůh hromu zakázal tvé armádě válečné pokřiky – schopnosti nefungují. Nad horami krouží jeho drak.' },
+  { n: 'Rytíři bez strachu', ic: '🛡️', diff: 4, wx: 'cloudy', par: 960, mods: { age: 2, only: 0, noEvo: 1, eHp: 3.5, eGold: 8000 },
+    t: 'Řád rytířů přísahal, že nikdy necouvne. Do boje smějí jen pěšáci – nic jiného vyrábět nemůžeš a technika se dál nevyvine.' },
+  { n: 'Pouť pouští', ic: '🐫', diff: 4, wx: 'clear', mods: { age: 2, survive: 720, eGold: 18000, gm: 0.85, boss: 2 },
+    t: 'Karavana bohů táhne pouští a s ní obrněný vůz. Ubraň oázu 12 minut.' },
+  { n: 'Železná bouře', ic: '🌩️', diff: 4, wx: 'storm', par: 1080, mods: { age: 3, noTower: 1, eHp: 2.4, boss: 3 },
+    t: 'Na sopečné pláni nepostavíš jedinou věž. Bůh války tu velí ocelovým divizím a jeho tank nemá slitování.' },
+  { n: 'Poslední zákop', ic: '🪖', diff: 4, wx: 'rain', mods: { age: 3, survive: 780, noAbil: 1, gm: 0.8, eGold: 40000 },
+    t: 'Zákop, který nikdy nepadl. Válečné pokřiky přehluší dělostřelba – schopnosti nefungují. Vydrž 13 minut.' },
+  { n: 'Stroje bohů', ic: '🤖', diff: 4, wx: 'night', par: 1200, mods: { age: 4, noAbil: 1, noTower: 1, eHp: 1.8 },
+    t: 'Bohové si postavili armádu strojů, která ruší rádia i stavbu – nepostavíš věž a válečné pokřiky nefungují. Jen armáda proti armádě.' },
+  { n: 'Hvězdná kovárna', ic: '✨', diff: 4, wx: 'storm', mods: { age: 4, survive: 720, gm: 0.75, eGold: 120000, boss: 4 },
+    t: 'V kovárně mezi hvězdami se kuje zbraň, která má zničit svět. Hlídá ji Titán a nekonečné armády bohů. Vydrž 12 minut.' },
+  { n: 'Soumrak bohů', ic: '🔱', diff: 4, wx: 'storm', par: 1680, mods: { age: 4, eHp: 2.7, eGold: 110000, gm: 0.85, limit: 2100, bossRush: [0, 1, 2, 3, 4] },
+    t: 'Poslední bitva všech věků. Bohové války povolají každou bestii, kterou jsi kdy porazil – tygra, draka, obrněný vůz, tank i Titána – jednoho po druhém. Máš 35 minut.',
+    end: 'Poslední bůh války padl a jeho bestie se rozpadly v prach. Války věků skončily – a ty jsi je vyhrál všechny. Jsi nesmrtelný! 🔱🏆' },
 ];
 ['meadow', 'winter', 'volcano', 'meadow', 'meadow', 'meadow', 'desert', 'desert', 'meadow', 'meadow', 'meadow', 'winter', 'desert', 'volcano', 'volcano',
  'volcano', 'winter', 'meadow', 'meadow', 'desert', 'winter', 'meadow', 'desert', 'volcano', 'volcano',
- 'meadow', 'volcano', 'winter', 'meadow', 'desert', 'desert', 'volcano', 'winter', 'volcano', 'volcano']
+ 'meadow', 'volcano', 'winter', 'meadow', 'desert', 'desert', 'volcano', 'winter', 'volcano', 'volcano',
+ 'forest', 'swamp', 'winter', 'meadow', 'desert', 'volcano', 'forest', 'desert', 'volcano', 'volcano']
   .forEach((f, i) => { CAMP[i].field = f; });
 const CAMPS = load('aow-camp', {});               // index mise → počet hvězd
 let lastStars = 0, campSel = 0, campChap = 0;
@@ -92,7 +115,8 @@ const campOpen = i => { if (i === 0 || CHEAT().open) return true; const k = chap
 // col = barvy mapy kapitoly: moře nahoře, moře dole, pláž, pevnina
 const CAMP_CH = [{ n: 'I. Dějiny světa', a: 0, b: 15, col: ['#1e3a5f', '#0f2140', '#c9b27a', '#5f8f3e'] },
   { n: 'II. Návrat hordy', a: 15, b: 25, col: ['#3b1d5c', '#170a2b', '#a8865a', '#5b4a3a'] },
-  { n: 'III. Říše stínů', a: 25, b: 35, col: ['#3a0d14', '#12040a', '#6b5a52', '#2f3036'] }];
+  { n: 'III. Říše stínů', a: 25, b: 35, col: ['#3a0d14', '#12040a', '#6b5a52', '#2f3036'] },
+  { n: 'IV. Válka bohů', a: 35, b: 45, col: ['#0d3b3b', '#05201f', '#d4b46a', '#6b7d3a'] }];
 const chapOf = i => (CAMP_CH.findIndex(c => i >= c.a && i < c.b) + 1 || 1) - 1;
 const chapDone = c => { const C = CAMP_CH[c]; for (let i = C.a; i < C.b; i++) if (!CAMPS[i]) return false; return true; };
 const chapStars = c => { const C = CAMP_CH[c]; let n = 0; for (let i = C.a; i < C.b; i++) n += CAMPS[i] || 0; return n; };
@@ -164,7 +188,7 @@ function renderCampMap() {
     <g fill="${C.col[2]}">${beach}</g><g fill="${C.col[3]}">${land}</g>
     <path d="${path}" fill="none" stroke="#f5e6c4" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round" opacity=".7"/>
     ${ages}${cells}
-    ${lockCh ? `<rect x="200" y="188" width="600" height="52" rx="14" fill="#0b0614" opacity=".85"/><text x="500" y="223" class="age lockmsg">🔒 Odemkne se po dohrání ${CAMP_CH.slice(0, campChap).map(c => c.n.split(' ')[0]).join(' a ')} kapitoly</text>` : ''}</svg>`;
+    ${lockCh ? `<rect x="200" y="188" width="600" height="52" rx="14" fill="#0b0614" opacity=".85"/><text x="500" y="223" class="age lockmsg">🔒 Odemkne se po dohrání ${CAMP_CH.slice(0, campChap).map(c => c.n.split(' ')[0]).join(', ').replace(/, ([^,]*)$/, ' a $1')} kapitoly</text>` : ''}</svg>`;
   $('campMap').querySelectorAll('.cell.open').forEach(g => g.onclick = () => { campSel = +g.dataset.i; sfx('click'); renderCamp(); });
   $('campMap').querySelectorAll('.camp-tabs button').forEach(b => b.onclick = () => {
     campChap = +b.dataset.c; sfx('click');
@@ -182,7 +206,8 @@ function renderCamp() {
   $('campCount').textContent = `${Object.keys(CAMPS).length} / ${CAMP.length} území · ${total} ★${crowns ? ` · ${crowns} 👑` : ''}`;
   const goal = m.mods.survive ? `Vydrž ${fmtTime(m.mods.survive)}` : m.mods.limit ? `Znič základnu do ${fmtTime(m.mods.limit)}` : 'Znič nepřátelskou základnu';
   const extra = [m.mods.eHp && 'nepřítel má silnější základnu', WORLD.att === campSel && '⚔ ÚZEMÍ JE POD ÚTOKEM', m.mods.eGold && 'nepřítel má víc zlata', m.mods.noTower && 'nesmíš stavět věže', m.mods.boss != null && '👹 boss: ' + BOSSES[m.mods.boss].n,
-    m.mods.only != null && 'smíš vyrábět jen ' + AGES[m.mods.age || 0].units[m.mods.only].n.toLowerCase() + 'y', m.mods.noEvo && 'evoluce je zamčená', m.mods.gm && 'za zabití je méně zlata'].filter(Boolean);
+    m.mods.only != null && 'smíš vyrábět jen ' + AGES[m.mods.age || 0].units[m.mods.only].n.toLowerCase() + 'y', m.mods.noEvo && 'evoluce je zamčená', m.mods.noAbil && 'schopnosti armády nefungují',
+    m.mods.bossRush && '👹 postupně přijdou všichni bossové: ' + m.mods.bossRush.map(a => BOSSES[a].n).join(', '), m.mods.gm && 'za zabití je méně zlata'].filter(Boolean);
   const done = m.end && st;
   $('campBrief').innerHTML = `
     <div class="cb-head"><span class="cb-ic">${m.ic}</span><div><small>Mise ${campSel + 1} · ${AGES[m.mods.age || 0].name}</small><h3>${m.n}</h3></div></div>

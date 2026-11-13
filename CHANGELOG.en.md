@@ -4,6 +4,14 @@
 
 The app updates itself – new versions are downloaded at startup. [Play in the browser](https://aeloth666.github.io/brutal-ages/) · [Game wiki](https://aeloth666.github.io/brutal-ages/wiki/en/)
 
+## Version 2.37 – 13. 11. 2026
+
+- Campaign: chapter IV “War of the gods” – 10 new missions with new restrictions (e.g. no army abilities). In the finale “Twilight of the gods” every boss comes, one after another. Unlocks after finishing the first three chapters.
+- Challenge a friend with a link: after creating a duel, the 📨 Send link button gives you a link – whoever opens it joins straight away.
+- Daily quests: complete all three for a daily bonus, which grows with your streak of days in a row (up to +5 general points).
+- New players get tips in their first games on what to do (buy a unit, build a tower, use the special attack…).
+- 9 new achievements – for chapter IV, weekly survival, daily quest streaks, fast evolution and inviting a friend.
+
 ## Version 2.36 – 12. 11. 2026
 
 - The battlefield is full size again and can be panned by dragging (arrow keys ← → on PC) – so you can see your whole base and the enemy's.

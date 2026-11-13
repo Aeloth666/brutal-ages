@@ -57,6 +57,7 @@ async function renderWeek() {
   $('bWeekGo').onclick = () => { $('weekPanel').classList.add('hidden'); cleanupNet(); survNext = true; wkNext = true; startGame('solo'); };
   try {
     await survwPush(); const L = await survwFetch();
+    if (L[0] && L[0].uid === me && survwBest() > 0) achId('wkTop');
     $('weekLb').innerHTML = L.length ? `<table class="bst lb"><tr><th>#</th><th>Hráč</th><th>Vln</th><th>Čas</th></tr>${L.map((p, i) => `<tr class="${p.uid === me ? 'me' : ''}"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td>${(EMBS[p.e] || {}).ic || ''} ${p.c ? `<small class="ctag">[${esc(p.c)}]</small> ` : ''}${esc(p.n)}</td><td><b>${p.w}</b></td><td>${fmtTime(p.t || 0)}</td></tr>`).join('')}</table>`
       : '<p class="muted">Tento týden zatím nikdo nehrál – buď první!</p>';
   } catch (e) { $('weekLb').innerHTML = '<p class="muted">Žebříček se nepodařilo načíst – jsi online?</p>'; }

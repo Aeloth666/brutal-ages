@@ -24,6 +24,25 @@ let rmMe = false, rmOpp = false;
 const WAIT_MAX = 120;                       // s – jak dlouho čekat na návrat soupeře
 
 function status(html) { document.getElementById('status').innerHTML = html; }
+// výzva kamaráda odkazem: kdo odkaz otevře, rovnou se připojí do hry (…/brutal-ages/?join=KÓD)
+const inviteUrl = code => 'https://aeloth666.github.io/brutal-ages/?join=' + code;
+function bindInvite(code) {
+  const b = document.getElementById('bInvite'); if (!b) return;
+  b.onclick = async () => {
+    sfx('click'); achId('invite');
+    const url = inviteUrl(code), text = `${SET.name || 'Kámoš'} tě vyzývá na souboj v Brutal Ages! ⚔`;
+    try { if (navigator.share) { await navigator.share({ title: 'Brutal Ages', text, url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(text + ' ' + url); b.textContent = '✔ Odkaz zkopírován – pošli ho kámošovi'; }
+    catch (e) { b.outerHTML = `<input class="invite-url" readonly value="${url}" onclick="this.select()">`; }
+  };
+}
+// otevřený odkaz s ?join=KÓD → po načtení hry se rovnou připojí
+setTimeout(() => {
+  const j = new URLSearchParams(location.search).get('join'); if (!j || !/^[A-Z0-9]{5}$/i.test(j)) return;
+  history.replaceState(null, '', location.pathname);                      // po obnovení stránky se znovu nepřipojí
+  try { $('code').value = j.toUpperCase(); } catch (e) {}
+  joinGame(j);
+}, 800);
 function mkCode() {
   const a = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   return Array.from({ length: 5 }, () => a[(Math.random() * a.length) | 0]).join('');
@@ -80,7 +99,7 @@ function hostGame(opt = {}) {
   peer = new Peer(PREFIX + code, { config: ICE, debug: 0 });
   hostGame.code = code;
   const what = HOSTOPT.camp != null ? `Co-op mise „${CAMP[HOSTOPT.camp].n}“` : HOSTOPT.coop ? 'Co-op proti počítači' : HOSTOPT.team ? '2 na 2' : 'Souboj';
-  peer.on('open', () => { if (!role) { if (HOSTOPT.team) lobbyUpdate(); else status(`${what} · kód hry: <b>${code}</b><br>Pošli ho kámošovi a čekej na připojení…`); } });
+  peer.on('open', () => { if (!role) { if (HOSTOPT.team) lobbyUpdate(); else { status(`${what} · kód hry: <b>${code}</b><br>Pošli ho kámošovi a čekej na připojení…<br><button id="bInvite" class="small-btn">📨 Poslat odkaz na souboj</button>`); bindInvite(code); } } });
   peer.on('connection', c => {
     const md = c.metadata || {};
     if (md.spec) {                                      // divák

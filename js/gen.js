@@ -33,6 +33,11 @@ const TERR = [
   { k: 'base', v: 1.1, t: 'Hradby +10 %' }, { k: 'build', v: 0.95, t: 'Výroba o 5 % rychlejší' }, { k: 'sgold', v: 1.25, t: '+25 % zlata na začátku' },
   { k: 'cost', v: 0.95, t: 'Jednotky o 5 % levnější' }, { k: 'tur', v: 0.94, t: 'Věže o 6 % levnější' }, { k: 'xp', v: 1.08, t: '+8 % XP za zabití' },
   { k: 'heroD', v: 1.2, t: 'Hrdina +20 % útoku' },
+  // 4. kapitola
+  { k: 'hp', v: 1.06, t: '+6 % zdraví jednotek' }, { k: 'gold', v: 1.07, t: '+7 % zlata za zabití' }, { k: 'dmg', v: 1.06, t: '+6 % útoku jednotek' },
+  { k: 'build', v: 0.94, t: 'Výroba o 6 % rychlejší' }, { k: 'base', v: 1.12, t: 'Hradby +12 %' }, { k: 'sgold', v: 1.3, t: '+30 % zlata na začátku' },
+  { k: 'tur', v: 0.93, t: 'Věže o 7 % levnější' }, { k: 'cost', v: 0.94, t: 'Jednotky o 6 % levnější' }, { k: 'xp', v: 1.1, t: '+10 % XP za zabití' },
+  { k: 'heroD', v: 1.25, t: 'Hrdina +25 % útoku' },
 ];
 const WORLD = load('aow-world', { att: null, n: 0 });                   // att = území pod útokem Rudé hordy
 const terrActive = () => CAMP.map((_, i) => i).filter(i => CAMPS[i] && WORLD.att !== i);
@@ -160,14 +165,24 @@ function questTrack(r) {
       if (sk) toasts.push({ a: { n: 'Nový skin armády: ' + sk.n }, h: '🎨 ODEMČENO', l: 4 });
     }
   }
+  // všechny tři dnešní úkoly → bonus a série dní v řadě (čím delší série, tím větší bonus, nejvýš +5)
+  if (QST.d.length && QST.d.every(q => q.ok) && QST.allDay !== QST.day) {
+    QST.streak = QST.allDay === dayKey(new Date(Date.now() - 864e5)) ? (QST.streak || 0) + 1 : 1;
+    QST.allDay = QST.day;
+    const b = Math.min(5, 1 + QST.streak); QST.pts += b;
+    toasts.push({ a: { n: `Všechny dnešní úkoly · +${b} body generála · série ${QST.streak} ${QST.streak === 1 ? 'den' : QST.streak < 5 ? 'dny' : 'dní'}` }, h: '🔥 DENNÍ BONUS', l: 5 });
+    if (QST.streak >= 3) achId('qStreak3'); if (QST.streak >= 7) achId('qStreak7');
+  }
   store('aow-quest', QST);
 }
+const qStreakNow = () => QST.allDay === dayKey() || QST.allDay === dayKey(new Date(Date.now() - 864e5)) ? QST.streak || 0 : 0;
 function renderQuest() {
   questRoll();
   const row = (q, rew) => { const D = QDEF[q.id], g = qGoal(q), p = Math.min(g, q.p), pct = Math.round(p / g * 100);
     return `<div class="q-row ${q.ok ? 'ok' : ''}"><span>${q.ok ? '✅' : '▫️'} ${D.n(q.k)}</span><small>${D.eq || D.set ? (q.ok ? 'splněno' : 'zatím ne') : p + ' / ' + g} · odměna ${rew} b.</small><i style="width:${pct}%"></i></div>`; };
   $('questBody').innerHTML = `
     <h3>📅 Dnešní úkoly <small>(nové každý den)</small></h3>${QST.d.map(q => row(q, 1)).join('')}
+    <p class="small ${QST.allDay === QST.day ? '' : 'muted'}">🔥 ${QST.allDay === QST.day ? 'Denní bonus získán!' : 'Splň všechny tři a dostaneš bonus +' + Math.min(5, 2 + qStreakNow()) + ' body.'} Série: <b>${qStreakNow()}</b> ${qStreakNow() === 1 ? 'den' : qStreakNow() > 1 && qStreakNow() < 5 ? 'dny' : 'dní'} v řadě</p>
     <h3>🗓 Týdenní úkol</h3>${row(QST.w, 3)}
     <p class="muted">Splněno celkem: <b>${QST.done}</b> úkolů · získáno ${QST.pts} bodů generála.</p>
     <h3>🎨 Skiny armády <small>(odemykají se splněnými úkoly)</small></h3>
@@ -305,6 +320,15 @@ function tipTick() {
   if (me.abc && me.abc.every(v => v <= 0) && V.time > 5) tip('abil', '✨ Schopnosti armády jsou nabité – tlačítka dole v zemi (klávesy A S D F). Na pár sekund posílí celou armádu, pak se zase nabíjí.');
   if (V.survPick) tip('sbon', '🎁 Po každém bossovi si v přežití vybereš bonus. Bonusy se sčítají – rozmysli si, co tvé armádě chybí.');
   if (V.speed > 1) tip('speed3', '⏩ Zrychlení přepíná 1× → 2× → 3× (na počítači klávesa Tab).');
+  if (camMax > camMin && V.time > 12) tip('pan', '↔ Bojiště jde posunout tažením do strany (na počítači šipky ← →) – uvidíš celou svoji i nepřátelskou základnu.');
+  // nováčci (prvních pár her): co dělat, když se nic neděje
+  if ((ST.games || 0) >= 8 || V.camp == null && role !== 'solo') return;
+  const mine = V.units.filter(u => u.side === mySide), foes = V.units.filter(u => u.side !== mySide);
+  if (V.time > 4 && !mine.length && !me.q.length && btns.some(b => b.ok && b.cmd && b.cmd.a === 'buy')) tip('n-buy', '💰 Máš zlato – klepni nahoře na jednotku a pošli ji do boje. Za každého zabitého nepřítele dostaneš další zlato.');
+  if (V.time > 40 && !me.tur.length && me.gold >= 200) tip('n-tower', '🏹 Postav věž: tlačítko Věže → vyber věž. Věž brání základnu sama a nestojí nic dalšího.');
+  if (me.hp < me.mhp * 0.6) tip('n-base', '🛡 Tvoje základna dostává zabrat! Pošli víc jednotek, postav věž, nebo použij speciální útok.');
+  if (V.time > 25 && me.spcd <= 0 && foes.length >= 3) tip('n-spec', '☄ Speciální útok je nabitý – tlačítko před Evolucí (mezerník). Zasáhne nepřátele po celém bojišti.');
+  if (V.time > 30 && me.up.every(l => !l) && me.gold >= 600) tip('n-up', '⚔ Zlato navíc dej do Vylepšení – útok, zdraví a hradby platí pro celou armádu.');
 }
 
 // ---------- emoty (online) ----------

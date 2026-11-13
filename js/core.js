@@ -485,5 +485,10 @@ function step(dt) {
       S.boss = 1; spawn(1, { a: M.boss, ty: 5 });
       S.ev.push([W / 2, 200, 'evt', 'boss', M.boss]); S.ev.push([W / 2, 200, 'roar']);
     }
+    // finále: bossové všech věků jeden po druhém (první ve 2:30, pak každých 100 s)
+    if (M.bossRush && (S.bossN || 0) < M.bossRush.length && S.time >= (S.bossT ?? 150)) {
+      const a = M.bossRush[S.bossN || 0]; S.bossN = (S.bossN || 0) + 1; S.bossT = S.time + 100;
+      spawn(1, { a, ty: 5 }); S.ev.push([W / 2, 200, 'evt', 'boss', a]); S.ev.push([W / 2, 200, 'roar']);
+    }
   }
 }

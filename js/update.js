@@ -97,6 +97,17 @@ if (nativeApp) { $('bUpdCheck').classList.remove('hidden'); $('bUpdCheck').oncli
 
 // ---------- co je nového (Nastavení → O hře) – v obou jazycích, ať to překladač nemusí skládat ----------
 const CHANGELOG = [
+  { v: '2.37', d: '2026-11-13', cs: [
+    'Kampaň: IV. kapitola „Válka bohů“ – 10 nových misí s novými omezeními (třeba bez schopností armády). Ve finále „Soumrak bohů“ přijdou jeden po druhém všichni bossové. Odemkne se po dohrání prvních tří kapitol.',
+    'Výzva kamaráda odkazem: když založíš souboj, tlačítkem 📨 Poslat odkaz pošleš kamarádovi odkaz – kdo ho otevře, rovnou se připojí.',
+    'Denní úkoly: za splnění všech tří dostaneš denní bonus a čím víc dní v řadě, tím větší (až +5 bodů generála).',
+    'Nováčci dostávají v prvních hrách rady, co dělat (koupit jednotku, postavit věž, použít speciální útok…).',
+    '9 nových úspěchů – za IV. kapitolu, týdenní přežití, série denních úkolů, rychlou evoluci a pozvání kamaráda.'], en: [
+    'Campaign: chapter IV “War of the gods” – 10 new missions with new restrictions (e.g. no army abilities). In the finale “Twilight of the gods” every boss comes, one after another. Unlocks after finishing the first three chapters.',
+    'Challenge a friend with a link: after creating a duel, the 📨 Send link button gives you a link – whoever opens it joins straight away.',
+    'Daily quests: complete all three for a daily bonus, which grows with your streak of days in a row (up to +5 general points).',
+    'New players get tips in their first games on what to do (buy a unit, build a tower, use the special attack…).',
+    '9 new achievements – for chapter IV, weekly survival, daily quest streaks, fast evolution and inviting a friend.'] },
   { v: '2.36', d: '2026-11-12', cs: ['Bojiště má zase plnou velikost a jde posouvat tažením (na PC i šipkami ← →) – tak uvidíš celou svoji i nepřátelskou základnu.', 'Pozadí v menu i ve hře vyplní celou obrazovku, bez tmavých pruhů.', 'Když můžeš do dalšího věku, hra tě upozorní a tlačítko Evoluce výrazně bliká.'], en: ['The battlefield is full size again and can be panned by dragging (arrow keys ← → on PC) – so you can see your whole base and the enemy\'s.', 'The background in the menu and in game fills the whole screen, no dark bars.', 'When you can advance to the next age, the game tells you and the Evolve button flashes brightly.'] },
   { v: '2.35', d: '2026-11-09', cs: ['Obě základny jsou vidět celé i na úzkých displejích – bojiště se v případě potřeby o kousek zmenší a pokračuje do okrajů obrazovky.'], en: ['Both bases are fully visible even on narrow screens – the battlefield shrinks slightly when needed and continues into the screen edges.'] },
   { v: '2.34', d: '2026-11-09', cs: ['Padlí mamuti, vlci, medvědi, pratuři a koně už jen nezmizí – podlomí se v nohou, sesunou k zemi a zvednou prach.'], en: ['Fallen mammoths, wolves, bears, aurochs and horses no longer just vanish – their legs buckle, they slump to the ground and kick up dust.'] },

@@ -344,3 +344,7 @@ table.cmp td.win { color: #4ade80; font-weight: 800; } table.cmp { margin-top: 8
 .cheat-list button { text-align: left; display: flex; justify-content: space-between; align-items: center; background: #1e293b; box-shadow: 0 4px 0 #0f172a; }
 .cheat-list button.on { background: linear-gradient(#16a34a, #166534); }
 .cheat-list small { opacity: .85; font-weight: 700; }
+
+/* výzva kamaráda odkazem */
+#bInvite { margin-top: 10px; padding: 8px 14px; font-size: 14px; }
+.invite-url { margin-top: 10px; width: 100%; padding: 8px; font-size: 13px; }

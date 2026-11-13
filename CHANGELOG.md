@@ -4,6 +4,14 @@
 
 Aplikace se aktualizuje sama – nové verze si stáhne při spuštění. [Hrát v prohlížeči](https://aeloth666.github.io/brutal-ages/) · [Wiki o hře](https://aeloth666.github.io/brutal-ages/wiki/)
 
+## Verze 2.37 – 13. 11. 2026
+
+- Kampaň: IV. kapitola „Válka bohů“ – 10 nových misí s novými omezeními (třeba bez schopností armády). Ve finále „Soumrak bohů“ přijdou jeden po druhém všichni bossové. Odemkne se po dohrání prvních tří kapitol.
+- Výzva kamaráda odkazem: když založíš souboj, tlačítkem 📨 Poslat odkaz pošleš kamarádovi odkaz – kdo ho otevře, rovnou se připojí.
+- Denní úkoly: za splnění všech tří dostaneš denní bonus a čím víc dní v řadě, tím větší (až +5 bodů generála).
+- Nováčci dostávají v prvních hrách rady, co dělat (koupit jednotku, postavit věž, použít speciální útok…).
+- 9 nových úspěchů – za IV. kapitolu, týdenní přežití, série denních úkolů, rychlou evoluci a pozvání kamaráda.
+
 ## Verze 2.36 – 12. 11. 2026
 
 - Bojiště má zase plnou velikost a jde posouvat tažením (na PC i šipkami ← →) – tak uvidíš celou svoji i nepřátelskou základnu.
